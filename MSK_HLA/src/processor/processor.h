@@ -4,9 +4,20 @@
 class Processor
 {
 public:
-    Processor();
+
+	enum State
+	{
+		working,
+		free,
+		unavailable
+	};
+
+    Processor(int ID);
     void runFederate();
 
+private:
+	int m_ID;
+	State m_state;
 };
 
 #endif

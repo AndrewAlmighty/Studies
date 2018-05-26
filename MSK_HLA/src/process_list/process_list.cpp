@@ -3,7 +3,7 @@
 
 Process_list::Process_list()
 {
-
+	
 }
 
 void Process_list::runFederate()
