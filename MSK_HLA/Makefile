@@ -1,4 +1,4 @@
-CC = g++ 
+CC = g++
 FLAGS = -Wall -pedantic-errors -ggdb -std=c++11
 
 BUILDDIR = build
@@ -18,7 +18,7 @@ $(BUILDDIR)/process: $(PROCESS_SRC)/*.cpp $(PROCESS_SRC)/*.h | $(BUILDDIR)
 $(BUILDDIR)/process_list: $(PROCESS_LIST_SRC)/*.cpp $(PROCESS_LIST_SRC)/*.h | $(BUILDDIR)
 	$(CC) $(FLAGS) $^ -o $@
 
-#if there are no directories, make them
+#if there are no build directory, make it
 
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
@@ -27,4 +27,4 @@ $(BUILDDIR):
 	clean
 
 clean:
-	rm -f build/* \
+	rm -f build/* 
