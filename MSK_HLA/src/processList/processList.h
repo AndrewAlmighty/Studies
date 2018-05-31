@@ -1,13 +1,13 @@
-#ifndef PROCESS_LIST_H_
-#define PROCESS_LIST_H_
+#ifndef PROCESSLIST_H_
+#define PROCESSLIST_H_
 
 #include <list>
 
-class Process_list
+class ProcessList
 {
 
 public:
-    Process_list();
+    ProcessList();
     void runFederate();
 
 private:

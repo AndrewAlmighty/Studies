@@ -5,10 +5,10 @@ BUILDDIR = build
 
 PROCESSOR_SRC = src/processor
 PROCESS_SRC = src/process
-PROCESS_LIST_SRC = src/process_list
+PROCESSLIST_SRC = src/processList
 PORTICO_INC= ~/workspace/portico/include/ieee1516e
 
-all: $(BUILDDIR)/processor $(BUILDDIR)/process $(BUILDDIR)/process_list $(BUILDDIR)/fom.fed
+all: $(BUILDDIR)/processor $(BUILDDIR)/process $(BUILDDIR)/processList $(BUILDDIR)/fom.fed
 
 $(BUILDDIR)/processor: $(PROCESSOR_SRC)/*.cpp $(PROCESSOR_SRC)/*.h | $(BUILDDIR)
 	$(CC) $(FLAGS) -I $(PORTICO_INC) $^ -o $@
@@ -16,7 +16,7 @@ $(BUILDDIR)/processor: $(PROCESSOR_SRC)/*.cpp $(PROCESSOR_SRC)/*.h | $(BUILDDIR)
 $(BUILDDIR)/process: $(PROCESS_SRC)/*.cpp $(PROCESS_SRC)/*.h | $(BUILDDIR)
 	$(CC) $(FLAGS) -I $(PORTICO_INC) $^ -o $@
 
-$(BUILDDIR)/process_list: $(PROCESS_LIST_SRC)/*.cpp $(PROCESS_LIST_SRC)/*.h | $(BUILDDIR)
+$(BUILDDIR)/processList: $(PROCESSLIST_SRC)/*.cpp $(PROCESSLIST_SRC)/*.h | $(BUILDDIR)
 	$(CC) $(FLAGS) -I $(PORTICO_INC) $^ -o $@
 
 $(BUILDDIR)/fom.fed: src/fom.fed | $(BUILDDIR)
