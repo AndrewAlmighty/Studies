@@ -1,11 +1,10 @@
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-from gi.repository import GObject
+from gi.repository import Gtk, Gdk
 
 #for ps
 import subprocess
-import base64
+from subprocess import Popen, PIPE
 
 class App:
 	def __init__(self):
@@ -13,13 +12,6 @@ class App:
 		self.builder.add_from_file("Gui.glade")
 		self.builder.connect_signals(SignalHandler())
 		
-class Manager(GObject.GObject):
-	def __init__(self):
-		GObject.GObject.__init__(self)
-		
-	__gsignals__ = {
-	}
-
 class SignalHandler:
 	def __init__(self):
 		self.option_A = False
@@ -32,6 +24,30 @@ class SignalHandler:
 
 	def onDestroy(self, *args):
 		Gtk.main_quit()
+
+	def on_Quit_activate(self, *args):
+		Gtk.main_quit()
+		
+	def on_MenuSave_activate(self, *args):
+		pass
+		
+	def on_MenuOpen_activate(self, *args):
+		pass
+	
+	def on_ActionBo_changed(self, ActionBox):
+			
+		if ActionBox.get_active() == 1:
+			app.builder.get_object("OutputText").get_buffer().set_text("")
+			
+		elif ActionBox.get_active() == 2:
+			start = app.builder.get_object("OutputText").get_buffer().get_start_iter()
+			end = app.builder.get_object("OutputText").get_buffer().get_end_iter()
+			clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+			clipboard.set_text(app.builder.get_object("OutputText").get_buffer().get_text(start,end,True), len = -1)
+			clipboard.store()			
+			
+		else:
+			pass
 
 	def on_ExecuteButton_clicked(self, ExecuteButton):
 		psArgs = app.builder.get_object("PSArgs").get_text()
@@ -58,7 +74,7 @@ class SignalHandler:
 					
 		
 		if self.firstTime == True:
-			app.builder.get_object("OutputLabel").set_opacity(1.0)
+			app.builder.get_object("ActionBox").set_opacity(1.0)
 			app.builder.get_object("OutputText").set_opacity(1.0)
 			self.firstTime = False
 		
@@ -70,8 +86,8 @@ class SignalHandler:
 			proc = subprocess.Popen(['ps', psArgs], stdout = subprocess.PIPE)
 
 		out, err = proc.communicate()
-		#out = base64.b64encode(out.digest()).decode('utf-8') 
 		app.builder.get_object("OutputText").get_buffer().set_text(out.decode("utf-8"))
+		app.builder.get_object("OutputText").get_buffer().get_end_iter()
 			
 
 	def on_Basic_clicked(self, Basic):
