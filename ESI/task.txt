@@ -1,9 +1,9 @@
 Przy wykorzystaniu GTK (gimp tool kit) przy pomocy Glade stworzyć nakładkę graficzną na PS.
 Aplikacja musi zawierać:
--pasek menu
+-pasek menu - done
 -checkbox - done
 -radiobox - done
--lista wyboru
+-lista wyboru - done
 -paski przewijania - done
 -okno dialogowe wyboru pliku/katalogu
 -obsługa błędów(3 rodzaje błędów)
