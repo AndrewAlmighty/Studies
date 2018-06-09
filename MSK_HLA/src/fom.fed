@@ -3,7 +3,6 @@
 (FED
 	(Federation AlmightyFederation)
 	(FEDversion v1.3)
-;;Declaring objects
 	(objects
 		(class ObjectRoot
 			(attribute privillegeToDelete reliable timestamp)
