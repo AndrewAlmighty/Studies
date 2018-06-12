@@ -7,7 +7,7 @@ Process::Process()
 	m_UID = "root";
 	m_state = State::Waiting;
 }
-/*
+
 void Process::runFederate(std::wstring federateName)
 {
 	//1. Create the RTIambassador
@@ -146,6 +146,6 @@ int Process::getState() const
 {
 	return m_state;
 }
-*/
+
 
 

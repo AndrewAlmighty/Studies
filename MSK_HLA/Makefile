@@ -6,7 +6,7 @@ BUILDDIR = build
 PROCESSOR_SRC = src/processor
 PROCESS_SRC = src/process
 PROCESSLIST_SRC = src/processList
-PORTICO_INC= ~/workspace/portico/include/ieee1516e
+PORTICO_INC= ~/workspace/portico/include/hla13
 
 all: $(BUILDDIR)/processor $(BUILDDIR)/process $(BUILDDIR)/processList $(BUILDDIR)/fom.fed
 

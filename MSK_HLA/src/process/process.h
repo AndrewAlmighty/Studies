@@ -4,9 +4,7 @@
 #include <string>
 #include <memory>
 
-//#include "RTI/RTI1516.h"
-
-//using namespace rti1516e;
+#include "RTI.hh"
 
 #define READY_TO_RUN L"ReadyToRun"
 

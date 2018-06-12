@@ -11,14 +11,13 @@
 				(attribute Process_ID reliable timestamp)
 				(attribute Process_State reliable timestamp)
 				(attribute Process_Type reliable timestamp)
+				(class ProcessList
+					(class Processor
+						(attribute Proc_ID reliable timestamp)
+						(attribute Proc_State reliable timestamp)
+					)
+				)
 			)
-			(class ProcessList
-				(attribute Processes_Queue reliable timestamp)
-			)
-			(class Processor
-				(attribute Proc_ID reliable timestamp)
-				(attribute Proc_State reliable timestamp)
-			)			
 		)
 	)
 	(interactions
@@ -27,14 +26,14 @@
 			(class DoJob reliable timestamp
 				(parameter ProcessID)
 				(parameter ProcessorID)
+				(class RemoveProcess reliable timestamp
+					(parameter ProcessID)
+					(class JobFinished reliable timestamp
+						(parameter ProcessID)
+						(parameter ProcessorID)
+					)
+				)
 			)
-			(class RemoveProcess reliable timestamp
-				(parameter ProcessID)
-			)
-			(class JobFinished reliable timestamp
-				(parameter ProcessID)
-				(parameter ProcessorID)
-			)			
 		)
 	)
 )

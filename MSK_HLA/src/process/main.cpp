@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 		federateName = toWideString(std::string(argv[1]));
 
     std::unique_ptr<Process> process_federate(new Process());
-//    process_federate ->  runFederate(federateName);
+    process_federate ->  runFederate(federateName);
 
     return 0;
 }
