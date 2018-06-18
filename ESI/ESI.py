@@ -44,7 +44,9 @@ class SignalHandler:
 				self.fcd.destroy()
 			
 			elif self.response == Gtk.ResponseType.OK:
-				pass
+				self.filename = self.fcd.get_filename()
+				open(self.filename, 'w').write(output)
+				self.fcd.destroy()
 	
 	def on_ActionBo_changed(self, ActionBox):
 			
