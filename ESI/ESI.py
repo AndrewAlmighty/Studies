@@ -2,7 +2,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
-#for ps
+#for df
 import subprocess
 from subprocess import Popen, PIPE
 
@@ -14,12 +14,10 @@ class App:
 		
 class SignalHandler:
 	def __init__(self):
-		self.option_A = False
-		self.option_F = False
-		self.option_U = False
-		self.option_L = False
-		self.option_X = False
-		self.option_E = False
+		self.option_k = False
+		self.option_P = False
+		self.option_t = False
+		self.option_h = False
 		self.firstTime = True
 
 	def onDestroy(self, *args):
@@ -29,23 +27,38 @@ class SignalHandler:
 		Gtk.main_quit()
 		
 	def on_MenuSave_activate(self, *args):
-		x = FileChooserWindow()
-		x.on
+		start = app.builder.get_object("OutputText").get_buffer().get_start_iter()
+		end = app.builder.get_object("OutputText").get_buffer().get_end_iter()
+		output = app.builder.get_object("OutputText").get_buffer().get_text(start,end,True)
 		
-	def on_MenuOpen_activate(self, *args):
-		x = FileChooserWindow()
+		if not output:
+			self.errMessage = Gtk.MessageDialog(type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text = "There is no output to save!")
+			self.errResponse = self.errMessage.run()
+			if self.errResponse == Gtk.ResponseType.OK:
+				self.errMessage.destroy() 	
+			
+		else:
+			self.fcd = Gtk.FileChooserDialog("Save...", None, Gtk.FileChooserAction.SAVE, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+			self.response = self.fcd.run()
+			if self.response == Gtk.ResponseType.CANCEL:
+				self.fcd.destroy()
+			
+			elif self.response == Gtk.ResponseType.OK:
+				pass
 	
 	def on_ActionBo_changed(self, ActionBox):
 			
 		if ActionBox.get_active() == 1:
 			app.builder.get_object("OutputText").get_buffer().set_text("")
+			app.builder.get_object("ActionBo").set_active(0)
 			
 		elif ActionBox.get_active() == 2:
 			start = app.builder.get_object("OutputText").get_buffer().get_start_iter()
 			end = app.builder.get_object("OutputText").get_buffer().get_end_iter()
 			clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 			clipboard.set_text(app.builder.get_object("OutputText").get_buffer().get_text(start,end,True), len = -1)
-			clipboard.store()			
+			clipboard.store()	
+			app.builder.get_object("ActionBo").set_active(0)
 			
 		else:
 			pass
@@ -55,24 +68,17 @@ class SignalHandler:
 
 		if not psArgs:
 
-			if self.option_A:
-				psArgs += "a"
+			if self.option_k:
+				psArgs += "k"
 
-			if self.option_F:
-				psArgs += "f"
+			if self.option_P:
+				psArgs += "P"
 
-			if self.option_U:
-				psArgs += "u"
+			if self.option_t:
+				psArgs += "t"
 		
-			if self.option_L:
-				psArgs += "l"
-
-			if self.option_X:
-				psArgs += "x"
-
-			if self.option_E:
-				psArgs += "e"
-					
+			if self.option_h:
+				psArgs += "h"					
 		
 		if self.firstTime == True:
 			app.builder.get_object("ActionBox").set_opacity(1.0)
@@ -81,10 +87,10 @@ class SignalHandler:
 		
 		
 		if not psArgs:
-			proc = subprocess.Popen(['ps'], stdout = subprocess.PIPE)
+			proc = subprocess.Popen(['df'], stdout = subprocess.PIPE)
 			
 		else:
-			proc = subprocess.Popen(['ps', psArgs], stdout = subprocess.PIPE)
+			proc = subprocess.Popen(['df', ("-" + psArgs)], stdout = subprocess.PIPE)
 
 		out, err = proc.communicate()
 		
@@ -102,47 +108,33 @@ class SignalHandler:
 		app.builder.get_object("PSArgs").set_opacity(1.0)
 		app.builder.get_object("OptionsCheckBoxes").set_opacity(0.0)
 
-	def on_Options_A_clicked(self, Options_A):
-		if Options_A.get_active():
-			self.option_A = True
+	def on_Options_k_clicked(self, Options_k):
+		if Options_k.get_active():
+			self.option_k = True
 
 		else:
-			self.option_A = False
+			self.option_k = False
 
-	def on_Options_F_clicked(self, Options_F):
-		if Options_F.get_active():
-			self.option_F = True
-
-		else:
-			self.option_F = False
-
-	def on_Options_U_clicked(self, Options_U):
-		if Options_U.get_active():
-			self.option_U = True
+	def on_Options_P_clicked(self, Options_P):
+		if Options_P.get_active():
+			self.option_P = True
 
 		else:
-			self.option_U = False
+			self.option_P = False
 
-	def on_Options_L_clicked(self, Options_L):
-		if Options_L.get_active():
-			self.option_L = True
+	def on_Options_t_clicked(self, Options_t):
+		if Options_t.get_active():
+			self.option_t = True
+
+		else:
+			self.option_t = False
+
+	def on_Options_h_clicked(self, Options_h):
+		if Options_h.get_active():
+			self.option_h = True
 		
 		else:
-			self.option_L = False
-
-	def on_Options_X_clicked(self, Options_X):
-		if Options_X.get_active():
-			self.option_X = True
-
-		else:
-			self.option_X = False
-
-	def on_Options_E_clicked(self, Options_E):
-		if Options_E.get_active():
-			self.option_E = True
-
-		else:
-			self.option_E = False
+			self.option_h = False
 			
 if __name__ == "__main__":
 	app = App()
