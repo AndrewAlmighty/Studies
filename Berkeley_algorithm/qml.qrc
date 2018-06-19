@@ -4,5 +4,6 @@
         <file>SetupWindow.qml</file>
         <file>DirectIPOption.qml</file>
         <file>IpList.qml</file>
+        <file>RunWindow.qml</file>
     </qresource>
 </RCC>
