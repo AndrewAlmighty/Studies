@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>SetupWindow.qml</file>
+        <file>DirectIPOption.qml</file>
+        <file>IpList.qml</file>
     </qresource>
 </RCC>
