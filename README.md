@@ -1,1 +1,1 @@
-Projects from my master degree studies.
+Simple app using python, GTK and Glade
