@@ -18,7 +18,11 @@ Item
 
         TextField
         {
-
+            id: serverIPField
+            onEditingFinished:
+            {
+                GuiManager.setServerIP(serverIPField.getText(0, serverIPField.length -1))
+            }
         }
     }
 }

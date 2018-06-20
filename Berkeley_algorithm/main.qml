@@ -12,6 +12,6 @@ Window {
     {
         id: windowLoader
         anchors.fill: parent
-        source: "RunWindow.qml"
+        source: "SetupWindow.qml"
     }
 }

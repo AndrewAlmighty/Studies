@@ -71,7 +71,25 @@ Item
         anchors.top: searchOptions.bottom
         anchors.topMargin: 30
         width: parent.width
-        source: "DirectIPOption.qml"
+        sourceComponent: directIP_component
+    }
+
+    Component
+    {
+        id: directIP_component
+        DirectIPOption
+        {
+            id: serverIPItem
+        }
+    }
+
+    Component
+    {
+        id: listIP_component
+        IpList
+        {
+            id:ipList
+        }
     }
 
     Button
@@ -81,6 +99,10 @@ Item
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         anchors.horizontalCenter: parent.horizontalCenter
+        onClicked:
+        {
+            windowLoader.source = "RunWindow.qml"
+        }
     }
 
     Connections
@@ -90,6 +112,7 @@ Item
         {
             searchOptions.visible = false
             clientOptLoader.visible = false
+            GuiManager.setMode("Server")
         }
     }
 
@@ -100,6 +123,7 @@ Item
         {
             searchOptions.visible = true
             clientOptLoader.visible = true
+            GuiManager.setMode("Client")
         }
     }
 
@@ -110,7 +134,7 @@ Item
         {
             clientOptLoader.anchors.bottom = runButton.top
             clientOptLoader.anchors.bottomMargin = 10
-            clientOptLoader.source = "IpList.qml"
+            clientOptLoader.sourceComponent = listIP_component
         }
     }
 
@@ -121,7 +145,7 @@ Item
         {
             clientOptLoader.anchors.bottom = undefined
             clientOptLoader.height = 20
-            clientOptLoader.source = "DirectIPOption.qml"
+            clientOptLoader.sourceComponent = directIP_component
         }
     }
 }

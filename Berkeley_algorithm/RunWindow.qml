@@ -13,7 +13,8 @@ Item
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 20
-        text: "00:00:00"
+        font.pixelSize: 30
+        text: GuiManager.time
     }
 
     Label
@@ -21,7 +22,7 @@ Item
         id: whichModeLabel
         anchors.top: timeLabel.bottom
         anchors.left: parent.left
-        anchors.topMargin: 20
+        anchors.topMargin: 40
         text: "Running as:"
     }
 
@@ -31,7 +32,75 @@ Item
         anchors.left: whichModeLabel.right
         anchors.leftMargin: 10
         anchors.verticalCenter: whichModeLabel.verticalCenter
-        text: "Server"
+        text: GuiManager.mode
+    }
+
+    Label
+    {
+        id: myIPLabel
+        anchors.left: parent.left
+        anchors.top: whichModeLabel.bottom
+        anchors.topMargin: 10
+        text: "Device IP:"
+    }
+
+    Label
+    {
+        id: myIP
+        anchors.left: myIPLabel.right
+        anchors.verticalCenter: myIPLabel.verticalCenter
+        anchors.leftMargin: 10
+        text: GuiManager.ip
+    }
+
+    Label
+    {
+        id: myMACLabel
+        anchors.left: parent.left
+        anchors.top: myIPLabel.bottom
+        anchors.topMargin: 10
+        text: "Device MAC:"
+    }
+
+    Label
+    {
+        id: myMAC
+        anchors.left: myMACLabel.right
+        anchors.verticalCenter: myMACLabel.verticalCenter
+        anchors.leftMargin: 10
+        text: GuiManager.MAC
+    }
+
+    Label
+    {
+        id: setTimeLabel
+        anchors.right: setTimeTextField.left
+        anchors.rightMargin: 10
+        anchors.verticalCenter: modeLabel.verticalCenter
+        text: "Set time to:"
+    }
+
+    TextField
+    {
+        id: setTimeTextField
+        anchors.right: parent.right
+        anchors.verticalCenter: modeLabel.verticalCenter
+        placeholderText: "hh:mm:ss"
+    }
+
+    Button
+    {
+        id: setTimeButton
+        anchors.top: setTimeTextField.bottom
+        anchors.right: parent.right
+        anchors.margins: 15
+        text: "Set time"
+
+        onClicked:
+        {
+            GuiManager.setTime(setTimeTextField.getText(0, setTimeTextField.length - 1))
+            setTimeTextField.text = "hh:mm:ss"
+        }
     }
 
     Button
@@ -41,5 +110,9 @@ Item
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 10
         text: "Abort"
+        onClicked:
+        {
+            windowLoader.source = "SetupWindow.qml"
+        }
     }
 }
