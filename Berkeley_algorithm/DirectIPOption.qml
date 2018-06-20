@@ -21,7 +21,7 @@ Item
             id: serverIPField
             onEditingFinished:
             {
-                GuiManager.setServerIP(serverIPField.getText(0, serverIPField.length -1))
+                GuiManager.setServerIP(serverIPField.getText(0, serverIPField.length))
             }
         }
     }

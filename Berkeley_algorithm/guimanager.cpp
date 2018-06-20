@@ -9,31 +9,61 @@ GuiManager & GuiManager::GetInstance()
 
 GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
-    m_mode = "Server";
-    m_time = "00:00:00";
-    m_ip = "127.0.0.1";
-    m_mac = "jakis mac";
+    m_berkeley = std::unique_ptr<BerkeleyManager>(new BerkeleyManager());
+    restartConfiguration();
     m_running = false;
+}
+
+void GuiManager::restartConfiguration()
+{
+    m_mode = "Server";
+    m_time = "Not Specified";
+    m_ip = "Not Specified";
+    m_mac = "Not Specified";
     m_ID = -1;
 }
 
 void GuiManager::beginJob()
 {
+    if(m_mode == "Server")
+    {
+        qDebug() << "Prepare to run as Server!";
+        if(m_berkeley -> RunAsServer() == false)
+            return;
+    }
+
+    else if(m_mode == "Client")
+    {
+        qDebug() << "Prepare to run as Server!";
+        if(m_berkeley -> RunAsClient(m_serverIP.toStdString()) == false)
+                return;
+    }
+
+    else
+        return;
+
+    qDebug() << "Preparing done!";
+    setID(m_berkeley -> getID());
+    setMode(QString(m_berkeley -> getMode().c_str()));
+    setMAC(QString(m_berkeley -> getMAC().c_str()));
+    setIp(QString(m_berkeley -> getIP().c_str()));
     setRunning(true);
 }
 
 void GuiManager::finishJob()
 {
-    m_ID = -1;
+    m_berkeley -> Stop();
+    restartConfiguration();
     setRunning(false);
 }
 
 void GuiManager::setTime(QString time)
 {
-    if(m_time == time)
+    if(m_berkeley -> getTime() == time.toStdString())
         return;
 
-    m_time = time;
+    m_berkeley -> setTime(time.toStdString());
+    m_time = QString(m_berkeley -> getTime().c_str());
     emit timeChanged();
     qDebug() << "Time: " << m_time;
 }

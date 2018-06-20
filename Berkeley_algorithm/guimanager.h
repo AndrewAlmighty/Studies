@@ -2,6 +2,8 @@
 #define GUIMANAGER_H
 
 #include <QObject>
+#include <memory>
+#include "berkeleymanager.h"
 
 class GuiManager : public QObject
 {
@@ -55,6 +57,9 @@ private:
     GuiManager(QObject *parent = nullptr);
     GuiManager(const GuiManager &);
     GuiManager& operator =(const GuiManager&);
+    void restartConfiguration();
+
+    std::unique_ptr<BerkeleyManager> m_berkeley;
 
     QString m_time;
     QString m_ip;
