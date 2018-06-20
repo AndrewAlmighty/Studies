@@ -13,6 +13,19 @@ GuiManager::GuiManager(QObject *parent) : QObject(parent)
     m_time = "00:00:00";
     m_ip = "127.0.0.1";
     m_mac = "jakis mac";
+    m_running = false;
+    m_ID = -1;
+}
+
+void GuiManager::beginJob()
+{
+    setRunning(true);
+}
+
+void GuiManager::finishJob()
+{
+    m_ID = -1;
+    setRunning(false);
 }
 
 void GuiManager::setTime(QString time)
@@ -88,4 +101,39 @@ void GuiManager::setMAC(QString mac)
 QString GuiManager::MAC() const
 {
     return m_mac;
+}
+
+void GuiManager::setRunning(bool running)
+{
+    if(m_running == running)
+        return;
+
+    m_running = running;
+    emit runningChanged();
+
+    if(m_running == true)
+        qDebug() << "Running!";
+
+    else
+        qDebug() << "Stopped!";
+}
+
+bool GuiManager::running() const
+{
+    return m_running;
+}
+
+void GuiManager::setID(int id)
+{
+    if(m_ID == id)
+        return;
+
+    m_ID = id;
+    emit IDChanged();
+    qDebug() << "ID: " << m_ID;
+}
+
+int GuiManager::ID() const
+{
+    return m_ID;
 }

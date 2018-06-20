@@ -12,14 +12,19 @@ class GuiManager : public QObject
     Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(QString serverIP READ serverIP WRITE setServerIP NOTIFY serverIPChanged)
     Q_PROPERTY(QString MAC READ MAC WRITE setMAC NOTIFY MACChanged)
+    Q_PROPERTY(int ID READ ID WRITE setID NOTIFY IDChanged)
+    Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
 
 public:
     static GuiManager & GetInstance();
 
+    Q_INVOKABLE void beginJob();
+    Q_INVOKABLE void finishJob();
+
     Q_INVOKABLE void setTime(QString time);
     QString time() const;
 
-    Q_INVOKABLE void setIp(QString ip);
+    void setIp(QString ip);
     QString ip() const;
 
     Q_INVOKABLE void setMode(QString mode);
@@ -28,8 +33,14 @@ public:
     Q_INVOKABLE void setServerIP(QString ip);
     QString serverIP() const;
 
-    Q_INVOKABLE void setMAC(QString mac);
+    void setMAC(QString mac);
     QString MAC() const;
+
+    void setRunning(bool connected);
+    bool running() const;
+
+    void setID(int id);
+    int ID() const;
 
 signals:
     void timeChanged();
@@ -37,6 +48,8 @@ signals:
     void modeChanged();
     void serverIPChanged();
     void MACChanged();
+    void runningChanged();
+    void IDChanged();
 
 private:
     GuiManager(QObject *parent = nullptr);
@@ -48,6 +61,8 @@ private:
     QString m_mode;
     QString m_serverIP;
     QString m_mac;
+    bool m_running;
+    int m_ID;
 };
 
 #endif // GUIMANAGER_H

@@ -73,6 +73,24 @@ Item
 
     Label
     {
+        id: programIDLabel
+        anchors.left: parent.left
+        anchors.top: myMACLabel.bottom
+        anchors.topMargin: 10
+        text: "ID:"
+    }
+
+    Label
+    {
+        id: programID
+        anchors.left: programIDLabel.right
+        anchors.verticalCenter: programIDLabel.verticalCenter
+        anchors.leftMargin: 10
+        text: GuiManager.ID
+    }
+
+    Label
+    {
         id: setTimeLabel
         anchors.right: setTimeTextField.left
         anchors.rightMargin: 10
@@ -112,6 +130,7 @@ Item
         text: "Abort"
         onClicked:
         {
+            GuiManager.finishJob()
             windowLoader.source = "SetupWindow.qml"
         }
     }

@@ -101,7 +101,9 @@ Item
         anchors.horizontalCenter: parent.horizontalCenter
         onClicked:
         {
-            windowLoader.source = "RunWindow.qml"
+           GuiManager.beginJob()
+            if(GuiManager.running)
+                windowLoader.source = "RunWindow.qml"
         }
     }
 
@@ -113,6 +115,7 @@ Item
             searchOptions.visible = false
             clientOptLoader.visible = false
             GuiManager.setMode("Server")
+            GuiManager.setServerIP("127.0.0.1")
         }
     }
 
