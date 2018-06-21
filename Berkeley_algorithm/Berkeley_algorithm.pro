@@ -15,7 +15,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
     guimanager.cpp \
-    berkeleymanager.cpp
+    berkeleymanager.cpp \
+    networkmanager.cpp \
+    clock.cpp \
+    device.cpp
 
 RESOURCES += qml.qrc
 
@@ -32,4 +35,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     guimanager.h \
-    berkeleymanager.h
+    berkeleymanager.h \
+    networkmanager.h \
+    clock.h \
+    device.h

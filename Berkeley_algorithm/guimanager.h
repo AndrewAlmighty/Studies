@@ -2,7 +2,6 @@
 #define GUIMANAGER_H
 
 #include <QObject>
-#include <memory>
 #include "berkeleymanager.h"
 
 class GuiManager : public QObject
@@ -19,6 +18,7 @@ class GuiManager : public QObject
 
 public:
     static GuiManager & GetInstance();
+    void setManager(BerkeleyManager &manager);
 
     Q_INVOKABLE void beginJob();
     Q_INVOKABLE void finishJob();
@@ -59,7 +59,7 @@ private:
     GuiManager& operator =(const GuiManager&);
     void restartConfiguration();
 
-    std::unique_ptr<BerkeleyManager> m_berkeley;
+    BerkeleyManager* m_berkeley;    //pointer to main manager. Do not destroy!
 
     QString m_time;
     QString m_ip;

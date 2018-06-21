@@ -2,27 +2,22 @@
 #define BERKELEYMANAGER_H
 
 #include <string>
+#include <memory>
+
+#include "networkmanager.h"
+#include "clock.h"
+#include "device.h"
 
 class BerkeleyManager
 {
 public:
-
-    enum Mode{
-        NotSpecified,
-        Server,
-        Client
-    };
-
     BerkeleyManager();
 
     bool RunAsServer();
     bool RunAsClient(std::string ip);
     void Stop();
 
-    void setMode(Mode m);
-    void setID(int id);
     void setTime(std::string time);
-
     int getID() const;
     std::string getMode() const;
     std::string getIP() const;
@@ -30,8 +25,9 @@ public:
     std::string getTime() const;
 
 private:
-    Mode m_mode;
-    int m_id;
+    Device m_device;
+    std::unique_ptr<NetworkManager> m_network;
+    std::unique_ptr<Clock> m_clock;
 };
 
 #endif // BERKELEYMANAGER_H

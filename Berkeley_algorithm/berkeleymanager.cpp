@@ -2,41 +2,23 @@
 
 BerkeleyManager::BerkeleyManager()
 {
-    m_id = -1;  //when -1 for not specified
-    m_mode = NotSpecified;
+    m_network = std::unique_ptr<NetworkManager>(new NetworkManager(m_device));
+    m_clock = std::unique_ptr<Clock>(new Clock());
 }
 
 bool BerkeleyManager::RunAsServer()
 {
-    m_mode = Server;
     return true;
 }
 
 bool BerkeleyManager::RunAsClient(std::string ip)
 {
-    m_mode = Client;
     return true;
 }
 
 void BerkeleyManager::Stop()
 {
-    m_mode = NotSpecified;
-    m_id = -1;
-}
-
-void BerkeleyManager::setMode(Mode m)
-{
-    if(m_mode == m)
-        return;
-
-    m_mode = m;
-}
-void BerkeleyManager::setID(int id)
-{
-    if(m_id == id)
-        return;
-
-    m_id = id;
+    m_device.setID(-1);
 }
 
 void BerkeleyManager::setTime(std::string time)
@@ -46,29 +28,22 @@ void BerkeleyManager::setTime(std::string time)
 
 int BerkeleyManager::getID() const
 {
-    return m_id;
+    return m_device.getID();
 }
 
 std::string BerkeleyManager::getMode() const
 {
-    if(m_mode == Server)
-        return std::string("server");
-
-    else if(m_mode == Client)
-        return std::string("client");
-
-    else
-        return std::string("NotSpecified");
+    return m_device.getMode();
 }
 
 std::string BerkeleyManager::getIP() const
 {
-    return std::string("cos1");
+    return m_device.getIP();
 }
 
 std::string BerkeleyManager::getMAC() const
 {
-    return std::string("cos2");
+    return m_device.getMAC();
 }
 
 std::string BerkeleyManager::getTime() const

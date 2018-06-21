@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "guimanager.h"
+#include "berkeleymanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +12,8 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
+    BerkeleyManager manager;
+    GuiManager::GetInstance().setManager(manager);
     engine.rootContext() -> setContextProperty("GuiManager", &GuiManager::GetInstance());
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

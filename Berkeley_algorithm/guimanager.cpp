@@ -7,9 +7,13 @@ GuiManager & GuiManager::GetInstance()
     return instance;
 }
 
+void GuiManager::setManager(BerkeleyManager &manager)
+{
+    m_berkeley = &manager;
+}
+
 GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
-    m_berkeley = std::unique_ptr<BerkeleyManager>(new BerkeleyManager());
     restartConfiguration();
     m_running = false;
 }
