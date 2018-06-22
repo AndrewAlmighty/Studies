@@ -1,4 +1,8 @@
 #include "berkeleymanager.h"
+#include "guimanager.h"
+
+#include <thread>
+#include <QDebug>
 
 BerkeleyManager::BerkeleyManager()
 {
@@ -6,14 +10,31 @@ BerkeleyManager::BerkeleyManager()
     m_clock = std::unique_ptr<Clock>(new Clock());
 }
 
-bool BerkeleyManager::RunAsServer()
+bool BerkeleyManager::PrepareToRunAsServer()
 {
+    m_device.setMode(Device::Server);
     return true;
 }
 
-bool BerkeleyManager::RunAsClient(std::string ip)
+bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
 {
+    m_device.setMode(Device::Client);
     return true;
+}
+
+void BerkeleyManager::start()
+{
+    m_clock -> setSystemTime();
+/*
+    std::thread threadObj([]{
+        while(GuiManager::GetInstance().running() == true)
+        {
+
+        }
+   });
+
+    threadObj.detach();
+    */
 }
 
 void BerkeleyManager::Stop()
@@ -23,7 +44,7 @@ void BerkeleyManager::Stop()
 
 void BerkeleyManager::setTime(std::string time)
 {
-
+    m_clock -> setTime(time);
 }
 
 int BerkeleyManager::getID() const
@@ -48,5 +69,5 @@ std::string BerkeleyManager::getMAC() const
 
 std::string BerkeleyManager::getTime() const
 {
-    return std::string("asdf");
+    return m_clock -> getTime();
 }

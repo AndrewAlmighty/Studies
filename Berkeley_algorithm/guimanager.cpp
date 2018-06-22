@@ -32,14 +32,14 @@ void GuiManager::beginJob()
     if(m_mode == "Server")
     {
         qDebug() << "Prepare to run as Server!";
-        if(m_berkeley -> RunAsServer() == false)
+        if(m_berkeley -> PrepareToRunAsServer() == false)
             return;
     }
 
     else if(m_mode == "Client")
     {
-        qDebug() << "Prepare to run as Server!";
-        if(m_berkeley -> RunAsClient(m_serverIP.toStdString()) == false)
+        qDebug() << "Prepare to run as Client!";
+        if(m_berkeley -> PrepareToRunAsClient(m_serverIP.toStdString()) == false)
                 return;
     }
 
@@ -52,6 +52,7 @@ void GuiManager::beginJob()
     setMAC(QString(m_berkeley -> getMAC().c_str()));
     setIp(QString(m_berkeley -> getIP().c_str()));
     setRunning(true);
+    m_berkeley -> start();
 }
 
 void GuiManager::finishJob()
@@ -61,13 +62,14 @@ void GuiManager::finishJob()
     setRunning(false);
 }
 
+void GuiManager::changeClock(QString time)
+{
+    m_berkeley -> setTime(time.toStdString());
+}
+
 void GuiManager::setTime(QString time)
 {
-    if(m_berkeley -> getTime() == time.toStdString())
-        return;
-
-    m_berkeley -> setTime(time.toStdString());
-    m_time = QString(m_berkeley -> getTime().c_str());
+    m_time = time;
     emit timeChanged();
     qDebug() << "Time: " << m_time;
 }
@@ -146,7 +148,10 @@ void GuiManager::setRunning(bool running)
     emit runningChanged();
 
     if(m_running == true)
+    {
         qDebug() << "Running!";
+        setTime(QString(m_berkeley -> getTime().c_str()));
+    }
 
     else
         qDebug() << "Stopped!";

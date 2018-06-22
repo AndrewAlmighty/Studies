@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 
+
 #include "networkmanager.h"
 #include "clock.h"
 #include "device.h"
@@ -13,8 +14,9 @@ class BerkeleyManager
 public:
     BerkeleyManager();
 
-    bool RunAsServer();
-    bool RunAsClient(std::string ip);
+    bool PrepareToRunAsServer();
+    bool PrepareToRunAsClient(std::string ip);
+    void start();
     void Stop();
 
     void setTime(std::string time);

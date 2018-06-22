@@ -116,7 +116,7 @@ Item
 
         onClicked:
         {
-            GuiManager.setTime(setTimeTextField.getText(0, setTimeTextField.length))
+            GuiManager.changeClock(setTimeTextField.getText(0, setTimeTextField.length))
             setTimeTextField.text = "hh:mm:ss"
         }
     }

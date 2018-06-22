@@ -22,6 +22,7 @@ public:
 
     Q_INVOKABLE void beginJob();
     Q_INVOKABLE void finishJob();
+    Q_INVOKABLE void changeClock(QString time);
 
     Q_INVOKABLE void setTime(QString time);
     QString time() const;
