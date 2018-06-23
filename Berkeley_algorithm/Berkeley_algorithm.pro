@@ -18,7 +18,8 @@ SOURCES += \
     berkeleymanager.cpp \
     networkmanager.cpp \
     clock.cpp \
-    device.cpp
+    device.cpp \
+    networkmethods.c
 
 RESOURCES += qml.qrc
 
@@ -38,4 +39,5 @@ HEADERS += \
     berkeleymanager.h \
     networkmanager.h \
     clock.h \
-    device.h
+    device.h \
+    networkmethods.h

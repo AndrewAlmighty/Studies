@@ -1,9 +1,12 @@
 #include "networkmanager.h"
 
+#include "networkmethods.h"
+
 NetworkManager::NetworkManager(Device &dev)
 {
     dev.setMac(readMac());
     dev.setIp(readIP());
+    runUDPServer();
 }
 
 std::string NetworkManager::readMac()
