@@ -77,7 +77,8 @@ Item
     Component
     {
         id: directIP_component
-        DirectIPOption
+
+        DirectIP
         {
             id: serverIPItem
         }
@@ -86,9 +87,10 @@ Item
     Component
     {
         id: listIP_component
-        IpList
+
+        DevicesList
         {
-            id:ipList
+            id:devicesList
         }
     }
 

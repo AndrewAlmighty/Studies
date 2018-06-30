@@ -5,5 +5,7 @@
         <file>DirectIPOption.qml</file>
         <file>IpList.qml</file>
         <file>RunWindow.qml</file>
+        <file>DevicesList.qml</file>
+        <file>DirectIP.qml</file>
     </qresource>
 </RCC>
