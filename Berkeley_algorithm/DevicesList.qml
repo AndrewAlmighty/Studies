@@ -14,7 +14,7 @@ Rectangle
         property int argsNumber: 4
 
         anchors.fill: parent
-        model: jakismodel
+        model: GuiManager.model
         highlight: Rectangle { color: "lightsteelblue"}
         highlightFollowsCurrentItem: true
         headerPositioning: ListView.OverlayHeader
@@ -54,194 +54,16 @@ Rectangle
             Row
             {
                 anchors.fill: parent
-                Text { text: ID; width: parent.width / devicesList.argsNumber }
-                Text { text: IP; width: parent.width / devicesList.argsNumber }
-                Text { text: MAC; width: parent.width / devicesList.argsNumber }
-                Text { text: Mode; width: parent.width / devicesList.argsNumber }
+                Text { text: model.modelData.ID; width: parent.width / devicesList.argsNumber }
+                Text { text: model.modelData.IP; width: parent.width / devicesList.argsNumber }
+                Text { text: model.modelData.MAC; width: parent.width / devicesList.argsNumber }
+                Text { text: model.modelData.Mode; width: parent.width / devicesList.argsNumber }
             }
 
             onClicked:
             {
                 devicesList.currentIndex = index
             }
-        }
-    }
-
-    ListModel
-    {
-        id:pustymodel
-    }
-
-    ListModel
-    {
-        id: jakismodel
-        ListElement
-        {
-            ID: 1
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-
-        }
-
-        ListElement
-        {
-            ID: 2
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 3
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 4
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 5
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 6
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 7
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 8
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 9
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
-        }
-
-        ListElement
-        {
-            ID: 10
-            IP: "12.43.65.87"
-            MAC: "78:32:1b:03:3a:71"
-            Mode: "Server"
         }
     }
 }

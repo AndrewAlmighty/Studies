@@ -19,7 +19,8 @@ SOURCES += \
     networkmanager.cpp \
     clock.cpp \
     device.cpp \
-    networkmethods.c
+    networkmethods.c \
+    devicemodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -40,4 +41,5 @@ HEADERS += \
     networkmanager.h \
     clock.h \
     device.h \
-    networkmethods.h
+    networkmethods.h \
+    devicemodel.h

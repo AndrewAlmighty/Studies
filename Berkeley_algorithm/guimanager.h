@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "berkeleymanager.h"
+#include "devicemodel.h"
 
 class GuiManager : public QObject
 {
@@ -15,6 +16,7 @@ class GuiManager : public QObject
     Q_PROPERTY(QString MAC READ MAC WRITE setMAC NOTIFY MACChanged)
     Q_PROPERTY(int ID READ ID WRITE setID NOTIFY IDChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
+    Q_PROPERTY(QList<QObject*> model READ model NOTIFY modelChanged)
 
 public:
     static GuiManager & GetInstance();
@@ -45,6 +47,10 @@ public:
     void setID(int id);
     int ID() const;
 
+    QList<QObject*> model() const;
+    void addDevice(int id, QString ip, QString mac, QString mode);
+    bool removeDevice(int id);
+
 signals:
     void timeChanged();
     void ipChanged();
@@ -53,6 +59,7 @@ signals:
     void MACChanged();
     void runningChanged();
     void IDChanged();
+    void modelChanged();
 
 private:
     GuiManager(QObject *parent = nullptr);
@@ -62,6 +69,7 @@ private:
 
     BerkeleyManager* m_berkeley;    //pointer to main manager. Do not destroy!
 
+    QList<QObject*> m_deviceModel;
     QString m_time;
     QString m_ip;
     QString m_mode;

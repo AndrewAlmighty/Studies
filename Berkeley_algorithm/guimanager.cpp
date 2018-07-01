@@ -16,6 +16,19 @@ GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
     restartConfiguration();
     m_running = false;
+
+    addDevice(1,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(2,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(3,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(4,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(5,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(6,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(7,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(8,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(9,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+    addDevice(10,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
+
+    removeDevice(5);
 }
 
 void GuiManager::restartConfiguration()
@@ -69,6 +82,9 @@ void GuiManager::changeClock(QString time)
 
 void GuiManager::setTime(QString time)
 {
+    if(m_time == time)
+        return;
+
     m_time = time;
     emit timeChanged();
     qDebug() << "Time: " << m_time;
@@ -80,7 +96,7 @@ QString GuiManager::time() const
 }
 
 void GuiManager::setIp(QString ip)
-{
+{qDebug() << "Device with ID disconnected!";
     if(m_ip == ip)
         return;
 
@@ -144,7 +160,7 @@ void GuiManager::setRunning(bool running)
     if(m_running == running)
         return;
 
-    m_running = running;
+    m_running = running;qDebug() << "Device with ID disconnected!";
     emit runningChanged();
 
     if(m_running == true)
@@ -175,4 +191,32 @@ void GuiManager::setID(int id)
 int GuiManager::ID() const
 {
     return m_ID;
+}
+
+QList<QObject *> GuiManager::model() const
+{
+    return m_deviceModel;
+}
+
+void GuiManager::addDevice(int id, QString ip, QString mac, QString mode)
+{
+    m_deviceModel.append(new DeviceModel(id, ip, mac, mode));
+    emit modelChanged();
+    qDebug() << "New device connected! ID: " + QString::number(id) + " IP:" + ip + " MAC:" + mac + " Mode:" + mode;
+}
+
+bool GuiManager::removeDevice(int id)
+{
+    for(int i = 0; i < m_deviceModel.size(); i++)
+    {
+        if(m_deviceModel.at(i) -> property("ID") == id)
+        {
+            m_deviceModel.removeAt(i);
+            emit modelChanged();
+            qDebug() << "Device with ID:" + QString::number(id) + " disconnected!";
+            return true;
+        }
+    }
+
+    return false;
 }
