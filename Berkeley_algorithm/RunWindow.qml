@@ -121,6 +121,18 @@ Item
         }
     }
 
+    Item
+    {
+        id: devices
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: programIDLabel.bottom
+        anchors.bottom: abortButton.top
+        anchors.margins: 5
+
+        DevicesList {}
+    }
+
     Button
     {
         id: abortButton
