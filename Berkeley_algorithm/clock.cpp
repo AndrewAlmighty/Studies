@@ -14,11 +14,14 @@ Clock::Clock()
 
 std::string Clock::getTime() const
 {
+    //Returns time in HH:MM:SS format.
     return std::string(std::to_string(m_hour) + ":" + std::to_string((m_min)) + ":" + std::to_string(m_sec));
 }
 
 bool Clock::setTime(std::string time)
 {
+    //This method sets time in our clock. First we check if string got HH:MM:SS format, then if values are good, then we change clock.
+
     std::string tmp;
     int pos = 0;
     int h = 0,
@@ -66,6 +69,8 @@ bool Clock::setTime(std::string time)
 
 void Clock::setSystemTime()
 {
+    //Set clock to system time.
+
     auto systemTime = std::chrono::system_clock::now();
 
     time_t tt = std::chrono::system_clock::to_time_t(systemTime);
@@ -79,6 +84,8 @@ void Clock::setSystemTime()
 
 void Clock::run()
 {
+    //This method runs in separate thread for all the time. It's responsible to keep clock running.
+
     std::thread threadObj([this]{
         while(true)
         {
@@ -112,6 +119,8 @@ void Clock::run()
 
 void Clock::updateGui()
 {
+    //This method updates clock which one is in GUI.
+
     if(GuiManager::GetInstance().running() == true)
         GuiManager::GetInstance().setTime(QString(getTime().c_str()));
 }

@@ -1,3 +1,8 @@
+/* This is clock class. Here we got our own clock, which one is running while app is running.
+ * Here we can also get information about system time and we can set the time to time which we want.
+ * The clock is running in separate thread.
+ */
+
 #ifndef CLOCK_H
 #define CLOCK_H
 

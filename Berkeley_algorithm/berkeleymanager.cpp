@@ -24,7 +24,16 @@ bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
 
 void BerkeleyManager::DetectServers()
 {
+/*
+    std::thread threadObj([]{
+        while(GuiManager::GetInstance().detectServers() == true)
+        {
 
+        }
+   });
+
+   threadObj.detach();
+*/
 }
 
 void BerkeleyManager::start()
@@ -39,7 +48,7 @@ void BerkeleyManager::start()
    });
 
     threadObj.detach();
-    */
+d*/
 }
 
 void BerkeleyManager::Stop()

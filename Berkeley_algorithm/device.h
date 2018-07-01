@@ -1,3 +1,6 @@
+/* The Device class. Here we keep information about device.
+ */
+
 #ifndef DEVICE_H
 #define DEVICE_H
 

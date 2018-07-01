@@ -1,3 +1,7 @@
+/* DeviceModel class. Here we store information about all servers which are available or all devices which are
+ * connected to one network. This model is exported to QML ListView through GuiManager.
+ */
+
 #ifndef DEVICEMODEL_H
 #define DEVICEMODEL_H
 

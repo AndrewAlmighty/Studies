@@ -1,3 +1,8 @@
+/* This is GuiManager class. It's role is simple - manage Gui which one is written in QML.
+ * It's singleton. We don't need more that one object of this class and it's useful to get it anywhere.
+ * Do not forget to set pointer to BerkeleyManager object!
+ */
+
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
 
@@ -55,6 +60,7 @@ public:
     QList<QObject*> model() const;
     void addDevice(int id, QString ip, QString mac, QString mode);
     bool removeDevice(int id);
+    void removeAllDevices();
 
 signals:
     void timeChanged();
@@ -75,15 +81,15 @@ private:
 
     BerkeleyManager* m_berkeley;    //pointer to main manager. Do not destroy!
 
-    QList<QObject*> m_deviceModel;
-    QString m_time;
-    QString m_ip;
-    QString m_mode;
-    QString m_serverIP;
-    QString m_mac;
-    bool m_running;
-    bool m_detectingServers;
-    int m_ID;
+    QList<QObject*> m_deviceModel;  //It's model. It's role is to show all available servers or all devices which are connected to server
+    QString m_time;                 //Shows time
+    QString m_ip;                   //Shows our IP
+    QString m_mode;                 //Contain information about mode which we want to run: Server or Client
+    QString m_serverIP;             //Contain IP of server which we want to connect
+    QString m_mac;                  //shows our MAC
+    bool m_running;                 //True if we are not in setup window
+    bool m_detectingServers;        //True if we want to detect local servers
+    int m_ID;                       //Shows ID of device
 };
 
 #endif // GUIMANAGER_H

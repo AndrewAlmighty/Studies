@@ -1,3 +1,9 @@
+/* This is main main manager. Here I request to do all network stuff like start working as server/client, detect devices etc.
+ * Manager contains:
+ * - object Clock - it's responsible for internal clock.
+ * - object Device - it contains information about this device.
+ */
+
 #ifndef BERKELEYMANAGER_H
 #define BERKELEYMANAGER_H
 

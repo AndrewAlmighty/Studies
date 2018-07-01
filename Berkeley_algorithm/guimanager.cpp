@@ -21,6 +21,7 @@ GuiManager::GuiManager(QObject *parent) : QObject(parent)
 
 void GuiManager::restartConfiguration()
 {
+    //Restart method. Do it before you click run.
     m_mode = "Server";
     m_time = "Not Specified";
     m_ip = "Not Specified";
@@ -30,6 +31,10 @@ void GuiManager::restartConfiguration()
 
 void GuiManager::beginJob()
 {
+    /* This method runs after run is clicked. First we turn off detecting servers, if this option is on.
+     * Then, we send information to our manager to start working as Server or Client.
+     * If everything is ok and program works as Server/Client, we get all needed information for Gui and change running flag.
+     */
     setDetectServers(false);
 
     if(m_mode == "Server")
@@ -60,6 +65,7 @@ void GuiManager::beginJob()
 
 void GuiManager::finishJob()
 {
+    //Stop the job. We do it when abort is clicked.
     m_berkeley -> Stop();
     restartConfiguration();
     setRunning(false);
@@ -67,6 +73,7 @@ void GuiManager::finishJob()
 
 void GuiManager::changeClock(QString time)
 {
+    //This function manually changes clock in our device to time which we set in gui.
     m_berkeley -> setTime(time.toStdString());
 }
 
@@ -166,6 +173,7 @@ QString GuiManager::MAC() const
 
 void GuiManager::setRunning(bool running)
 {
+    //Setting running flag. If true, get actual time here to have good time on clock!
     if(m_running == running)
         return;
 
@@ -209,6 +217,8 @@ QList<QObject *> GuiManager::model() const
 
 void GuiManager::addDevice(int id, QString ip, QString mac, QString mode)
 {
+    //This method adds device to DeviceModel.
+
     m_deviceModel.append(new DeviceModel(id, ip, mac, mode));
     emit modelChanged();
     qDebug() << "New device connected! ID: " + QString::number(id) + " IP:" + ip + " MAC:" + mac + " Mode:" + mode;
@@ -216,6 +226,8 @@ void GuiManager::addDevice(int id, QString ip, QString mac, QString mode)
 
 bool GuiManager::removeDevice(int id)
 {
+    //This method removes device from DeviceModel
+
     for(int i = 0; i < m_deviceModel.size(); i++)
     {
         if(m_deviceModel.at(i) -> property("ID") == id)
@@ -228,4 +240,10 @@ bool GuiManager::removeDevice(int id)
     }
 
     return false;
+}
+
+void GuiManager::removeAllDevices()
+{
+    //This method clears list of devices in DeviceModel
+    m_deviceModel.clear();
 }
