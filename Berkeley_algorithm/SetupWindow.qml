@@ -8,67 +8,71 @@ Item
     anchors.fill: parent
     anchors.margins: 5
 
-    RowLayout
+    Label
     {
-        id: modeLayout
+        id: runModeLabel
         anchors.top: parent.top
         anchors.topMargin: 20
-        width: parent.width
-        height: 30
+        anchors.left: parent.left
+        anchors.leftMargin: 10
 
-        Label
-        {
-            id: runModeLabel
-            text: qsTr("Run mode:")
-        }
-
-        RadioButton
-        {
-            id: serverOption
-            text: qsTr("Server")
-            checked: true
-        }
-
-        RadioButton
-        {
-            id: clientOption
-            text: qsTr("Client")
-        }
+        text: qsTr("Run mode:")
     }
 
-    RowLayout
+    RadioButton
     {
-        id: searchOptions
-        visible: false
-        anchors.top: modeLayout.bottom
+        id: serverOption
+        anchors.left: runModeLabel.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: runModeLabel.verticalCenter
+        text: qsTr("Server")
+        checked: true
+    }
+
+    RadioButton
+    {
+        id: clientOption
+        anchors.left: serverOption.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: runModeLabel.verticalCenter
+        text: qsTr("Client")
+    }
+
+    Label
+    {
+        id: searchOptionLabel
+        anchors.top: runModeLabel.bottom
         anchors.topMargin: 20
-        width: parent.width
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        visible: false
+        text: qsTr("Search for server:")
+    }
 
-        Label
-        {
-            id: searchOptionLabel
-            text: qsTr("Search for server:")
-        }
+    RadioButton
+    {
+        id: ipOption
+        anchors.verticalCenter: searchOptionLabel.verticalCenter
+        x: serverOption.x
+        visible: false
+        text: qsTr("Direct IP")
+        checked: true
+    }
 
-        RadioButton
-        {
-            id: ipOption
-            text: qsTr("Direct IP")
-            checked: true
-        }
-
-        RadioButton
-        {
-            id: lookOption
-            text: qsTr("Look for servers")
-        }
+    RadioButton
+    {
+        id: lookOption
+        anchors.verticalCenter: searchOptionLabel.verticalCenter
+        x: clientOption.x
+        visible: false
+        text: qsTr("Look for servers")
     }
 
     Loader
     {
         id: clientOptLoader
         visible: false
-        anchors.top: searchOptions.bottom
+        anchors.top: searchOptionLabel.bottom
         anchors.topMargin: 30
         width: parent.width
         sourceComponent: directIP_component
@@ -114,7 +118,9 @@ Item
         target: serverOption
         onClicked:
         {
-            searchOptions.visible = false
+            searchOptionLabel.visible = false
+            ipOption.visible = false
+            lookOption.visible = false
             clientOptLoader.visible = false
             GuiManager.setMode("Server")
             GuiManager.setServerIP("127.0.0.1")
@@ -126,7 +132,9 @@ Item
         target: clientOption
         onClicked:
         {
-            searchOptions.visible = true
+            searchOptionLabel.visible = true
+            ipOption.visible = true
+            lookOption.visible = true
             clientOptLoader.visible = true
             GuiManager.setMode("Client")
         }
@@ -152,5 +160,15 @@ Item
             clientOptLoader.height = 20
             clientOptLoader.sourceComponent = directIP_component
         }
+    }
+
+    ButtonGroup
+    {
+        buttons: [serverOption, clientOption]
+    }
+
+    ButtonGroup
+    {
+        buttons: [ipOption, lookOption]
     }
 }

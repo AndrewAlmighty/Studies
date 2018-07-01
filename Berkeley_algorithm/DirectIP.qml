@@ -5,12 +5,11 @@ import QtQuick.Controls 2.2
 Item
 {
     anchors.top: parent.top
-    width: parent.width
+    anchors.left: parent.left
+    anchors.leftMargin: 10
 
     RowLayout
     {
-        anchors.fill: parent
-
         Label
         {
             text: qsTr("Server IP: ")
