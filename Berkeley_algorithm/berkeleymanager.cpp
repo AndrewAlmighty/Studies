@@ -22,6 +22,11 @@ bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
     return true;
 }
 
+void BerkeleyManager::DetectServers()
+{
+
+}
+
 void BerkeleyManager::start()
 {
     m_clock -> setSystemTime();

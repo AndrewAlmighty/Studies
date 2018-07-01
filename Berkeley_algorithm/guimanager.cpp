@@ -30,6 +30,8 @@ void GuiManager::restartConfiguration()
 
 void GuiManager::beginJob()
 {
+    setDetectServers(false);
+
     if(m_mode == "Server")
     {
         qDebug() << "Prepare to run as Server!";
@@ -111,6 +113,25 @@ void GuiManager::setMode(QString mode)
 QString GuiManager::mode() const
 {
     return m_mode;
+}
+
+void GuiManager::setDetectServers(bool detect)
+{
+    if(m_detectingServers == detect)
+        return;
+
+    m_detectingServers = detect;
+
+    if(m_detectingServers == true)
+        m_berkeley -> DetectServers();
+
+    emit detectServersChanged();
+    qDebug() << "Detecting servers: " << m_detectingServers;
+}
+
+bool GuiManager::detectServers() const
+{
+    return m_detectingServers;
 }
 
 void GuiManager::setServerIP(QString ip)

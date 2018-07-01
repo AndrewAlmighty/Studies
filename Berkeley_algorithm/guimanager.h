@@ -12,11 +12,12 @@ class GuiManager : public QObject
 
     Q_PROPERTY(QString time READ time WRITE setTime NOTIFY timeChanged)
     Q_PROPERTY(QString ip READ ip WRITE setIp NOTIFY ipChanged)
-    Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)    
     Q_PROPERTY(QString serverIP READ serverIP WRITE setServerIP NOTIFY serverIPChanged)
     Q_PROPERTY(QString MAC READ MAC WRITE setMAC NOTIFY MACChanged)
     Q_PROPERTY(int ID READ ID WRITE setID NOTIFY IDChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
+    Q_PROPERTY(bool detectServers READ detectServers WRITE setDetectServers NOTIFY detectServersChanged)
     Q_PROPERTY(QList<QObject*> model READ model NOTIFY modelChanged)
 
 public:
@@ -35,6 +36,9 @@ public:
 
     Q_INVOKABLE void setMode(QString mode);
     QString mode() const;
+
+    Q_INVOKABLE void setDetectServers(bool detect);
+    bool detectServers() const;
 
     Q_INVOKABLE void setServerIP(QString ip);
     QString serverIP() const;
@@ -61,6 +65,7 @@ signals:
     void runningChanged();
     void IDChanged();
     void modelChanged();
+    void detectServersChanged();
 
 private:
     GuiManager(QObject *parent = nullptr);
@@ -77,6 +82,7 @@ private:
     QString m_serverIP;
     QString m_mac;
     bool m_running;
+    bool m_detectingServers;
     int m_ID;
 };
 

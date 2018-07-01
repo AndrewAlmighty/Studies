@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <list>
 
 #include "networkmanager.h"
 #include "clock.h"
@@ -15,6 +16,7 @@ public:
 
     bool PrepareToRunAsServer();
     bool PrepareToRunAsClient(std::string ip);
+    void DetectServers();
     void start();
     void Stop();
 

@@ -15,7 +15,6 @@ Item
         anchors.topMargin: 20
         anchors.left: parent.left
         anchors.leftMargin: 10
-
         text: qsTr("Run mode:")
     }
 
@@ -65,7 +64,7 @@ Item
         anchors.verticalCenter: searchOptionLabel.verticalCenter
         x: clientOption.x
         visible: false
-        text: qsTr("Look for servers")
+        text: qsTr("Detect servers")
     }
 
     Loader
@@ -123,6 +122,7 @@ Item
             lookOption.visible = false
             clientOptLoader.visible = false
             GuiManager.setMode("Server")
+            GuiManager.setDetectServers(false)
             GuiManager.setServerIP("127.0.0.1")
         }
     }
@@ -137,6 +137,9 @@ Item
             lookOption.visible = true
             clientOptLoader.visible = true
             GuiManager.setMode("Client")
+
+            if(lookOption.checked)
+                GuiManager.setDetectServers(true)
         }
     }
 
@@ -148,6 +151,7 @@ Item
             clientOptLoader.anchors.bottom = runButton.top
             clientOptLoader.anchors.bottomMargin = 10
             clientOptLoader.sourceComponent = listIP_component
+            GuiManager.setDetectServers(true)
         }
     }
 
@@ -159,6 +163,7 @@ Item
             clientOptLoader.anchors.bottom = undefined
             clientOptLoader.height = 20
             clientOptLoader.sourceComponent = directIP_component
+            GuiManager.setDetectServers(false)
         }
     }
 
