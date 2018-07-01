@@ -15,6 +15,7 @@ public:
 
 private:
     void run();
+    void updateGui();
 
     std::mutex m_mutex;
     int m_hour,

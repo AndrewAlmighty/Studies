@@ -16,19 +16,6 @@ GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
     restartConfiguration();
     m_running = false;
-
-    addDevice(1,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(2,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(3,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(4,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(5,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(6,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(7,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(8,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(9,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-    addDevice(10,"123:456:789:123", "78:32:1b:03:3a:71", "Server");
-
-    removeDevice(5);
 }
 
 void GuiManager::restartConfiguration()

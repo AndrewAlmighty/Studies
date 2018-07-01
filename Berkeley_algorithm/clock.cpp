@@ -103,10 +103,15 @@ void Clock::run()
                     m_hour = 0;
 
             }
-            if(GuiManager::GetInstance().running() == true)
-                GuiManager::GetInstance().setTime(QString(getTime().c_str()));
+            updateGui();
         }
     });
 
     threadObj.detach();
+}
+
+void Clock::updateGui()
+{
+    if(GuiManager::GetInstance().running() == true)
+        GuiManager::GetInstance().setTime(QString(getTime().c_str()));
 }
