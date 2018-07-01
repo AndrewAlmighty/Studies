@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 
-
 #include "networkmanager.h"
 #include "clock.h"
 #include "device.h"

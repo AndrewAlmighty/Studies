@@ -1,4 +1,5 @@
 #include "guimanager.h"
+
 #include <QDebug>
 
 GuiManager & GuiManager::GetInstance()
@@ -83,7 +84,7 @@ QString GuiManager::time() const
 }
 
 void GuiManager::setIp(QString ip)
-{qDebug() << "Device with ID disconnected!";
+{
     if(m_ip == ip)
         return;
 
@@ -147,7 +148,7 @@ void GuiManager::setRunning(bool running)
     if(m_running == running)
         return;
 
-    m_running = running;qDebug() << "Device with ID disconnected!";
+    m_running = running;
     emit runningChanged();
 
     if(m_running == true)

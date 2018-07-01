@@ -2,6 +2,7 @@
 #define GUIMANAGER_H
 
 #include <QObject>
+
 #include "berkeleymanager.h"
 #include "devicemodel.h"
 

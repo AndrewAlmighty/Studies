@@ -1,8 +1,8 @@
 #ifndef NETWORKMANAGER_H
 #define NETWORKMANAGER_H
 
-
 #include <string>
+
 #include "device.h"
 
 class NetworkManager

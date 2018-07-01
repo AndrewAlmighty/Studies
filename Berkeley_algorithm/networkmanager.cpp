@@ -1,5 +1,4 @@
 #include "networkmanager.h"
-
 #include "networkmethods.h"
 
 NetworkManager::NetworkManager(Device &dev)
