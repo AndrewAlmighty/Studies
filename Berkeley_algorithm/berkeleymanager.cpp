@@ -43,7 +43,7 @@ void BerkeleyManager::DetectServers()
 void BerkeleyManager::start()
 {
     m_clock -> setSystemTime();
-/*
+
     std::thread threadObj([]{
         while(GuiManager::GetInstance().running() == true)
         {
@@ -52,13 +52,13 @@ void BerkeleyManager::start()
    });
 
     threadObj.detach();
-d*/
+
 }
 
 bool BerkeleyManager::Stop()
 {
     m_device.setID(-1);
-    if(m_network ->shutdownSocket() == false)
+    if(m_network ->shutdownConnection() == false)
         return false;
 
     return true;

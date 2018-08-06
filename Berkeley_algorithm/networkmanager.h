@@ -11,7 +11,7 @@ public:
 
     bool createServer(int port);
     bool connectToServer(std::string ip);
-    bool shutdownSocket();
+    bool shutdownConnection();
 
 private:
     int m_socket;

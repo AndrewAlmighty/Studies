@@ -31,7 +31,7 @@ enum serverStatus createUDPServer(int *server_socket, int port)
     return Running;
 }
 
-int turnOffSocket(int *socket)
+int shutdownSocket(int *socket)
 {
     //Shutdown the socket. If it closed, return 1. Else return 0.
     if(close(*socket) < 0)

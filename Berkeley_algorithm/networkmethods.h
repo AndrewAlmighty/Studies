@@ -19,7 +19,7 @@ enum serverStatus
 };
 
 enum serverStatus createUDPServer(int *server_socket, int port);
-int turnOffSocket(int *socket);
+int shutdownSocket(int *socket);
 
 #ifdef __cplusplus
 }
