@@ -10,10 +10,14 @@ BerkeleyManager::BerkeleyManager()
     m_clock = std::unique_ptr<Clock>(new Clock());
 }
 
-bool BerkeleyManager::PrepareToRunAsServer()
+bool BerkeleyManager::PrepareToRunAsServer(int port)
 {
     m_device.setMode(Device::Server);
-    return true;
+
+    if(m_network -> createServer(port))
+        return true;
+
+    else return false;
 }
 
 bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
@@ -51,9 +55,13 @@ void BerkeleyManager::start()
 d*/
 }
 
-void BerkeleyManager::Stop()
+bool BerkeleyManager::Stop()
 {
     m_device.setID(-1);
+    if(m_network ->shutdownSocket() == false)
+        return false;
+
+    return true;
 }
 
 void BerkeleyManager::setTime(std::string time)

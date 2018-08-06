@@ -18,10 +18,8 @@ enum serverStatus
     Running
 };
 
-int runUDPServer();
-int connectTo();
-void disconnectFrom();
-void sendMessage();
+enum serverStatus createUDPServer(int *server_socket, int port);
+int turnOffSocket(int *socket);
 
 #ifdef __cplusplus
 }

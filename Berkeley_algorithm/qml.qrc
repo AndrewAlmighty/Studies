@@ -2,8 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>SetupWindow.qml</file>
-        <file>DirectIPOption.qml</file>
-        <file>IpList.qml</file>
         <file>RunWindow.qml</file>
         <file>DevicesList.qml</file>
         <file>DirectIP.qml</file>

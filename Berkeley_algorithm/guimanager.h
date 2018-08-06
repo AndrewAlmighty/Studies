@@ -20,6 +20,7 @@ class GuiManager : public QObject
     Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)    
     Q_PROPERTY(QString serverIP READ serverIP WRITE setServerIP NOTIFY serverIPChanged)
     Q_PROPERTY(QString MAC READ MAC WRITE setMAC NOTIFY MACChanged)
+    Q_PROPERTY(QString port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(int ID READ ID WRITE setID NOTIFY IDChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
     Q_PROPERTY(bool detectServers READ detectServers WRITE setDetectServers NOTIFY detectServersChanged)
@@ -51,6 +52,9 @@ public:
     void setMAC(QString mac);
     QString MAC() const;
 
+    Q_INVOKABLE void setPort(QString port);
+    QString port() const;
+
     void setRunning(bool connected);
     bool running() const;
 
@@ -67,6 +71,7 @@ signals:
     void ipChanged();
     void modeChanged();
     void serverIPChanged();
+    void portChanged();
     void MACChanged();
     void runningChanged();
     void IDChanged();
@@ -87,6 +92,7 @@ private:
     QString m_mode;                 //Contain information about mode which we want to run: Server or Client
     QString m_serverIP;             //Contain IP of server which we want to connect
     QString m_mac;                  //shows our MAC
+    QString m_port;
     bool m_running;                 //True if we are not in setup window
     bool m_detectingServers;        //True if we want to detect local servers
     int m_ID;                       //Shows ID of device

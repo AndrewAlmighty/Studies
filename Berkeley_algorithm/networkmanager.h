@@ -2,7 +2,6 @@
 #define NETWORKMANAGER_H
 
 #include <string>
-
 #include "device.h"
 
 class NetworkManager
@@ -10,7 +9,12 @@ class NetworkManager
 public:
     NetworkManager(Device &dev);
 
+    bool createServer(int port);
+    bool connectToServer(std::string ip);
+    bool shutdownSocket();
+
 private:
+    int m_socket;
     std::string readMac();
     std::string readIP();
 };

@@ -39,6 +39,36 @@ Item
 
     Label
     {
+        id: portLabel
+        anchors.right: portField.left
+        anchors.rightMargin: 5
+        anchors.verticalCenter: runModeLabel.verticalCenter
+        text: qsTr("PORT")
+    }
+
+    TextField
+    {
+        id: portField
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.verticalCenter: runModeLabel.verticalCenter
+        inputMask: "9999"
+
+        Component.onCompleted:
+        {
+            text = "9000"
+            GuiManager.setPort(text)
+        }
+
+        onEditingFinished:
+        {
+            console.log("PORT PROVIDED!")
+            GuiManager.setPort(text)
+        }
+    }
+
+    Label
+    {
         id: searchOptionLabel
         anchors.top: runModeLabel.bottom
         anchors.topMargin: 20
@@ -137,7 +167,6 @@ Item
             lookOption.visible = true
             clientOptLoader.visible = true
             GuiManager.setMode("Client")
-
             if(lookOption.checked)
                 GuiManager.setDetectServers(true)
         }

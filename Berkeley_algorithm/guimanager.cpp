@@ -40,7 +40,7 @@ void GuiManager::beginJob()
     if(m_mode == "Server")
     {
         qDebug() << "Prepare to run as Server!";
-        if(m_berkeley -> PrepareToRunAsServer() == false)
+        if(m_berkeley -> PrepareToRunAsServer(port().toInt()) == false)
             return;
     }
 
@@ -66,7 +66,9 @@ void GuiManager::beginJob()
 void GuiManager::finishJob()
 {
     //Stop the job. We do it when abort is clicked.
-    m_berkeley -> Stop();
+    if(m_berkeley -> Stop() == false)
+        qDebug() << "Failed to close connection";
+
     restartConfiguration();
     setRunning(false);
 }
@@ -169,6 +171,21 @@ void GuiManager::setMAC(QString mac)
 QString GuiManager::MAC() const
 {
     return m_mac;
+}
+
+void GuiManager::setPort(QString port)
+{
+    if(m_port == port)
+        return;
+
+    m_port = port;
+    emit portChanged();
+    qDebug() << "PORT:" << m_port;
+}
+
+QString GuiManager::port() const
+{
+    return m_port;
 }
 
 void GuiManager::setRunning(bool running)

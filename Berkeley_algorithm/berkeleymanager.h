@@ -1,4 +1,4 @@
-/* This is main main manager. Here I request to do all network stuff like start working as server/client, detect devices etc.
+/* This is main manager. Here are requests to do all network stuff like start working as server/client, detect devices, set time etc.
  * Manager contains:
  * - object Clock - it's responsible for internal clock.
  * - object Device - it contains information about this device.
@@ -20,11 +20,11 @@ class BerkeleyManager
 public:
     BerkeleyManager();
 
-    bool PrepareToRunAsServer();
+    bool PrepareToRunAsServer(int port);
     bool PrepareToRunAsClient(std::string ip);
     void DetectServers();
     void start();
-    void Stop();
+    bool Stop();
 
     void setTime(std::string time);
     int getID() const;

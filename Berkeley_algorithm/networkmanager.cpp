@@ -5,7 +5,37 @@ NetworkManager::NetworkManager(Device &dev)
 {
     dev.setMac(readMac());
     dev.setIp(readIP());
-    runUDPServer();
+    m_socket = 0;
+}
+
+bool NetworkManager::createServer(int port)
+{
+    //check if we have already opened a socket.
+    if(m_socket < 0)
+        return false;
+
+    //Create a socket. Provide a ptr to socket and port.
+    if(createUDPServer(&m_socket, port) == serverStatus::Running)
+        return true;
+
+    else return false;
+}
+
+bool NetworkManager::connectToServer(std::string ip)
+{
+
+}
+
+bool NetworkManager::shutdownSocket()
+{
+    //Shutdown a socket. Doesn't mean if it's working as server or client. After shutdown, delete the pointer to avoid leak.
+    if(turnOffSocket(&m_socket) == true)
+    {
+        m_socket = -1;
+        return true;
+    }
+
+    else return false;
 }
 
 std::string NetworkManager::readMac()
