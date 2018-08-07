@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <net/if.h>
 #include <ifaddrs.h>
+#include <sys/ioctl.h>
 #include <netdb.h>
 #include <errno.h>
 #include <string.h>
@@ -46,17 +48,14 @@ int shutdownSocket(int *socket)
     return 1;
 }
 
-void getMacAddr()
+enum ipStatus getIPAndMAC(char *ip_addr, char *iface)
 {
-
-}
-
-enum ipStatus getIpAddr(char *ip_addr)
-{
-    //This method read ip address of our machine. We read the first ip address with is not 127.0.0.1. If We read more or none we return error.
+    //This method read ip address and MAC of our machine. We read the first ip address with is not 127.0.0.1. If We read more or none we return error.
+    //If interface name will be longer than 5 characters we will also get error.
     struct ifaddrs *ifaddr, *ifa;
     int family, s, addr_number = 0;
     char host[NI_MAXHOST];
+
     //Get list of network interfaces and ip addresses. Something like ifconfig.
     if (getifaddrs(&ifaddr) == -1)
     {
@@ -65,12 +64,12 @@ enum ipStatus getIpAddr(char *ip_addr)
     }
 
     //Iterate over all founded addresses and found the right one
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa -> ifa_next)
     {
-        family = ifa->ifa_addr->sa_family;
+        family = ifa -> ifa_addr -> sa_family;
 
         if (family == AF_INET) {
-            s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            s = getnameinfo(ifa -> ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0)
             {
                 fprintf(stderr, "GetNameInfo() failed. Errno: %d", errno);
@@ -79,9 +78,12 @@ enum ipStatus getIpAddr(char *ip_addr)
 
             if(addr_number == 0 && strcmp("127.0.0.1", host) != 0)
             {
+                //get ip address and interface. Interface is needed to get MAC.
                 strcpy(ip_addr, host);
                 addr_number += 1;
-                fprintf(stderr, "Found ip address: %s\n", ip_addr);
+                fprintf(stderr, "Found IP address: %s\n", ip_addr);
+                strcpy(iface, ifa -> ifa_name);
+                fprintf(stderr, "Interface: %s\n", iface);
                 continue;
             }
 
@@ -94,4 +96,33 @@ enum ipStatus getIpAddr(char *ip_addr)
     }
 
     return IPFound;
+}
+
+enum macStatus getMacAddr(char *mac_addr, const char *ifc)
+{
+    //Get MAC address. Need Interface name to get it.
+    int fd;
+    struct ifreq ifr;
+    unsigned char *mac;
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , ifc, IFNAMSIZ-1);
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+    close(fd);
+    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+
+    //translate address
+    static const char* hex_lookup = "0123456789ABCDEF";
+
+    for (int i = 0 ; i < 6 ; i++)
+    {
+        *mac_addr++ = hex_lookup[mac[i] >> 4];
+        *mac_addr++ = hex_lookup[mac[i] & 0x0F];
+
+        if ((i+1)%16 && i != 5)
+            *mac_addr++ = ':';
+    }
+
+    *mac_addr = '\0';
+    return MacAddrFound;
 }

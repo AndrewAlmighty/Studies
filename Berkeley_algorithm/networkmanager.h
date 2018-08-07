@@ -15,8 +15,8 @@ public:
 
 private:
     int m_socket;
-    std::string readMac();
-    std::string readIP();
+    std::string readMac(std::string ifc);
+    std::string readIPandIfc();
 };
 
 #endif // NETWORKMANAGER_H

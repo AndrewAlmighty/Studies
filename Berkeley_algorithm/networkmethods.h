@@ -12,6 +12,12 @@ enum ipStatus
     MoreThanOneIp
 };
 
+enum macStatus
+{
+    CannotGetMacAddr,
+    MacAddrFound
+};
+
 enum connectStatus
 {
     NotConnected,
@@ -27,8 +33,8 @@ enum serverStatus
 
 enum serverStatus createUDPServer(int *server_socket, int port);
 int shutdownSocket(int *socket);
-void getMacAddr();
-enum ipStatus getIpAddr(char *ip_addr);
+enum macStatus getMacAddr(char *mac_addr, const char *ip_addr);
+enum ipStatus getIPAndMAC(char *ip_addr, char *iface);
 
 #ifdef __cplusplus
 }

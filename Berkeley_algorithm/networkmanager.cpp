@@ -3,8 +3,8 @@
 
 NetworkManager::NetworkManager(Device &dev)
 {
-    dev.setMac(readMac());
-    dev.setIp(readIP());
+    dev.setIPandIfc(readIPandIfc());
+    dev.setMac(readMac(dev.getInterface()));
     m_socket = -1;
 }
 
@@ -38,20 +38,33 @@ void NetworkManager::listen()
 
 }
 
-std::string NetworkManager::readMac()
+std::string NetworkManager::readMac(std::string ifc)
 {
-    return std::string("78:32:1b:03:3a:71");
+    char mac_addr[17];
+    if(getMacAddr(mac_addr, ifc.c_str()) == CannotGetMacAddr)
+        return std::string("MAC ADDR - ERROR");
+
+    else return std::string(mac_addr);
 }
 
-std::string NetworkManager::readIP()
+std::string NetworkManager::readIPandIfc()
 {
-    char ip_addr[15];
-    switch (getIpAddr(ip_addr))
+    //read IP and interface and return it. Need interface for MAC address.
+    char ip_addr[15], iface[5];
+    switch (getIPAndMAC(ip_addr, iface))
     {
         case MoreThanOneIp:
         case CannotGetIP:
             return std::string("127.0.0.1");
         case IPFound:
-            return std::string(ip_addr);
+        {
+            std::string IpIface;
+            IpIface += ip_addr;
+            IpIface += "_";
+            IpIface += iface;
+            return IpIface;
+        }
+        default:
+            return std::string("IP READ ERROR!");
     }
 }
