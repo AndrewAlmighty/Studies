@@ -21,11 +21,6 @@ bool NetworkManager::createServer(int port)
     else return false;
 }
 
-bool NetworkManager::connectToServer(std::string ip)
-{
-
-}
-
 bool NetworkManager::shutdownConnection()
 {
     //Shutdown a socket. Doesn't mean if it's working as server or client. After shutdown, delete the pointer to avoid leak.
@@ -38,6 +33,11 @@ bool NetworkManager::shutdownConnection()
     else return false;
 }
 
+void NetworkManager::listen()
+{
+
+}
+
 std::string NetworkManager::readMac()
 {
     return std::string("78:32:1b:03:3a:71");
@@ -45,5 +45,13 @@ std::string NetworkManager::readMac()
 
 std::string NetworkManager::readIP()
 {
-    return std::string("192.168.1.106");
+    char ip_addr[15];
+    switch (getIpAddr(ip_addr))
+    {
+        case MoreThanOneIp:
+        case CannotGetIP:
+            return std::string("127.0.0.1");
+        case IPFound:
+            return std::string(ip_addr);
+    }
 }

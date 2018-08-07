@@ -5,6 +5,13 @@
 extern "C"{
 #endif
 
+enum ipStatus
+{
+    CannotGetIP,
+    IPFound,
+    MoreThanOneIp
+};
+
 enum connectStatus
 {
     NotConnected,
@@ -20,6 +27,8 @@ enum serverStatus
 
 enum serverStatus createUDPServer(int *server_socket, int port);
 int shutdownSocket(int *socket);
+void getMacAddr();
+enum ipStatus getIpAddr(char *ip_addr);
 
 #ifdef __cplusplus
 }

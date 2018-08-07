@@ -47,12 +47,10 @@ void BerkeleyManager::start()
     std::thread threadObj([]{
         while(GuiManager::GetInstance().running() == true)
         {
-
         }
    });
 
     threadObj.detach();
-
 }
 
 bool BerkeleyManager::Stop()

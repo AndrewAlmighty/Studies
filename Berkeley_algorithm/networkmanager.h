@@ -10,8 +10,8 @@ public:
     NetworkManager(Device &dev);
 
     bool createServer(int port);
-    bool connectToServer(std::string ip);
     bool shutdownConnection();
+    void listen();
 
 private:
     int m_socket;
