@@ -40,7 +40,7 @@ bool NetworkManager::shutdownConnection()
 
 bool NetworkManager::checkMailBox()
 {
-    checkMessageBox(&m_socket, 123);
+    checkMessageBox(&m_socket);
     return false;
 }
 

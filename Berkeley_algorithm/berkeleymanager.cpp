@@ -2,7 +2,6 @@
 #include "guimanager.h"
 
 #include <thread>
-#include <QDebug>
 
 BerkeleyManager::BerkeleyManager()
 {
@@ -48,10 +47,7 @@ void BerkeleyManager::start()
     std::thread threadObj([&]{
         while(GuiManager::GetInstance().running() == true)
         {
-            if(m_network -> checkMailBox() == true)
-            {
-
-            }
+            m_network -> checkMailBox();
         }
    });
 

@@ -45,7 +45,7 @@ enum connectionStatus
 };
 
 enum serverStatus createUDPServer(int *server_socket, const int port);
-enum MessageBoxStatus checkMessageBox(int *server_socket, const int port);
+enum MessageBoxStatus checkMessageBox(int *server_socket);
 enum connectionStatus connectToServer(int *client_socket, const char *ip, const int port);
 int shutdownSocket(const int *socket);
 enum macStatus getMacAddr(char *mac_addr, const char *ip_addr);
