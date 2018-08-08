@@ -10,8 +10,9 @@ public:
     NetworkManager(Device &dev);
 
     bool createServer(int port);
+    bool connectTo(std::string ip, int port);
     bool shutdownConnection();
-    void listen();
+    bool checkMailBox();
 
 private:
     int m_socket;

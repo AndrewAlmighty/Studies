@@ -21,6 +21,11 @@ bool NetworkManager::createServer(int port)
     else return false;
 }
 
+bool NetworkManager::connectTo(std::string ip, int port)
+{
+    connectToServer(&m_socket, ip.c_str(), port);
+}
+
 bool NetworkManager::shutdownConnection()
 {
     //Shutdown a socket. Doesn't mean if it's working as server or client. After shutdown, delete the pointer to avoid leak.
@@ -33,9 +38,10 @@ bool NetworkManager::shutdownConnection()
     else return false;
 }
 
-void NetworkManager::listen()
+bool NetworkManager::checkMailBox()
 {
-
+    checkMessageBox(&m_socket, 123);
+    return false;
 }
 
 std::string NetworkManager::readMac(std::string ifc)
@@ -51,7 +57,7 @@ std::string NetworkManager::readIPandIfc()
 {
     //read IP and interface and return it. Need interface for MAC address.
     char ip_addr[15], iface[5];
-    switch (getIPAndMAC(ip_addr, iface))
+    switch (getIPAndIFACE(ip_addr, iface))
     {
         case MoreThanOneIp:
         case CannotGetIP:

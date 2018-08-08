@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-enum serverStatus createUDPServer(int *server_socket, int port)
+enum serverStatus createUDPServer(int *server_socket, const int port)
 {
     //create socket
     if((*server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -35,7 +35,7 @@ enum serverStatus createUDPServer(int *server_socket, int port)
     return Running;
 }
 
-int shutdownSocket(int *socket)
+int shutdownSocket(const int *socket)
 {
     //Shutdown the socket. If it closed, return 1. Else return 0.
     if(close(*socket) < 0)
@@ -48,7 +48,7 @@ int shutdownSocket(int *socket)
     return 1;
 }
 
-enum ipStatus getIPAndMAC(char *ip_addr, char *iface)
+enum ipStatus getIPAndIFACE(char *ip_addr, char *iface)
 {
     //This method read ip address and MAC of our machine. We read the first ip address with is not 127.0.0.1. If We read more or none we return error.
     //If interface name will be longer than 5 characters we will also get error.
@@ -125,4 +125,38 @@ enum macStatus getMacAddr(char *mac_addr, const char *ifc)
 
     *mac_addr = '\0';
     return MacAddrFound;
+}
+
+enum connectionStatus connectToServer(int *client_socket, const char *ip, const int port)
+{
+    if((*client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        fprintf(stderr, "Socket creation failed! Errno: %d\n", errno);
+        return cannotConnect;
+    }
+
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(ip);
+    server_addr.sin_port = htons(port);
+
+    const char *czesc = "hejhej";
+    char x[100];
+    int n, len;
+    sendto(client_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
+    n = recvfrom(client_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
+    fprintf(stderr, "WIADOMOSC: %s\n", x);
+
+}
+
+enum MessageBoxStatus checkMessageBox(int *server_socket, const int port)
+{
+    const char *czesc = "spierdalaj";
+    char x[100];
+    int n, len;
+    struct sockaddr_in client_addr;
+    n = recvfrom(server_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &client_addr, &len);
+    fprintf(stderr, "WIADOMOSC: %s\n", x);
+    sendto(server_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&client_addr,sizeof(client_addr));
 }
