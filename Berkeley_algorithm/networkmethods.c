@@ -135,6 +135,7 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
         return cannotConnect;
     }
 
+    fprintf(stderr, "LOOK FOR:%s", ip);
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -144,8 +145,8 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
     const char *czesc = "hejhej";
     char x[1024];
     int n, len;
-    sendto(client_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
-    n = recvfrom(client_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
+    sendto(*client_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
+    n = recvfrom(*client_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
     fprintf(stderr, "WIADOMOSC: %s\n", x);
 
 }
@@ -156,10 +157,7 @@ enum MessageBoxStatus checkMessageBox(int *server_socket)
     char x[1024];
     int n, len;
     struct sockaddr_in client_addr;
-    n = recvfrom(server_socket, x, 1024, MSG_WAITALL, (struct sockaddr *) &client_addr, &len);
-    if(strcmp(x, "") != 0)
-    {
-        fprintf(stderr, "WIADOMOSC: %s\n", x);
-        sendto(server_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&client_addr,sizeof(client_addr));
-    }
+    n = recvfrom(*server_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &client_addr, &len);
+    fprintf(stderr, "WIADOMOSC: %s\n", x);
+    sendto(*server_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&client_addr,sizeof(client_addr));
 }

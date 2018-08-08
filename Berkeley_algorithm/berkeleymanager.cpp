@@ -51,7 +51,7 @@ void BerkeleyManager::start()
         }
    });
 
-    threadObj.detach();
+   threadObj.detach();
 }
 
 bool BerkeleyManager::Stop()
