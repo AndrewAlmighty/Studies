@@ -144,8 +144,8 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
 
     const char *czesc = "hejhej";
     char x[1024];
-    int n, len;
-    sendto(*client_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
+    int n, len = sizeof(server_addr);
+    sendto(*client_socket, czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
     n = recvfrom(*client_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
     fprintf(stderr, "WIADOMOSC: %s\n", x);
 

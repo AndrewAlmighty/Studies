@@ -22,7 +22,7 @@ bool BerkeleyManager::PrepareToRunAsServer(int port)
 bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
 {
     m_device.setMode(Device::Client);
-    m_network ->connectTo(ip, 9000);
+    m_network -> connectTo(ip, 9000);
     return true;
 }
 
