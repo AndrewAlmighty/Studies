@@ -153,11 +153,18 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
 
 enum MessageBoxStatus checkMessageBox(int *server_socket)
 {
-    const char *czesc = "spierdalaj";
+    char *czesc = "spierdalaj";
     char x[1024];
-    int n, len;
     struct sockaddr_in client_addr;
+    int n, len = sizeof(client_addr);
+    memset(&client_addr, 0, sizeof(client_addr));
+
     n = recvfrom(*server_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &client_addr, &len);
+    char *ip = inet_ntoa(client_addr.sin_addr);
+    fprintf(stderr, "IP:%s, len:%d",ip, len);
+    x[n] = '\0';
     fprintf(stderr, "WIADOMOSC: %s\n", x);
-    sendto(*server_socket, *czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *)&client_addr,sizeof(client_addr));
+    sendto(*server_socket, czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *) &client_addr, len);
+   // sendto(*server_socket, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &client_addr, len);
+
 }
