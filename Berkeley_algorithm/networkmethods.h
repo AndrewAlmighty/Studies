@@ -5,6 +5,8 @@
 extern "C"{
 #endif
 
+#include "message.h"
+
 enum ipStatus
 {
     CannotGetIP,
@@ -28,13 +30,6 @@ enum MessageBoxStatus
 {
     MessageBoxEmpty,
     MessageBoxNotEmpty
-};
-
-enum MessageTypes
-{
-    HelloMsg,   //Client "hello". Request to join.
-    WelcomeMsg, //Server "hello". Accept the client. Provides ID.
-    GoodByeMsg  //This message means that someone shutdown the connection or Server refuse the client to connect.
 };
 
 enum connectionStatus

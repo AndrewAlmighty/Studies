@@ -42,4 +42,5 @@ HEADERS += \
     clock.h \
     device.h \
     networkmethods.h \
-    devicemodel.h
+    devicemodel.h \
+    message.h
