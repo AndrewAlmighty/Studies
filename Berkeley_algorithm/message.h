@@ -17,7 +17,9 @@ enum MessageType
 {
     //This is message type. It's fast recognize what says that message.
 
+    EmptyMessage,           //Empty message - just ignore it.
     ConnectionRequest,      //client is asking to join the network.
+    ConnectionAccepted,     //Server accept client.
     ConnectionRefused,      //server refuse client's connection request.
     Disconnect,             //client is leaving the network.
     ClientsCheck,           //Server checks if clients are connected.
@@ -31,7 +33,7 @@ struct Message
 {
     enum MessageType type;
     int device_id;
-    const char message[64];
+    char message[64];
 };
 
 #ifdef __cplusplus

@@ -14,6 +14,7 @@
 #include "networkmanager.h"
 #include "clock.h"
 #include "device.h"
+#include "message.h"
 
 class BerkeleyManager
 {

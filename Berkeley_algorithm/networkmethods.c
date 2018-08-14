@@ -127,15 +127,14 @@ enum macStatus getMacAddr(char *mac_addr, const char *ifc)
     return MacAddrFound;
 }
 
-enum connectionStatus connectToServer(int *client_socket, const char *ip, const int port)
+enum connectionStatus connectToServer(int *client_socket, const char *ip, const int port, int *device_id)
 {
     if((*client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         fprintf(stderr, "Socket creation failed! Errno: %d\n", errno);
-        return cannotConnect;
+        return CannotConnect;
     }
 
-    fprintf(stderr, "LOOK FOR:%s", ip);
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -145,26 +144,27 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
     struct Message msg;
     msg.type = ConnectionRequest;
     msg.device_id = 0;
-    msg.message = "WEŹ SPIERDALAJ";
-    int n, len = sizeof(server_addr);
-    sendto(*client_socket, (struct Message*) msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
-    n = recvfrom(*client_socket, (char*)x, 1024, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
-    fprintf(stderr, "WIADOMOSC: %s\n", x);
+    strcpy(msg.message, "");
 
+    unsigned int socket_len = sizeof(server_addr);
+    sendto(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
+    recvfrom(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &server_addr, &socket_len);
+
+    if(msg.type == ConnectionAccepted)
+    {
+        *device_id = msg.device_id;
+        return Connected;
+    }
+
+    else
+        return ServerRefuse;
 }
 
-enum MessageBoxStatus checkMessageBox(int *server_socket)
+void checkMessageBox(int *server_socket, struct Message *msg)
 {
     struct sockaddr_in client_addr;
-    int n, len = sizeof(client_addr);
+    unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
-    struct Message msg;
 
-
-
-    n = recvfrom(*server_socket, (struct Message*) msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &len);
-    char *ip = inet_ntoa(client_addr.sin_addr);
-    fprintf(stderr, "IP:%s, len:%d",ip, len);
-    fprintf(stderr, "WIADOMOSC: %s\n", msg.message);
-    sendto(*server_socket, czesc, strlen(czesc), MSG_CONFIRM, (const struct sockaddr *) &client_addr, len);
+    recvfrom(*server_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
 }

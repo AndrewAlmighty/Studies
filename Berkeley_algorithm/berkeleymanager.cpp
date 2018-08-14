@@ -22,8 +22,14 @@ bool BerkeleyManager::PrepareToRunAsServer(int port)
 bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
 {
     m_device.setMode(Device::Client);
-    m_network -> connectTo(ip, 9000);
-    return true;
+    int id;
+    if(m_network -> connectTo(ip, 9000, &id) == true)
+    {
+        m_device.setID(id);
+        return true;
+    }
+
+    else return false;
 }
 
 void BerkeleyManager::DetectServers()
@@ -45,9 +51,11 @@ void BerkeleyManager::start()
     m_clock -> setSystemTime();
 
     std::thread threadObj([&]{
+
+        struct Message msg;
         while(GuiManager::GetInstance().running() == true)
         {
-            m_network -> checkMailBox();
+            m_network -> checkMailBox(&msg);
         }
    });
 

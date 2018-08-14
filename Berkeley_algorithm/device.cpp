@@ -10,7 +10,7 @@ Device::Device()
 void Device::setIPandIfc(std::string s)
 {
     std::string tmp;
-    for(int i = 0; i < s.length(); i++)
+    for(unsigned i = 0; i < s.length(); i++)
     {
         if(s[i] != '_')
             tmp += s[i];
