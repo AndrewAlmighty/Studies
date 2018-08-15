@@ -86,7 +86,7 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg)
     unsigned msgSize = strlen(msg -> message);
 
     std::string ip, mac;
-    bool foundIp = false, foundMac = false, isIp = false, isMAC;
+    bool foundIp = false, foundMac = false, isIp = false, isMAC = false;
 
     for(unsigned i = 0; i < msgSize; i++)
     {
@@ -141,7 +141,10 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg)
             }
 
             if(isOK == true)
+            {
                 foundIp = true;
+                continue;
+            }
 
             else
                 break;
@@ -176,9 +179,11 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg)
                 {
                     if(mac[j] != ':')
                         tmp1++;
-
                     else if(mac[j] == ':' && tmp1 != 0)
+                    {
+                        tmp1 = 0;
                         tmp2++;
+                    }
 
                     else if(mac[j] == ':' && tmp1 == 0)
                     {

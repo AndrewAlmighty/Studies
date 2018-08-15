@@ -156,6 +156,7 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
     recvfrom(*server_socket, msg, sizeof(*msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
+    fprintf(stderr, "WIADOMOSC:%s\n", msg -> message);
 }
 
 void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port)
