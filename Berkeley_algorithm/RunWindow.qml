@@ -19,10 +19,28 @@ Item
 
     Label
     {
-        id: whichModeLabel
+        id: statusLabel
         anchors.top: timeLabel.bottom
         anchors.left: parent.left
         anchors.topMargin: 40
+        text: "Status:"
+    }
+
+    Label
+    {
+        id: workingStatus
+        anchors.left: statusLabel.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: statusLabel.verticalCenter
+        text: GuiManager.status
+    }
+
+    Label
+    {
+        id: whichModeLabel
+        anchors.top: statusLabel.bottom
+        anchors.left: parent.left
+        anchors.topMargin: 10
         text: "Running as:"
     }
 

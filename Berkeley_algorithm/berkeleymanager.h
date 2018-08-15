@@ -39,7 +39,7 @@ private:
     bool makingConnection(struct Message *msg);
     void runAsServer();
     void runAsClient();
-    void updateGui();
+    void updateGui(std::string status);
     void breakAll();
 
     std::unique_ptr<NetworkManager> m_network;

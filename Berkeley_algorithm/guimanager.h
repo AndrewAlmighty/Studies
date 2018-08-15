@@ -24,6 +24,7 @@ class GuiManager : public QObject
     Q_PROPERTY(QString MAC READ MAC WRITE setMAC NOTIFY MACChanged)
     Q_PROPERTY(QString port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(QString qmlFile READ qmlFile WRITE setQmlFile NOTIFY qmlFileChanged)
+    Q_PROPERTY(QString status READ status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(int ID READ ID WRITE setID NOTIFY IDChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
     Q_PROPERTY(bool detectServers READ detectServers WRITE setDetectServers NOTIFY detectServersChanged)
@@ -62,6 +63,9 @@ public:
     Q_INVOKABLE void setQmlFile(QString fileName);
     QString qmlFile() const;
 
+    Q_INVOKABLE void setStatus(QString status);
+    QString status() const;
+
     void setRunning(bool connected);
     bool running() const;
 
@@ -86,6 +90,7 @@ signals:
     void qmlFileChanged();
     void modelChanged();
     void detectServersChanged();
+    void statusChanged();
 
 private:
     GuiManager(QObject *parent = nullptr);
@@ -103,7 +108,8 @@ private:
     QString m_serverIP;             //Contain IP of server which we want to connect
     QString m_mac;                  //shows our MAC
     QString m_port;
-    QString m_qmlFileName;
+    QString m_qmlFileName;          //Contain name of qmlfile which we load.
+    QString m_status;               //shows status - connected, connecting etc...
     bool m_running;                 //True if we are not in setup window
     bool m_detectingServers;        //True if we want to detect local servers
     int m_ID;                       //Shows ID of device

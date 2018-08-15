@@ -10,9 +10,28 @@ Item
 
     Label
     {
-        id: runModeLabel
+        id: statusLabel
         anchors.top: parent.top
         anchors.topMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        text: qsTr("Status:")
+    }
+
+    Label
+    {
+        id: workingStatus
+        anchors.left: statusLabel.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: statusLabel.verticalCenter
+        text: GuiManager.status
+    }
+
+    Label
+    {
+        id: runModeLabel
+        anchors.top: statusLabel.top
+        anchors.topMargin: 35
         anchors.left: parent.left
         anchors.leftMargin: 10
         text: qsTr("Run mode:")

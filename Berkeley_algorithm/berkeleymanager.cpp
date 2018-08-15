@@ -138,6 +138,7 @@ void BerkeleyManager::runAsServer()
 {
     std::thread threadObj([&]{
 
+        updateGui("Working");
         struct Message msg;
         while(GuiManager::GetInstance().running() == true)
         {
@@ -157,7 +158,7 @@ void BerkeleyManager::runAsClient()
         msg.type = EmptyMessage;
         if(makingConnection(&msg) == true)
         {
-            updateGui();
+            updateGui("Connected");
 
             while(GuiManager::GetInstance().running() == true)
             {
@@ -173,10 +174,13 @@ void BerkeleyManager::runAsClient()
     threadObj.detach();
 }
 
-void BerkeleyManager::updateGui()
+void BerkeleyManager::updateGui(std::string status)
 {
     GuiManager::GetInstance().setID(getID());
     GuiManager::GetInstance().setMode(QString(getMode().c_str()));
+
+    if(!status.empty())
+        GuiManager::GetInstance().setStatus(QString::fromStdString(status));
 }
 
 void BerkeleyManager::breakAll()
@@ -190,6 +194,7 @@ void BerkeleyManager::breakAll()
 
 bool BerkeleyManager::makingConnection(struct Message *msg)
 {
+    updateGui("Connecting ...");
     int maxTime = 10;   //we wait no more than 10 second to connect
     while(maxTime > 0)
     {

@@ -33,6 +33,7 @@ void GuiManager::restartConfiguration()
     m_mac = "Not Specified";
     m_ID = -1;
     setQmlFile("SetupWindow.qml");
+    setStatus("Not working");
 }
 
 void GuiManager::beginJob()
@@ -207,6 +208,20 @@ void GuiManager::setQmlFile(QString fileName)
 QString GuiManager::qmlFile() const
 {
     return m_qmlFileName;
+}
+
+void GuiManager::setStatus(QString status)
+{
+    if(m_status == status)
+        return;
+
+    m_status = status;
+    emit statusChanged();
+}
+
+QString GuiManager::status() const
+{
+    return m_status;
 }
 
 void GuiManager::setRunning(bool running)
