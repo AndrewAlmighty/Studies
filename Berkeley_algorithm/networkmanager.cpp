@@ -225,12 +225,6 @@ bool NetworkManager::handleConnectionAcceptedMessage(const struct Message *msg)
             tmp.clear();
             IDbegin = true;
         }
-
-        else if (IDbegin == true)
-        {
-            if(isdigit(tmp[i]) == false)
-                return false;
-        }
     }
 
     m_device.setID(std::stoi(tmp));

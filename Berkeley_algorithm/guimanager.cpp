@@ -55,12 +55,14 @@ void GuiManager::beginJob()
         return;
 
     qDebug() << "Preparing done!";
+
     setID(m_berkeley -> getID());
     setMode(QString(m_berkeley -> getMode().c_str()));
     setMAC(QString(m_berkeley -> getMAC().c_str()));
     setIp(QString(m_berkeley -> getIP().c_str()));
     setRunning(true);
     m_berkeley -> start();
+
 }
 
 void GuiManager::finishJob()

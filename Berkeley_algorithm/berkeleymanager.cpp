@@ -89,7 +89,7 @@ std::string BerkeleyManager::getTime() const
     return m_clock -> getTime();
 }
 
-bool BerkeleyManager::handleMessage(const Message *msg)
+bool BerkeleyManager::handleMessage(struct Message *msg)
 {
     //Here we check what kind of message came and then we react for it.
     switch(msg -> type)
@@ -99,10 +99,12 @@ bool BerkeleyManager::handleMessage(const Message *msg)
 
     case ConnectionRequest:
         m_network -> handleConnectionRequest(msg);
+        msg -> type = EmptyMessage;
         return true;
 
     case ConnectionAccepted:
         m_network -> handleConnectionAcceptedMessage(msg);
+        msg -> type = EmptyMessage;
         return true;
 
     case ConnectionRefused:
@@ -150,7 +152,9 @@ void BerkeleyManager::runAsClient()
     std::thread threadObj([&]{
 
         struct Message msg;
-        makingConnection(&msg);
+        msg.type = EmptyMessage;
+        if(makingConnection(&msg) == true)
+            updateGui();
 
         while(GuiManager::GetInstance().running() == true)
         {
@@ -161,6 +165,12 @@ void BerkeleyManager::runAsClient()
    });
 
     threadObj.detach();
+}
+
+void BerkeleyManager::updateGui()
+{
+    GuiManager::GetInstance().setID(getID());
+    GuiManager::GetInstance().setMode(QString(getMode().c_str()));
 }
 
 bool BerkeleyManager::makingConnection(struct Message *msg)

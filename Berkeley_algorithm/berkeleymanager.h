@@ -35,10 +35,12 @@ public:
     std::string getTime() const;
 
 private:
-    bool handleMessage(const struct Message *msg);
+    bool handleMessage(struct Message *msg);
+    bool makingConnection(struct Message *msg);
     void runAsServer();
     void runAsClient();
-    bool makingConnection(struct Message *msg);
+    void updateGui();
+
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
 };
