@@ -24,7 +24,7 @@ public:
 
 private:
     void acceptClient(const std::string &ip, const std::string &mac);
-    void addDeviceToNetworkList(const std::string &ip, const std::string &mac, const int id, Device::Mode mode);
+    void addDeviceToNetworkList(const std::string &ip, const std::string &mac, const int id, enum Device::Mode mode);
     std::string readMac(std::string ifc);
     std::string readIPandIfc();
 

@@ -28,23 +28,14 @@ bool BerkeleyManager::prepareToRunAsClient(std::string ip, int port)
 
 void BerkeleyManager::detectServers()
 {
-/*
-    std::thread threadObj([]{
-        while(GuiManager::GetInstance().detectServers() == true)
-        {
-
-        }
-   });
-
-   threadObj.detach();
-*/
+    //To implement
 }
 
 void BerkeleyManager::start()
 {
     m_clock -> setSystemTime();
 
-    if(m_network -> getDevice().getModeStr() == "server")
+    if(m_network -> getDevice().getModeStr().compare("server") == 0)
         runAsServer();
 
     else
@@ -56,6 +47,7 @@ bool BerkeleyManager::stop()
     if(m_network -> shutdownConnection() == false)
         return false;
 
+    m_network -> resetIDCounter();
     return true;
 }
 
@@ -139,6 +131,7 @@ void BerkeleyManager::runAsServer()
     std::thread threadObj([&]{
 
         updateGui("Working");
+        updateDevicesList();
         struct Message msg;
         while(GuiManager::GetInstance().running() == true)
         {

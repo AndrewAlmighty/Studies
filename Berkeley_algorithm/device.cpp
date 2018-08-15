@@ -6,6 +6,16 @@ Device::Device()
     m_mac = "Not Specified";
     m_ifc = "Not Spiecified";
     m_ID = -1;
+    m_mode = NotSpecified;
+}
+
+Device::Device(const Device &dev)
+{
+    m_ip = dev.getIP();
+    m_mac = dev.getMAC();
+    m_ifc = dev.getInterface();
+    m_ID = dev.getID();
+    m_mode = dev.getMode();
 }
 
 void Device::setIPandIfc(std::string s)
@@ -83,7 +93,7 @@ std::string Device::getModeStr() const
         return std::string("client");
 
     else
-        return std::string("NotSpecified");
+        return std::string("Not Specified");
 }
 
 Device::Mode Device::getMode() const

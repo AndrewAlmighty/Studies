@@ -16,6 +16,7 @@ public:
     };
 
     Device();
+    Device(const Device &dev);
     void setIPandIfc(std::string s);
     void setIP(std::string ip);
     void setMac(std::string mac);
@@ -30,7 +31,7 @@ public:
     std::string getInterface() const;
 
 private:
-    Mode m_mode;
+    enum Mode m_mode;
     std::string m_ip;
     std::string m_ifc;
     std::string m_mac;

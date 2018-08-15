@@ -265,8 +265,7 @@ QList<QObject *> GuiManager::model() const
 
 void GuiManager::addDevice(int id, QString ip, QString mac, QString mode)
 {
-    //This method adds device to DeviceModel.
-
+    //This method adds device to DeviceModel.    
     m_deviceModel.append(new DeviceModel(id, ip, mac, mode));
     emit modelChanged();
     qDebug() << "New device connected! ID: " + QString::number(id) + " IP:" + ip + " MAC:" + mac + " Mode:" + mode;

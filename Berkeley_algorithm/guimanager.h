@@ -10,6 +10,7 @@
 
 #include "berkeleymanager.h"
 #include "devicemodel.h"
+#include "device.h"
 
 class GuiManager : public QObject
 {

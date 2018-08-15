@@ -23,9 +23,10 @@ bool NetworkManager::createServer(int *port)
     if(createAndBindSocket(&m_socket, port) == Working)
     {
         m_port = *port;
+        fprintf(stderr,"Stworzono socket!\n");
         m_device.setMode(Device::Server);
         m_device.setID(m_IDcounter);
-        addDeviceToNetworkList(m_device.getIP(), m_device.getMAC(), m_device.getID(), m_device.getMode());
+        addDeviceToNetworkList(m_device.getIP(), m_device.getMAC(), m_device.getID(), Device::Server);
         return true;
     }
 
@@ -265,7 +266,7 @@ void NetworkManager::addDeviceToNetworkList(const std::string &ip, const std::st
     newDevice.setMac(mac);
     newDevice.setMode(mode);
     newDevice.setID(id);
-    m_deviceList.push_back(Device());
+    m_deviceList.push_back(newDevice);
     m_IDcounter++;
 }
 
