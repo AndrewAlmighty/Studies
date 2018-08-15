@@ -65,9 +65,9 @@ void NetworkManager::checkMailBox(struct Message *msg)
     checkMessageBox(&m_socket, msg);
 }
 
-void NetworkManager::sendMsg(const Message *msg, const char *ip)
+void NetworkManager::sendMsg(const Message *msg, const std::string &ip)
 {
-    sendMessage(&m_socket, msg, ip, &m_port);
+    sendMessage(&m_socket, msg, ip.c_str(), &m_port);
 }
 
 void NetworkManager::resetIDCounter()
@@ -229,6 +229,7 @@ void NetworkManager::acceptClient(const std::string &ip, const std::string &mac)
     msg.type = ConnectionAccepted;
     msg.device_id = 1;
     strcpy(msg.message, "ID:2");
+    sendMsg(&msg, ip);
 }
 
 void NetworkManager::addDeviceToNetworkList(const std::string &ip, const std::string &mac, const int id, Device::Mode mode)

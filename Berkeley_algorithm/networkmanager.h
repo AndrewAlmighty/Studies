@@ -16,7 +16,7 @@ public:
     bool shutdownConnection();
     bool handleConnectionRequest(const Message *msg);
     void checkMailBox(Message *msg);
-    void sendMsg(const Message *msg, const char *ip);
+    void sendMsg(const Message *msg, const std::string &ip);
     void resetIDCounter();
     Device getDevice() const;
 
