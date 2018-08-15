@@ -135,9 +135,10 @@ enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, c
     unsigned int socket_len = sizeof(server_addr);
     sendto(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
     recvfrom(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &server_addr, &socket_len);
-
+    fprintf(stderr, "WIADOMOSC:%s\n", msg.message);
     if(msg.type == ConnectionAccepted)
     {
+        fprintf(stderr, "POLACZENIE UZYSKANO!");
         *device_id = msg.device_id;
         return Connected;
     }
