@@ -95,7 +95,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     switch(msg -> type)
     {
     case EmptyMessage:
-        break;
+        return false;
 
     case ConnectionRequest:
         m_network -> handleConnectionRequest(msg);

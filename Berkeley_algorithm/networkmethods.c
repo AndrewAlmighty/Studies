@@ -139,10 +139,9 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
     recvfrom(*server_socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
-    fprintf(stderr, "KOLEJNY ZAJEBISTY PROBLEM - odbieranie...\n");
 }
 
-void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port)
+void sendMessage(int *mySocket, const struct Message *msg, const char *ip, const int *port)
 {
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
@@ -150,7 +149,6 @@ void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *
     addr.sin_addr.s_addr = inet_addr(ip);
     addr.sin_port = htons(*port);
     sendto(*mySocket, msg, sizeof(*msg), MSG_CONFIRM, (const struct sockaddr *)&addr,sizeof(addr));
-    fprintf(stderr, "KOLEJNY ZAJEBISTY PROBLEM - wysylanie ...\n");
 }
 
 int shutdownSocket(const int *socket)

@@ -238,9 +238,6 @@ Device NetworkManager::getDevice() const
 
 void NetworkManager::acceptClient(const std::string &ip, const std::string &mac)
 {
-    //Adding new device to list of devices in network.
-    addDeviceToNetworkList(ip, mac, m_IDcounter, Device::Client);
-
     //Send confirmation of connection request.
     struct Message msg;
     msg.type = ConnectionAccepted;
@@ -248,6 +245,9 @@ void NetworkManager::acceptClient(const std::string &ip, const std::string &mac)
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
     sendMsg(&msg, ip);
+
+    //Adding new device to list of devices in network.
+    addDeviceToNetworkList(ip, mac, m_IDcounter, Device::Client);
 }
 
 void NetworkManager::addDeviceToNetworkList(const std::string &ip, const std::string &mac, const int id, Device::Mode mode)
