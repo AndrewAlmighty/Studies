@@ -11,13 +11,13 @@
 #include <string.h>
 #include <unistd.h>
 
-enum serverStatus createAndBindSocket(int *server_socket, const int *port)
+enum socketStatus createAndBindSocket(int *server_socket, const int *port)
 {
     //create socket
     if((*server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         fprintf(stderr, "Socket creation failed! Errno: %d\n", errno);
-        return NotRunning;
+        return NotWorking;
     }
     //fill information about server. Bind.
     struct sockaddr_in server_addr;
@@ -29,10 +29,10 @@ enum serverStatus createAndBindSocket(int *server_socket, const int *port)
     if(bind(*server_socket, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
     {
         fprintf(stderr, "Bind failed! Errno:%d\n", errno);
-        return NotRunning;
+        return NotWorking;
     }
 
-    return Running;
+    return Working;
 }
 
 enum ipStatus getIPAndIFACE(char *ip_addr, char *iface)
@@ -114,16 +114,12 @@ enum macStatus getMacAddr(char *mac_addr, const char *ifc)
     return MacAddrFound;
 }
 
-enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC, int *device_id)
+enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC)
 {
-    createAndBindSocket(client_socket, port);
+    if(createAndBindSocket(client_socket, port) == NotWorking)
+        return NotWorking;
 
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(dest_ip);
-    server_addr.sin_port = htons(*port);
-
+    //Prepare message for connection request.
     struct Message msg;
     msg.type = ConnectionRequest;
     msg.device_id = 0;
@@ -132,22 +128,13 @@ enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, c
     strcat(msg.message, "_MAC:");
     strcat(msg.message, MAC);
 
-    unsigned int socket_len = sizeof(server_addr);
-    sendto(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
-    recvfrom(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &server_addr, &socket_len);
-
-    if(msg.type == ConnectionAccepted)
-    {
-        *device_id = msg.device_id;
-        return Connected;
-    }
-
-    else
-        return ServerRefuse;
+    sendMessage(client_socket, &msg, dest_ip, port);
+    return Working;
 }
 
 void checkMessageBox(int *server_socket, struct Message *msg)
 {
+    //check if we have messages in our messagebox.
     struct sockaddr_in client_addr;
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));

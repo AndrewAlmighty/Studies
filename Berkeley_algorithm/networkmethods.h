@@ -20,23 +20,16 @@ enum macStatus
     MacAddrFound
 };
 
-enum serverStatus
+enum socketStatus
 {
-    NotRunning,
-    Running
-};
-
-enum connectionStatus
-{
-    CannotConnect,
-    ServerRefuse,
-    Connected
+    NotWorking,
+    Working
 };
 
 enum macStatus getMacAddr(char *mac_addr, const char *ip_addr);
 enum ipStatus getIPAndIFACE(char *ip_addr, char *iface);
-enum serverStatus createAndBindSocket(int *server_socket, const int *port);
-enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC, int* device_id);
+enum socketStatus createAndBindSocket(int *server_socket, const int *port);
+enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC);
 void checkMessageBox(int *server_socket, struct Message *msg);
 void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port);
 int shutdownSocket(const int *socket);

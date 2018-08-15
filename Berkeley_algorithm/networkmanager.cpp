@@ -20,7 +20,7 @@ bool NetworkManager::createServer(int *port)
         return false;
 
     //Create a socket. Provide a ptr to socket and port.
-    if(createAndBindSocket(&m_socket, port) == serverStatus::Running)
+    if(createAndBindSocket(&m_socket, port) == Working)
     {
         m_port = *port;
         m_device.setMode(Device::Server);
@@ -34,12 +34,10 @@ bool NetworkManager::createServer(int *port)
 
 bool NetworkManager::connectTo(std::string ip, const int &port)
 {
-    int id = 0;
-    if(connectToServer(&m_socket, ip.c_str(), &port, m_device.getIP().c_str(), m_device.getMAC().c_str(), &id) == Connected)
+    if(sendConnectionRequest(&m_socket, ip.c_str(), &port, m_device.getIP().c_str(), m_device.getMAC().c_str()) == Working)
     {
         m_port = port;
         m_device.setMode(Device::Client);
-        m_device.setID(id);
         return true;
     }
 
@@ -214,6 +212,31 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg)
     return false;
 }
 
+bool NetworkManager::handleConnectionAcceptedMessage(const struct Message *msg)
+{
+    std::string tmp;
+    bool IDbegin = false;
+    for(unsigned i = 0; i < strlen(msg -> message); i++)
+    {
+        tmp += msg -> message[i];
+
+        if(IDbegin == false && tmp == "ID:")
+        {
+            tmp.clear();
+            IDbegin = true;
+        }
+
+        else if (IDbegin == true)
+        {
+            if(isdigit(tmp[i]) == false)
+                return false;
+        }
+    }
+
+    m_device.setID(std::stoi(tmp));
+    return true;
+}
+
 Device NetworkManager::getDevice() const
 {
     return m_device;
@@ -228,7 +251,8 @@ void NetworkManager::acceptClient(const std::string &ip, const std::string &mac)
     struct Message msg;
     msg.type = ConnectionAccepted;
     msg.device_id = 1;
-    strcpy(msg.message, "ID:2");
+    strcpy(msg.message, "ID:");
+    strcat(msg.message, std::to_string(m_IDcounter).c_str());
     sendMsg(&msg, ip);
 }
 

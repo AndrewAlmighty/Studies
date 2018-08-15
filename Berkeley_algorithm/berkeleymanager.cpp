@@ -2,6 +2,7 @@
 #include "guimanager.h"
 
 #include <thread>
+#include <unistd.h>
 
 BerkeleyManager::BerkeleyManager()
 {
@@ -88,7 +89,7 @@ std::string BerkeleyManager::getTime() const
     return m_clock -> getTime();
 }
 
-void BerkeleyManager::respondForMessage(const Message *msg)
+bool BerkeleyManager::handleMessage(const Message *msg)
 {
     //Here we check what kind of message came and then we react for it.
     switch(msg -> type)
@@ -98,32 +99,35 @@ void BerkeleyManager::respondForMessage(const Message *msg)
 
     case ConnectionRequest:
         m_network -> handleConnectionRequest(msg);
-        break;
+        return true;
 
     case ConnectionAccepted:
-        return;
+        m_network -> handleConnectionAcceptedMessage(msg);
+        return true;
 
     case ConnectionRefused:
-        return;
+        return false;
 
     case Disconnect:
-        return;
+        return false;
 
     case ClientsCheck:
-        return;
+        return false;
 
     case ClientConfirm:
-        return;
+        return false;
 
     case ClientTime:
-        return;
+        return false;
 
     case TimeRequest:
-        return;
+        return false;
 
     case TimeAdjustRequest:
-        return;
+        return false;
     }
+
+    return false;
 }
 
 void BerkeleyManager::runAsServer()
@@ -134,7 +138,7 @@ void BerkeleyManager::runAsServer()
         while(GuiManager::GetInstance().running() == true)
         {
             m_network -> checkMailBox(&msg);
-            respondForMessage(&msg);
+            handleMessage(&msg);
         }
    });
 
@@ -146,12 +150,31 @@ void BerkeleyManager::runAsClient()
     std::thread threadObj([&]{
 
         struct Message msg;
+        makingConnection(&msg);
+
         while(GuiManager::GetInstance().running() == true)
         {
             m_network -> checkMailBox(&msg);
-            respondForMessage(&msg);
+            handleMessage(&msg);
         }
+
    });
 
-   threadObj.detach();
+    threadObj.detach();
+}
+
+bool BerkeleyManager::makingConnection(struct Message *msg)
+{
+    int maxTime = 10;   //we wait no more than 10 second to connect
+    while(maxTime > 0)
+    {
+        m_network -> checkMailBox(msg);
+        if(handleMessage(msg) == true)
+            return true;
+
+        sleep(1);
+        maxTime--;
+    }
+
+    return false;
 }
