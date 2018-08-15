@@ -43,17 +43,11 @@ void BerkeleyManager::start()
 {
     m_clock -> setSystemTime();
 
-    std::thread threadObj([&]{
+    if(m_network -> getDevice().getModeStr() == "server")
+        runAsServer();
 
-        struct Message msg;
-        while(GuiManager::GetInstance().running() == true)
-        {
-            m_network -> checkMailBox(&msg);
-            respondForMessage(&msg);
-        }
-   });
-
-   threadObj.detach();
+    else
+        runAsClient();
 }
 
 bool BerkeleyManager::Stop()
@@ -130,4 +124,34 @@ void BerkeleyManager::respondForMessage(const Message *msg)
     case TimeAdjustRequest:
         return;
     }
+}
+
+void BerkeleyManager::runAsServer()
+{
+    std::thread threadObj([&]{
+
+        struct Message msg;
+        while(GuiManager::GetInstance().running() == true)
+        {
+            m_network -> checkMailBox(&msg);
+            respondForMessage(&msg);
+        }
+   });
+
+   threadObj.detach();
+}
+
+void BerkeleyManager::runAsClient()
+{
+    std::thread threadObj([&]{
+
+        struct Message msg;
+        while(GuiManager::GetInstance().running() == true)
+        {
+            m_network -> checkMailBox(&msg);
+            respondForMessage(&msg);
+        }
+   });
+
+   threadObj.detach();
 }

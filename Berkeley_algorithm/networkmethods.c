@@ -135,10 +135,9 @@ enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, c
     unsigned int socket_len = sizeof(server_addr);
     sendto(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
     recvfrom(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &server_addr, &socket_len);
-    fprintf(stderr, "WIADOMOSC:%s\n", msg.message);
+
     if(msg.type == ConnectionAccepted)
     {
-        fprintf(stderr, "POLACZENIE UZYSKANO!");
         *device_id = msg.device_id;
         return Connected;
     }
@@ -152,9 +151,7 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     struct sockaddr_in client_addr;
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
-    recvfrom(*server_socket, msg, sizeof(*msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
-    int chosenPort = (int) ntohs(client_addr.sin_port);
-    fprintf(stderr, "ODEBRANO Z PORTU:%d", chosenPort);
+    recvfrom(*server_socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
 }
 
 void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port)
@@ -165,8 +162,6 @@ void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *
     addr.sin_addr.s_addr = inet_addr(ip);
     addr.sin_port = htons(*port);
     sendto(*mySocket, msg, sizeof(*msg), MSG_CONFIRM, (const struct sockaddr *)&addr,sizeof(addr));
-    int chosenPort = (int) ntohs(addr.sin_port);
-    fprintf(stderr, "WYSLANO DO Z PORTU:%d", chosenPort);
 }
 
 int shutdownSocket(const int *socket)

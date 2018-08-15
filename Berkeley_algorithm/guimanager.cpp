@@ -48,7 +48,7 @@ void GuiManager::beginJob()
     {
         qDebug() << "Prepare to run as Client!";
         if(m_berkeley -> PrepareToRunAsClient(m_serverIP.toStdString(), port().toInt()) == false)
-                return;
+            return;
     }
 
     else

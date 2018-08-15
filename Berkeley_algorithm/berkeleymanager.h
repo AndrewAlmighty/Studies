@@ -36,6 +36,8 @@ public:
 
 private:
     void respondForMessage(const struct Message *msg);
+    void runAsServer();
+    void runAsClient();
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
 };
