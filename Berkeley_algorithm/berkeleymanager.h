@@ -1,7 +1,7 @@
 /* This is main manager. Here are requests to do all network stuff like start working as server/client, detect devices, set time etc.
  * Manager contains:
- * - object Clock - it's responsible for internal clock.
- * - object Device - it contains information about this device.
+ * - Clock - it's responsible for internal clock.
+ * - NetwormManager - it's responsible for managing network
  */
 
 #ifndef BERKELEYMANAGER_H
@@ -22,7 +22,7 @@ public:
     BerkeleyManager();
 
     bool PrepareToRunAsServer(int port);
-    bool PrepareToRunAsClient(std::string ip);
+    bool PrepareToRunAsClient(std::string ip, int port);
     void DetectServers();
     void start();
     bool Stop();
@@ -35,7 +35,7 @@ public:
     std::string getTime() const;
 
 private:
-    Device m_device;
+    void respondForMessage(const struct Message *msg);
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
 };

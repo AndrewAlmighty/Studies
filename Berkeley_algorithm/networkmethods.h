@@ -33,12 +33,14 @@ enum connectionStatus
     Connected
 };
 
-enum serverStatus createUDPServer(int *server_socket, const int port);
-void checkMessageBox(int *server_socket, struct Message *msg);
-enum connectionStatus connectToServer(int *client_socket, const char *ip, const int port, int* device_id);
-int shutdownSocket(const int *socket);
 enum macStatus getMacAddr(char *mac_addr, const char *ip_addr);
 enum ipStatus getIPAndIFACE(char *ip_addr, char *iface);
+enum serverStatus createUDPServer(int *server_socket, const int *port);
+enum connectionStatus connectToServer(int *client_socket, const char *ip, const int *port, int* device_id);
+void checkMessageBox(int *server_socket, struct Message *msg);
+void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port);
+int shutdownSocket(const int *socket);
+
 
 #ifdef __cplusplus
 }

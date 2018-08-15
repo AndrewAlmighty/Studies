@@ -5,29 +5,22 @@
 
 BerkeleyManager::BerkeleyManager()
 {
-    m_network = std::unique_ptr<NetworkManager>(new NetworkManager(m_device));
+    m_network = std::unique_ptr<NetworkManager>(new NetworkManager());
     m_clock = std::unique_ptr<Clock>(new Clock());
 }
 
 bool BerkeleyManager::PrepareToRunAsServer(int port)
 {
-    m_device.setMode(Device::Server);
-
-    if(m_network -> createServer(port))
+    if(m_network -> createServer(&port))
         return true;
 
     else return false;
 }
 
-bool BerkeleyManager::PrepareToRunAsClient(std::string ip)
+bool BerkeleyManager::PrepareToRunAsClient(std::string ip, int port)
 {
-    m_device.setMode(Device::Client);
-    int id;
-    if(m_network -> connectTo(ip, 9000, &id) == true)
-    {
-        m_device.setID(id);
+    if(m_network -> connectTo(ip, port) == true)
         return true;
-    }
 
     else return false;
 }
@@ -56,6 +49,7 @@ void BerkeleyManager::start()
         while(GuiManager::GetInstance().running() == true)
         {
             m_network -> checkMailBox(&msg);
+            respondForMessage(&msg);
         }
    });
 
@@ -64,7 +58,6 @@ void BerkeleyManager::start()
 
 bool BerkeleyManager::Stop()
 {
-    m_device.setID(-1);
     if(m_network ->shutdownConnection() == false)
         return false;
 
@@ -78,25 +71,64 @@ void BerkeleyManager::setTime(std::string time)
 
 int BerkeleyManager::getID() const
 {
-    return m_device.getID();
+    return m_network -> getDevice().getID();
 }
 
 std::string BerkeleyManager::getMode() const
 {
-    return m_device.getMode();
+    return m_network -> getDevice().getModeStr();
 }
 
 std::string BerkeleyManager::getIP() const
 {
-    return m_device.getIP();
+    return m_network -> getDevice().getIP();
 }
 
 std::string BerkeleyManager::getMAC() const
 {
-    return m_device.getMAC();
+    return m_network -> getDevice().getMAC();
 }
 
 std::string BerkeleyManager::getTime() const
 {
     return m_clock -> getTime();
+}
+
+void BerkeleyManager::respondForMessage(const Message *msg)
+{
+    //Here we check what kind of message came and then we react for it.
+
+    switch(msg -> type)
+    {
+    case EmptyMessage:
+        break;
+
+    case ConnectionRequest:
+        m_network -> handleConnectionRequest(msg);
+        break;
+
+    case ConnectionAccepted:
+        return;
+
+    case ConnectionRefused:
+        return;
+
+    case Disconnect:
+        return;
+
+    case ClientsCheck:
+        return;
+
+    case ClientConfirm:
+        return;
+
+    case ClientTime:
+        return;
+
+    case TimeRequest:
+        return;
+
+    case TimeAdjustRequest:
+        return;
+    }
 }

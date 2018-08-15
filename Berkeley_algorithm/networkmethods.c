@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-enum serverStatus createUDPServer(int *server_socket, const int port)
+enum serverStatus createUDPServer(int *server_socket, const int *port)
 {
     //create socket
     if((*server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -33,19 +33,6 @@ enum serverStatus createUDPServer(int *server_socket, const int port)
     }
 
     return Running;
-}
-
-int shutdownSocket(const int *socket)
-{
-    //Shutdown the socket. If it closed, return 1. Else return 0.
-    if(close(*socket) < 0)
-    {
-        fprintf(stderr, "Cannot close the socket! Errno: %d", errno);
-        return 0;
-    }
-
-    fprintf(stderr, "Socket is closed!\n");
-    return 1;
 }
 
 enum ipStatus getIPAndIFACE(char *ip_addr, char *iface)
@@ -127,7 +114,7 @@ enum macStatus getMacAddr(char *mac_addr, const char *ifc)
     return MacAddrFound;
 }
 
-enum connectionStatus connectToServer(int *client_socket, const char *ip, const int port, int *device_id)
+enum connectionStatus connectToServer(int *client_socket, const char *ip, const int *port, int *device_id)
 {
     if((*client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
@@ -139,7 +126,7 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(ip);
-    server_addr.sin_port = htons(port);
+    server_addr.sin_port = htons(*port);
 
     struct Message msg;
     msg.type = ConnectionRequest;
@@ -165,6 +152,30 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     struct sockaddr_in client_addr;
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
-
     recvfrom(*server_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
+    if(msg->type == ConnectionAccepted)
+        fprintf(stderr, "WIADOMOŚĆ:%s", msg->message);
+}
+
+void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port)
+{
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_port = htons(port);
+    sendto(*mySocket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&addr,sizeof(addr));
+}
+
+int shutdownSocket(const int *socket)
+{
+    //Shutdown the socket. If it closed, return 1. Else return 0.
+    if(close(*socket) < 0)
+    {
+        fprintf(stderr, "Cannot close the socket! Errno: %d", errno);
+        return 0;
+    }
+
+    fprintf(stderr, "Socket is closed!\n");
+    return 1;
 }
