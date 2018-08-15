@@ -114,7 +114,7 @@ enum macStatus getMacAddr(char *mac_addr, const char *ifc)
     return MacAddrFound;
 }
 
-enum connectionStatus connectToServer(int *client_socket, const char *ip, const int *port, int *device_id)
+enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC, int *device_id)
 {
     if((*client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
@@ -125,13 +125,16 @@ enum connectionStatus connectToServer(int *client_socket, const char *ip, const 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(ip);
+    server_addr.sin_addr.s_addr = inet_addr(dest_ip);
     server_addr.sin_port = htons(*port);
 
     struct Message msg;
     msg.type = ConnectionRequest;
     msg.device_id = 0;
-    strcpy(msg.message, "");
+    strcpy(msg.message, "IP:");
+    strcat(msg.message, local_ip);
+    strcat(msg.message, "_MAC:");
+    strcat(msg.message, MAC);
 
     unsigned int socket_len = sizeof(server_addr);
     sendto(*client_socket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&server_addr,sizeof(server_addr));
@@ -152,9 +155,7 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     struct sockaddr_in client_addr;
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
-    recvfrom(*server_socket, (struct Message*) &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
-    if(msg->type == ConnectionAccepted)
-        fprintf(stderr, "WIADOMOŚĆ:%s", msg->message);
+    recvfrom(*server_socket, msg, sizeof(*msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
 }
 
 void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port)

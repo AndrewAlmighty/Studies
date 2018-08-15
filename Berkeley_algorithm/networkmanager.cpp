@@ -35,7 +35,7 @@ bool NetworkManager::createServer(int *port)
 bool NetworkManager::connectTo(std::string ip, const int &port)
 {
     int id = 0;
-    if(connectToServer(&m_socket, ip.c_str(), &port, &id) == true)
+    if(connectToServer(&m_socket, ip.c_str(), &port, m_device.getIP().c_str(), m_device.getMAC().c_str(), &id) == true)
     {
         m_port = port;
         m_device.setMode(Device::Client);

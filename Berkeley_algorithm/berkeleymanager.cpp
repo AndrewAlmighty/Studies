@@ -97,7 +97,6 @@ std::string BerkeleyManager::getTime() const
 void BerkeleyManager::respondForMessage(const Message *msg)
 {
     //Here we check what kind of message came and then we react for it.
-
     switch(msg -> type)
     {
     case EmptyMessage:
