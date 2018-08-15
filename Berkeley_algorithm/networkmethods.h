@@ -35,7 +35,7 @@ enum connectionStatus
 
 enum macStatus getMacAddr(char *mac_addr, const char *ip_addr);
 enum ipStatus getIPAndIFACE(char *ip_addr, char *iface);
-enum serverStatus createUDPServer(int *server_socket, const int *port);
+enum serverStatus createAndBindSocket(int *server_socket, const int *port);
 enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC, int* device_id);
 void checkMessageBox(int *server_socket, struct Message *msg);
 void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port);

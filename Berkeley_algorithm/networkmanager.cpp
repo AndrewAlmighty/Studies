@@ -20,7 +20,7 @@ bool NetworkManager::createServer(int *port)
         return false;
 
     //Create a socket. Provide a ptr to socket and port.
-    if(createUDPServer(&m_socket, port) == serverStatus::Running)
+    if(createAndBindSocket(&m_socket, port) == serverStatus::Running)
     {
         m_port = *port;
         m_device.setMode(Device::Server);

@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-enum serverStatus createUDPServer(int *server_socket, const int *port)
+enum serverStatus createAndBindSocket(int *server_socket, const int *port)
 {
     //create socket
     if((*server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -116,11 +116,7 @@ enum macStatus getMacAddr(char *mac_addr, const char *ifc)
 
 enum connectionStatus connectToServer(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC, int *device_id)
 {
-    if((*client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        fprintf(stderr, "Socket creation failed! Errno: %d\n", errno);
-        return CannotConnect;
-    }
+    createAndBindSocket(client_socket, port);
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -156,7 +152,6 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
     recvfrom(*server_socket, msg, sizeof(*msg), MSG_WAITALL, (struct sockaddr *) &client_addr, &socket_len);
-    fprintf(stderr, "WIADOMOSC:%s\n", msg -> message);
 }
 
 void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *port)
@@ -165,7 +160,7 @@ void sendMessage(int *mySocket, const struct Message *msg, const char *ip, int *
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr(ip);
-    addr.sin_port = htons(port);
+    addr.sin_port = htons(*port);
     sendto(*mySocket, (struct Message*) &msg, sizeof(msg), MSG_CONFIRM, (const struct sockaddr *)&addr,sizeof(addr));
 }
 
