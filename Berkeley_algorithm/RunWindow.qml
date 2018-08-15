@@ -146,7 +146,7 @@ Item
         onClicked:
         {
             GuiManager.finishJob()
-            windowLoader.source = "SetupWindow.qml"
+            GuiManager.setQmlFile("SetupWindow.qml")
         }
     }
 }

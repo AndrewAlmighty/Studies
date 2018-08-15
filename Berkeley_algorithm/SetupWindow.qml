@@ -138,7 +138,7 @@ Item
         {
            GuiManager.beginJob()
             if(GuiManager.running)
-                windowLoader.source = "RunWindow.qml"
+                GuiManager.setQmlFile("RunWindow.qml")
         }
     }
 

@@ -231,6 +231,14 @@ bool NetworkManager::handleConnectionAcceptedMessage(const struct Message *msg)
     return true;
 }
 
+void NetworkManager::handleConnectionRefuseMessage()
+{
+    m_port = -1;
+    m_device.setMode(Device::NotSpecified);
+    m_device.setID(-1);
+    m_IDcounter = 0;
+}
+
 Device NetworkManager::getDevice() const
 {
     return m_device;

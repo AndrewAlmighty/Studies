@@ -16,6 +16,7 @@ public:
     bool shutdownConnection();
     bool handleConnectionRequest(const struct Message *msg);
     bool handleConnectionAcceptedMessage(const struct Message *msg);
+    void handleConnectionRefuseMessage();
     void checkMailBox(Message *msg);
     void sendMsg(const Message *msg, const std::string &ip);
     void resetIDCounter();

@@ -7,6 +7,8 @@
 #define GUIMANAGER_H
 
 #include <QObject>
+#include <QQmlApplicationEngine>
+#include <QQmlComponent>
 
 #include "berkeleymanager.h"
 #include "devicemodel.h"
@@ -21,6 +23,7 @@ class GuiManager : public QObject
     Q_PROPERTY(QString serverIP READ serverIP WRITE setServerIP NOTIFY serverIPChanged)
     Q_PROPERTY(QString MAC READ MAC WRITE setMAC NOTIFY MACChanged)
     Q_PROPERTY(QString port READ port WRITE setPort NOTIFY portChanged)
+    Q_PROPERTY(QString qmlFile READ qmlFile WRITE setQmlFile NOTIFY qmlFileChanged)
     Q_PROPERTY(int ID READ ID WRITE setID NOTIFY IDChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
     Q_PROPERTY(bool detectServers READ detectServers WRITE setDetectServers NOTIFY detectServersChanged)
@@ -29,6 +32,7 @@ class GuiManager : public QObject
 public:
     static GuiManager & GetInstance();
     void setManager(BerkeleyManager &manager);
+    void setQmlEngine(QQmlApplicationEngine &engine);
 
     Q_INVOKABLE void beginJob();
     Q_INVOKABLE void finishJob();
@@ -55,6 +59,9 @@ public:
     Q_INVOKABLE void setPort(QString port);
     QString port() const;
 
+    Q_INVOKABLE void setQmlFile(QString fileName);
+    QString qmlFile() const;
+
     void setRunning(bool connected);
     bool running() const;
 
@@ -65,6 +72,7 @@ public:
     void addDevice(int id, QString ip, QString mac, QString mode);
     bool removeDevice(int id);
     void removeAllDevices();
+    void loadSetupWindow();
 
 signals:
     void timeChanged();
@@ -75,6 +83,7 @@ signals:
     void MACChanged();
     void runningChanged();
     void IDChanged();
+    void qmlFileChanged();
     void modelChanged();
     void detectServersChanged();
 
@@ -84,7 +93,8 @@ private:
     GuiManager& operator =(const GuiManager&);
     void restartConfiguration();
 
-    BerkeleyManager* m_berkeley;    //pointer to main manager. Do not destroy!
+    BerkeleyManager *m_berkeley;    //pointer to main manager. Do not destroy!
+    QQmlApplicationEngine *m_qmlEngine;
 
     QList<QObject*> m_deviceModel;  //It's model. It's role is to show all available servers or all devices which are connected to server
     QString m_time;                 //Shows time
@@ -93,6 +103,7 @@ private:
     QString m_serverIP;             //Contain IP of server which we want to connect
     QString m_mac;                  //shows our MAC
     QString m_port;
+    QString m_qmlFileName;
     bool m_running;                 //True if we are not in setup window
     bool m_detectingServers;        //True if we want to detect local servers
     int m_ID;                       //Shows ID of device

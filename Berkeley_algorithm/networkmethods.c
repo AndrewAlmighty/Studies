@@ -156,7 +156,7 @@ int shutdownSocket(const int *socket)
     //Shutdown the socket. If it closed, return 1. Else return 0.
     if(close(*socket) < 0)
     {
-        fprintf(stderr, "Cannot close the socket! Errno: %d", errno);
+        fprintf(stderr, "Cannot close the socket! Errno: %d\n", errno);
         return 0;
     }
 

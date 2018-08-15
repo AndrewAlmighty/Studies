@@ -21,11 +21,11 @@ class BerkeleyManager
 public:
     BerkeleyManager();
 
-    bool PrepareToRunAsServer(int port);
-    bool PrepareToRunAsClient(std::string ip, int port);
-    void DetectServers();
+    bool prepareToRunAsServer(int port);
+    bool prepareToRunAsClient(std::string ip, int port);
+    void detectServers();
     void start();
-    bool Stop();
+    bool stop();
 
     void setTime(std::string time);
     int getID() const;
@@ -40,6 +40,7 @@ private:
     void runAsServer();
     void runAsClient();
     void updateGui();
+    void breakAll();
 
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;

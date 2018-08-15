@@ -11,7 +11,8 @@ Window {
     Loader
     {
         id: windowLoader
+        objectName: "windowLoader"
         anchors.fill: parent
-        source: "SetupWindow.qml"
+        source: GuiManager.qmlFile
     }
 }

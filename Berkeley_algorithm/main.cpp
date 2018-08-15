@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 
     BerkeleyManager manager;
     GuiManager::GetInstance().setManager(manager);
+    GuiManager::GetInstance().setQmlEngine(engine);
     engine.rootContext() -> setContextProperty("GuiManager", &GuiManager::GetInstance());
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

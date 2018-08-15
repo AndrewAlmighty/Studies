@@ -10,7 +10,7 @@ BerkeleyManager::BerkeleyManager()
     m_clock = std::unique_ptr<Clock>(new Clock());
 }
 
-bool BerkeleyManager::PrepareToRunAsServer(int port)
+bool BerkeleyManager::prepareToRunAsServer(int port)
 {
     if(m_network -> createServer(&port))
         return true;
@@ -18,7 +18,7 @@ bool BerkeleyManager::PrepareToRunAsServer(int port)
     else return false;
 }
 
-bool BerkeleyManager::PrepareToRunAsClient(std::string ip, int port)
+bool BerkeleyManager::prepareToRunAsClient(std::string ip, int port)
 {
     if(m_network -> connectTo(ip, port) == true)
         return true;
@@ -26,7 +26,7 @@ bool BerkeleyManager::PrepareToRunAsClient(std::string ip, int port)
     else return false;
 }
 
-void BerkeleyManager::DetectServers()
+void BerkeleyManager::detectServers()
 {
 /*
     std::thread threadObj([]{
@@ -51,7 +51,7 @@ void BerkeleyManager::start()
         runAsClient();
 }
 
-bool BerkeleyManager::Stop()
+bool BerkeleyManager::stop()
 {
     if(m_network ->shutdownConnection() == false)
         return false;
@@ -108,6 +108,8 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return true;
 
     case ConnectionRefused:
+        m_network -> handleConnectionRefuseMessage();
+        msg -> type = EmptyMessage;
         return false;
 
     case Disconnect:
@@ -154,14 +156,18 @@ void BerkeleyManager::runAsClient()
         struct Message msg;
         msg.type = EmptyMessage;
         if(makingConnection(&msg) == true)
+        {
             updateGui();
 
-        while(GuiManager::GetInstance().running() == true)
-        {
-            m_network -> checkMailBox(&msg);
-            handleMessage(&msg);
+            while(GuiManager::GetInstance().running() == true)
+            {
+                m_network -> checkMailBox(&msg);
+                handleMessage(&msg);
+            }
         }
 
+        else
+            breakAll();
    });
 
     threadObj.detach();
@@ -171,6 +177,15 @@ void BerkeleyManager::updateGui()
 {
     GuiManager::GetInstance().setID(getID());
     GuiManager::GetInstance().setMode(QString(getMode().c_str()));
+}
+
+void BerkeleyManager::breakAll()
+{
+    //Something went wrong. Stop everything. Restart
+    fprintf(stderr, "Critical error. Stopping everything!!\n");
+    stop();
+    GuiManager::GetInstance().finishJob();
+    GuiManager::GetInstance().loadSetupWindow();
 }
 
 bool BerkeleyManager::makingConnection(struct Message *msg)

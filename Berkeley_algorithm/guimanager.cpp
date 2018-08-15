@@ -13,6 +13,11 @@ void GuiManager::setManager(BerkeleyManager &manager)
     m_berkeley = &manager;
 }
 
+void GuiManager::setQmlEngine(QQmlApplicationEngine &engine)
+{
+    m_qmlEngine = &engine;
+}
+
 GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
     restartConfiguration();
@@ -27,6 +32,7 @@ void GuiManager::restartConfiguration()
     m_ip = "Not Specified";
     m_mac = "Not Specified";
     m_ID = -1;
+    setQmlFile("SetupWindow.qml");
 }
 
 void GuiManager::beginJob()
@@ -40,14 +46,14 @@ void GuiManager::beginJob()
     if(m_mode == "Server")
     {
         qDebug() << "Prepare to run as Server!";
-        if(m_berkeley -> PrepareToRunAsServer(port().toInt()) == false)
+        if(m_berkeley -> prepareToRunAsServer(port().toInt()) == false)
             return;
     }
 
     else if(m_mode == "Client")
     {
         qDebug() << "Prepare to run as Client!";
-        if(m_berkeley -> PrepareToRunAsClient(m_serverIP.toStdString(), port().toInt()) == false)
+        if(m_berkeley -> prepareToRunAsClient(m_serverIP.toStdString(), port().toInt()) == false)
             return;
     }
 
@@ -62,13 +68,12 @@ void GuiManager::beginJob()
     setIp(QString(m_berkeley -> getIP().c_str()));
     setRunning(true);
     m_berkeley -> start();
-
 }
 
 void GuiManager::finishJob()
 {
     //Stop the job. We do it when abort is clicked.
-    if(m_berkeley -> Stop() == false)
+    if(m_berkeley -> stop() == false)
         qDebug() << "Failed to close connection";
 
     restartConfiguration();
@@ -134,7 +139,7 @@ void GuiManager::setDetectServers(bool detect)
     m_detectingServers = detect;
 
     if(m_detectingServers == true)
-        m_berkeley -> DetectServers();
+        m_berkeley -> detectServers();
 
     emit detectServersChanged();
     qDebug() << "Detecting servers: " << m_detectingServers;
@@ -188,6 +193,20 @@ void GuiManager::setPort(QString port)
 QString GuiManager::port() const
 {
     return m_port;
+}
+
+void GuiManager::setQmlFile(QString fileName)
+{
+    if(m_qmlFileName == fileName)
+        return;
+
+    m_qmlFileName = fileName;
+    emit qmlFileChanged();
+}
+
+QString GuiManager::qmlFile() const
+{
+    return m_qmlFileName;
 }
 
 void GuiManager::setRunning(bool running)
@@ -265,4 +284,9 @@ void GuiManager::removeAllDevices()
 {
     //This method clears list of devices in DeviceModel
     m_deviceModel.clear();
+}
+
+void GuiManager::loadSetupWindow()
+{
+
 }
