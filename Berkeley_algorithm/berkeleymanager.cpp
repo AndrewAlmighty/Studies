@@ -53,7 +53,7 @@ void BerkeleyManager::start()
 
 bool BerkeleyManager::stop()
 {
-    if(m_network ->shutdownConnection() == false)
+    if(m_network -> shutdownConnection() == false)
         return false;
 
     return true;
@@ -187,7 +187,6 @@ void BerkeleyManager::breakAll()
 {
     //Something went wrong. Stop everything. Restart
     fprintf(stderr, "Critical error. Stopping everything!!\n");
-    stop();
     GuiManager::GetInstance().finishJob();
     GuiManager::GetInstance().loadSetupWindow();
 }
