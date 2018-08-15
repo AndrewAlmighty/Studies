@@ -183,6 +183,11 @@ void BerkeleyManager::updateGui(std::string status)
         GuiManager::GetInstance().setStatus(QString::fromStdString(status));
 }
 
+void BerkeleyManager::updateDevicesList()
+{
+
+}
+
 void BerkeleyManager::breakAll()
 {
     //Something went wrong. Stop everything. Restart

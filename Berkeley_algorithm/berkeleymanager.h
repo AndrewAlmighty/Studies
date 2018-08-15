@@ -40,6 +40,7 @@ private:
     void runAsServer();
     void runAsClient();
     void updateGui(std::string status);
+    void updateDevicesList();
     void breakAll();
 
     std::unique_ptr<NetworkManager> m_network;

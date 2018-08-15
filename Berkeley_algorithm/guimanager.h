@@ -7,8 +7,6 @@
 #define GUIMANAGER_H
 
 #include <QObject>
-#include <QQmlApplicationEngine>
-#include <QQmlComponent>
 
 #include "berkeleymanager.h"
 #include "devicemodel.h"
@@ -33,7 +31,6 @@ class GuiManager : public QObject
 public:
     static GuiManager & GetInstance();
     void setManager(BerkeleyManager &manager);
-    void setQmlEngine(QQmlApplicationEngine &engine);
 
     Q_INVOKABLE void beginJob();
     Q_INVOKABLE void finishJob();
@@ -99,7 +96,6 @@ private:
     void restartConfiguration();
 
     BerkeleyManager *m_berkeley;    //pointer to main manager. Do not destroy!
-    QQmlApplicationEngine *m_qmlEngine;
 
     QList<QObject*> m_deviceModel;  //It's model. It's role is to show all available servers or all devices which are connected to server
     QString m_time;                 //Shows time

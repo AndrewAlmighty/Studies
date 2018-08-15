@@ -13,11 +13,6 @@ void GuiManager::setManager(BerkeleyManager &manager)
     m_berkeley = &manager;
 }
 
-void GuiManager::setQmlEngine(QQmlApplicationEngine &engine)
-{
-    m_qmlEngine = &engine;
-}
-
 GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
     restartConfiguration();
