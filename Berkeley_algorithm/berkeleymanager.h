@@ -27,6 +27,7 @@ public:
     void start();
     bool stop();
 
+    void setCheckTime(const int time);
     void setTime(std::string time);
     int getID() const;
     std::string getMode() const;
@@ -35,16 +36,24 @@ public:
     std::string getTime() const;
 
 private:
+    enum updateListAction
+    {
+        addDevice,
+        removeDevice,
+        clearList
+    };
+
     bool handleMessage(struct Message *msg);
     bool makingConnection(struct Message *msg);
     void runAsServer();
     void runAsClient();
     void updateGui(std::string status);
-    void updateDevicesList();
+    void updateDevicesList(updateListAction action, const Device &dev);
     void breakAll();
 
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
+    int m_checkTime;                    //check time every x seconds
 };
 
 #endif // BERKELEYMANAGER_H

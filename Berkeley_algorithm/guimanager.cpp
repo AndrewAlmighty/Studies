@@ -17,6 +17,7 @@ GuiManager::GuiManager(QObject *parent) : QObject(parent)
 {
     restartConfiguration();
     m_running = false;
+    connect(this, SIGNAL(addDevice(int, QString, QString, QString)), this, SLOT(onAddDevice(int, QString, QString, QString)),Qt::QueuedConnection);
 }
 
 void GuiManager::restartConfiguration()
@@ -29,6 +30,8 @@ void GuiManager::restartConfiguration()
     m_ID = -1;
     setQmlFile("SetupWindow.qml");
     setStatus("Not working");
+
+    removeAllDevices();
 }
 
 void GuiManager::beginJob()
@@ -57,7 +60,6 @@ void GuiManager::beginJob()
         return;
 
     qDebug() << "Preparing done!";
-
     setID(m_berkeley -> getID());
     setMode(QString(m_berkeley -> getMode().c_str()));
     setMAC(QString(m_berkeley -> getMAC().c_str()));
@@ -263,7 +265,12 @@ QList<QObject *> GuiManager::model() const
     return m_deviceModel;
 }
 
-void GuiManager::addDevice(int id, QString ip, QString mac, QString mode)
+void GuiManager::newDevice(int id, QString ip, QString mac, QString mode)
+{
+    emit addDevice(id, ip, mac, mode);
+}
+
+void GuiManager::onAddDevice(int id, QString ip, QString mac, QString mode)
 {
     //This method adds device to DeviceModel.    
     m_deviceModel.append(new DeviceModel(id, ip, mac, mode));

@@ -71,7 +71,7 @@ public:
     int ID() const;
 
     QList<QObject*> model() const;
-    void addDevice(int id, QString ip, QString mac, QString mode);
+    void newDevice(int id, QString ip, QString mac, QString mode);
     bool removeDevice(int id);
     void removeAllDevices();
     void loadSetupWindow();
@@ -89,6 +89,10 @@ signals:
     void modelChanged();
     void detectServersChanged();
     void statusChanged();
+    void addDevice(int id, QString ip, QString mac, QString mode);
+
+private slots:
+    void onAddDevice(int id, QString ip, QString mac, QString mode);
 
 private:
     GuiManager(QObject *parent = nullptr);

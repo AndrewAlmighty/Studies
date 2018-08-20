@@ -17,6 +17,8 @@ public:
 
     Device();
     Device(const Device &dev);
+    bool operator==(const Device &dev);
+
     void setIPandIfc(std::string s);
     void setIP(std::string ip);
     void setMac(std::string mac);

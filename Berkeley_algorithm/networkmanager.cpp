@@ -24,9 +24,7 @@ bool NetworkManager::createServer(int *port)
     {
         m_port = *port;
         fprintf(stderr,"Stworzono socket!\n");
-        m_device.setMode(Device::Server);
-        m_device.setID(m_IDcounter);
-        addDeviceToNetworkList(m_device.getIP(), m_device.getMAC(), m_device.getID(), Device::Server);
+        modifyNetworkDevicesList(NetworkManager::addDevice, m_IDcounter, &m_device, m_device.getIP(), m_device.getMAC(), Device::Server);
         return true;
     }
 
@@ -74,7 +72,7 @@ void NetworkManager::resetIDCounter()
     m_IDcounter = 0;
 }
 
-bool NetworkManager::handleConnectionRequest(const struct Message *msg)
+bool NetworkManager::handleConnectionRequest(const struct Message *msg, Device &dev)
 {
     /* Here we handle client's request for connection.
      * First, we check if in message there is IP and MAC of client. All this magic is in the for loop which is below.
@@ -206,7 +204,8 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg)
     //if we have IP and MAC, accept request.
     if(foundIp == true && foundMac == true)
     {
-        acceptClient(ip, mac);
+
+        acceptClient(dev, ip, mac);
         return true;
     }
 
@@ -240,34 +239,56 @@ void NetworkManager::handleConnectionRefuseMessage()
     m_IDcounter = 0;
 }
 
+void NetworkManager::handleTimeRequest(const struct Message *msg)
+{
+    //to implement
+}
+
 Device NetworkManager::getDevice() const
 {
     return m_device;
 }
 
-void NetworkManager::acceptClient(const std::string &ip, const std::string &mac)
+void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std::string &mac)
 {
     //Send confirmation of connection request.
     struct Message msg;
     msg.type = ConnectionAccepted;
-    msg.device_id = 1;
+    msg.device_id = m_IDcounter;
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
     sendMsg(&msg, ip);
 
     //Adding new device to list of devices in network.
-    addDeviceToNetworkList(ip, mac, m_IDcounter, Device::Client);
+    modifyNetworkDevicesList(NetworkManager::addDevice, m_IDcounter, &dev, ip, mac, Device::Client);
 }
 
-void NetworkManager::addDeviceToNetworkList(const std::string &ip, const std::string &mac, const int id, Device::Mode mode)
+void NetworkManager::modifyNetworkDevicesList(NetworkManager::updateListAction action, const int &id, Device *dev, const std::string &ip, const std::string &mac, const Device::Mode mode)
 {
-    Device newDevice;
-    newDevice.setIP(ip);
-    newDevice.setMac(mac);
-    newDevice.setMode(mode);
-    newDevice.setID(id);
-    m_deviceList.push_back(newDevice);
+    if(action == NetworkManager::addDevice)
+    {
+    dev -> setIP(ip);
+    dev -> setMac(mac);
+    dev -> setMode(mode);
+    dev -> setID(id);
     m_IDcounter++;
+    m_deviceList.push_back(*dev);
+    }
+
+    else if(action == NetworkManager::removeDevice)
+    {
+        for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        {
+            if(id == it -> getID())
+            {
+                m_deviceList.remove(*it);
+                return;
+            }
+        }
+    }
+
+    else if(action == NetworkManager::clearList)
+        m_deviceList.clear();
 }
 
 std::string NetworkManager::readMac(std::string ifc)

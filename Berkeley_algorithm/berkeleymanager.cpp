@@ -51,6 +51,11 @@ bool BerkeleyManager::stop()
     return true;
 }
 
+void BerkeleyManager::setCheckTime(const int time)
+{
+    m_checkTime = time;
+}
+
 void BerkeleyManager::setTime(std::string time)
 {
     m_clock -> setTime(time);
@@ -90,9 +95,12 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ConnectionRequest:
-        m_network -> handleConnectionRequest(msg);
+    {
+        Device newDevice;
+        m_network -> handleConnectionRequest(msg, newDevice);
         msg -> type = EmptyMessage;
         return true;
+    }
 
     case ConnectionAccepted:
         m_network -> handleConnectionAcceptedMessage(msg);
@@ -117,6 +125,8 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case TimeRequest:
+        m_network -> handleTimeRequest(msg);
+        msg -> type = EmptyMessage;
         return false;
 
     case TimeAdjustRequest:
@@ -131,7 +141,7 @@ void BerkeleyManager::runAsServer()
     std::thread threadObj([&]{
 
         updateGui("Working");
-        updateDevicesList();
+        updateDevicesList(BerkeleyManager::addDevice, m_network -> getDevice());
         struct Message msg;
         while(GuiManager::GetInstance().running() == true)
         {
@@ -176,9 +186,16 @@ void BerkeleyManager::updateGui(std::string status)
         GuiManager::GetInstance().setStatus(QString::fromStdString(status));
 }
 
-void BerkeleyManager::updateDevicesList()
+void BerkeleyManager::updateDevicesList(BerkeleyManager::updateListAction action, const Device &dev)
 {
+    if(action == addDevice)
+        GuiManager::GetInstance().addDevice(dev.getID(), dev.getIP().c_str(), dev.getMAC().c_str(), dev.getModeStr().c_str());
 
+    else if(action == removeDevice)
+        GuiManager::GetInstance().removeDevice(dev.getID());
+
+    else
+        GuiManager::GetInstance().removeAllDevices();
 }
 
 void BerkeleyManager::breakAll()

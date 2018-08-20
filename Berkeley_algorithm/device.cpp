@@ -18,6 +18,14 @@ Device::Device(const Device &dev)
     m_mode = dev.getMode();
 }
 
+bool Device::operator==(const Device &dev)
+{
+    if(dev.getID() == this -> m_ID)
+        return true;
+
+    else return false;
+}
+
 void Device::setIPandIfc(std::string s)
 {
     std::string tmp;

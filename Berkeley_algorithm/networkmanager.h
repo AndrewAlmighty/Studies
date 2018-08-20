@@ -14,17 +14,25 @@ public:
     bool createServer(int *port);
     bool connectTo(std::string ip, const int &port);
     bool shutdownConnection();
-    bool handleConnectionRequest(const struct Message *msg);
+    bool handleConnectionRequest(const struct Message *msg, Device &dev);
     bool handleConnectionAcceptedMessage(const struct Message *msg);
     void handleConnectionRefuseMessage();
+    void handleTimeRequest(const struct Message *msg);
     void checkMailBox(Message *msg);
     void sendMsg(const Message *msg, const std::string &ip);
     void resetIDCounter();
     Device getDevice() const;
 
 private:
-    void acceptClient(const std::string &ip, const std::string &mac);
-    void addDeviceToNetworkList(const std::string &ip, const std::string &mac, const int id, enum Device::Mode mode);
+    enum updateListAction
+    {
+        addDevice,
+        removeDevice,
+        clearList
+    };
+
+    void acceptClient(Device &dev, const std::string &ip, const std::string &mac);
+    void modifyNetworkDevicesList(updateListAction action, const int &id, Device *dev = nullptr, const std::string &ip = "", const std::string &mac = "",  const Device::Mode mode = Device::NotSpecified);
     std::string readMac(std::string ifc);
     std::string readIPandIfc();
 
