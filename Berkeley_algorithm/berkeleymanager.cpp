@@ -97,7 +97,9 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     case ConnectionRequest:
     {
         Device newDevice;
-        m_network -> handleConnectionRequest(msg, newDevice);
+        if(m_network -> handleConnectionRequest(msg, newDevice) == true)
+            updateDevicesList(addDevice, newDevice);
+
         msg -> type = EmptyMessage;
         return true;
     }
