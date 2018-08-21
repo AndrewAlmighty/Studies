@@ -72,8 +72,10 @@ void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
         sendMessage(&m_socket, msg, m_device.getID(), ip.c_str(), &m_port);
 
     else
+    {
+        fprintf(stderr, "--------------> adres do wyslania:%s\n", ip.c_str());
         sendMessage(&m_socket, msg, m_device.getID(), m_server_ip.c_str(), &m_port);
-
+    }
 }
 
 void NetworkManager::resetIDCounter()
@@ -258,7 +260,8 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
     strcpy(msg -> message, "NetworkSize:");
     strcat(msg -> message, std::to_string(m_deviceList.size()).c_str());
     msg -> type = NetworkSize;
-    sendMsg(msg);
+    fprintf(stderr, "--------------> wysylamy rozmiar!");
+    sendMsg(msg, getDeviceIp(msg -> sender_id));
 }
 
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
@@ -267,10 +270,10 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
     std::string tmp;
     Device dev;
     int k = 0, deadline = 0;  //we count ';' with it.
-
+       fprintf(stderr, "---------pobieramy liste!\n");
     for(int i = 0; i < size; i++)
     {
-
+        fprintf(stderr, "---------pobieramy liste!\n");
         msg -> type = DeviceInfoRequest;
         strcpy(msg -> message, "ID:");
         strcat(msg -> message, std::to_string(i).c_str());
@@ -280,16 +283,18 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
         while(msg -> type != DeviceInfo)
         {
             checkMailBox(msg);
+
             sleep(1);
 
-            if(deadline == 3)
+            if(deadline == 7)
                 return false;
 
             deadline++;
+            fprintf(stderr, "---------dedlajn!!%d\n", msg -> type);
         }
 
         deadline = 0;
-
+        fprintf(stderr, "---------cos mamy!\n");
         for(unsigned j = 0; j < strlen(msg -> message); j++)
         {
             tmp += msg -> message[j];
@@ -325,9 +330,11 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
                 continue;
             }
         }
+        fprintf(stderr, "---------blad w ifach!\n");
         //on the end set mode
         dev.setModeFromString(tmp);
         actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
+        fprintf(stderr, "---------___DODANO:%d\n", dev.getID());
         dev.resetDevice();
         tmp.clear();
     }
@@ -340,6 +347,7 @@ int NetworkManager::handleNetworkSize(Message *msg)
     //first, get size of network from message.
     std::string tmp;
     bool gotSize = false;
+    fprintf(stderr, "--------------> ogarniamy!");
     for(int i = 0; msg -> message[i] != '\0'; i++)
     {
         tmp += msg -> message[i];
@@ -347,19 +355,23 @@ int NetworkManager::handleNetworkSize(Message *msg)
         {
             tmp.clear();
             gotSize = true;
+            fprintf(stderr, "--------------> log!");
         }
 
         else if (gotSize == true && std::isdigit(msg -> message[i]) == false)
         {
             gotSize = false;
+            fprintf(stderr, "--------------> cos zlego 2!");
             break;
         }
     }
 
     int size = 0;
     if(gotSize == true)
+    {
+        fprintf(stderr, "--------------> cos mamy");
         size = atoi(tmp.c_str());
-
+}
     return size;
 }
 
@@ -372,6 +384,7 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
 {
     std::string tmp;
     bool is_ok = true;
+    fprintf(stderr, "---------ZAPYTANIE JEST!!\n");
     for(unsigned i = 0; i < strlen(msg -> message); i++)
     {
         tmp += msg -> message[i];
@@ -379,12 +392,17 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
         if(i < 3 && tmp == "ID:")
             tmp.clear();
 
-        else if(std::isdigit(tmp[i]) != true)
+        else if(i >= 3 && std::isdigit(msg -> message[i]) != true)
+        {
+            fprintf(stderr, "---------%c!\n", tmp[i]);
             is_ok = false;
+            break;
+        }
     }
 
     if(is_ok == true)
     {
+        fprintf(stderr, "---------jestem tutaj!?!\n");
         msg -> type = DeviceInfo;
         strcpy(msg -> message, "ID:");
         Device dev;
@@ -396,6 +414,7 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
         strcat(msg -> message, dev.getMAC().c_str());
         strcat(msg -> message, ";MODE:");
         strcat(msg -> message, dev.getModeStr().c_str());
+        fprintf(stderr, "---------wysylamy informacje!\n");
         sendMsg(msg, getIpFromList(msg ->sender_id));
         msg -> type = EmptyMessage;
     }
@@ -405,6 +424,11 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
 Device NetworkManager::getDevice() const
 {
     return m_device;
+}
+
+void NetworkManager::getDevicesList(const std::list<Device> *ptr) const
+{
+    ptr = &m_deviceList;
 }
 
 void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std::string &mac)
@@ -500,5 +524,16 @@ std::string NetworkManager::readIPandIfc()
         }
         default:
             return std::string("IP READ ERROR!");
+    }
+}
+
+std::string NetworkManager::getDeviceIp(const int &id) const
+{
+    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+    {
+        if(id == it -> getID())
+        {
+            return it -> getIP();
+        }
     }
 }

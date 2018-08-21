@@ -49,6 +49,7 @@ private:
     void runAsClient();
     void updateGui(std::string status);
     void updateDevicesList(updateListAction action, const Device &dev);
+    void setGuiDevicesList();
     void breakAll();
 
     std::unique_ptr<NetworkManager> m_network;

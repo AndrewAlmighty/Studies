@@ -27,6 +27,7 @@ public:
     void resetIDCounter();
     void resetServerIP(const std::string ip = "");
     Device getDevice() const;
+    void getDevicesList(const std::list<Device>* ptr) const;
 
 private:
     enum listAction
@@ -42,6 +43,7 @@ private:
     std::string getIpFromList(const int &id);
     std::string readMac(std::string ifc);
     std::string readIPandIfc();
+    std::string getDeviceIp(const int &id) const;
 
     int m_socket;
     int m_IDcounter;  //this value sets id of every device. It has to be unique.
