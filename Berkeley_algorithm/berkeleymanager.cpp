@@ -106,10 +106,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ConnectionAccepted:
         m_network -> handleConnectionAcceptedMessage(msg);
-      //  msg -> type = NetworkSizeRequest;
-       // strcpy(msg -> message, "ID:");
-        //strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
-        //m_network -> sendMsg(msg);
+        msg -> type = NetworkSizeRequest;
+        strcpy(msg -> message, "ID:");
+        strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
+        m_network -> sendMsg(msg);
         msg -> type = EmptyMessage;
         return true;
 
