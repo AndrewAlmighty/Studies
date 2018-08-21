@@ -218,7 +218,7 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg, Device &
     //if we have IP and MAC, accept request.
     if(foundIp == true && foundMac == true)
     {
-
+        fprintf(stderr, "--------->jest ip i mac\n");
         acceptClient(dev, ip, mac);
         return true;
     }
@@ -277,6 +277,7 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
         sendMsg(msg);
 
         msg -> type = EmptyMessage;
+        fprintf(stderr, "--------->przed while w getDevices\n");
         while(msg -> type != DeviceInfo)
         {
             checkMailBox(msg);
@@ -415,6 +416,8 @@ void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std:
     msg.sender_id = m_IDcounter;
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
+    fprintf(stderr, "--------->ackeptujemy klienta\n");
+    fprintf(stderr, "--------->pjego ip:%s\n", ip.c_str());
     sendMsg(&msg, ip);
 
     //Adding new device to list of devices in network.
