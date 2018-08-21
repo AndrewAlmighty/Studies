@@ -13,7 +13,7 @@ NetworkManager::NetworkManager()
     m_socket = -1;
     m_IDcounter = 0;
     m_port = -1;
-    m_server_ip = "";
+    m_server_ip.clear();
 }
 
 bool NetworkManager::createServer(int *port)
@@ -68,11 +68,12 @@ void NetworkManager::checkMailBox(struct Message *msg)
 
 void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
 {
-    if(ip.empty() != false)
+    if(ip.empty() == false)
         sendMessage(&m_socket, msg, m_device.getID(), ip.c_str(), &m_port);
 
     else
         sendMessage(&m_socket, msg, m_device.getID(), m_server_ip.c_str(), &m_port);
+
 }
 
 void NetworkManager::resetIDCounter()
@@ -218,7 +219,6 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg, Device &
     //if we have IP and MAC, accept request.
     if(foundIp == true && foundMac == true)
     {
-        fprintf(stderr, "--------->jest ip i mac\n");
         acceptClient(dev, ip, mac);
         return true;
     }
@@ -277,7 +277,6 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
         sendMsg(msg);
 
         msg -> type = EmptyMessage;
-        fprintf(stderr, "--------->przed while w getDevices\n");
         while(msg -> type != DeviceInfo)
         {
             checkMailBox(msg);
@@ -416,8 +415,6 @@ void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std:
     msg.sender_id = m_IDcounter;
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
-    fprintf(stderr, "--------->ackeptujemy klienta\n");
-    fprintf(stderr, "--------->pjego ip:%s\n", ip.c_str());
     sendMsg(&msg, ip);
 
     //Adding new device to list of devices in network.

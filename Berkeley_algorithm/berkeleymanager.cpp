@@ -106,11 +106,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ConnectionAccepted:
         m_network -> handleConnectionAcceptedMessage(msg);
-        fprintf(stderr, "--------->potwierdzenie przyjecia\n");
-        msg -> type = NetworkSizeRequest;
-        strcpy(msg -> message, "ID:");
-        strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
-        m_network -> sendMsg(msg);
+      //  msg -> type = NetworkSizeRequest;
+       // strcpy(msg -> message, "ID:");
+        //strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
+        //m_network -> sendMsg(msg);
         msg -> type = EmptyMessage;
         return true;
 
@@ -129,7 +128,6 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case NetworkSize:
     {
-        fprintf(stderr, "--------->info z wielkoscia sieci\n");
         int size = m_network -> handleNetworkSize(msg);
         m_network -> getDevices(msg, size);
         msg -> type = EmptyMessage;
@@ -241,7 +239,6 @@ bool BerkeleyManager::makingConnection(struct Message *msg)
     int maxTime = 10;   //we wait no more than 10 second to connect
     while(maxTime > 0)
     {
-        fprintf(stderr, "--------->making connection\n");
         m_network -> checkMailBox(msg);
         if(handleMessage(msg) == true)
             return true;
