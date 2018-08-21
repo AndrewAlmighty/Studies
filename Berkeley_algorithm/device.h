@@ -24,6 +24,8 @@ public:
     void setMac(std::string mac);
     void setID(int id);
     void setMode(Mode m);
+    void setModeFromString(std::string mode);
+    void resetDevice();
 
     int getID() const;
     std::string getIP() const;

@@ -31,7 +31,7 @@ enum ipStatus getIPAndIFACE(char *ip_addr, char *iface);
 enum socketStatus createAndBindSocket(int *server_socket, const int *port);
 enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC);
 void checkMessageBox(int *server_socket, struct Message *msg);
-void sendMessage(int *mySocket, const struct Message *msg, const char *ip, const int *port);
+void sendMessage(int *mySocket, struct Message *msg, const int id, const char *ip, const int *port);
 int shutdownSocket(const int *socket);
 
 

@@ -3,6 +3,8 @@
 
 #include <ctype.h>
 #include <cstring>
+#include <thread>
+#include <unistd.h>
 
 NetworkManager::NetworkManager()
 {
@@ -11,6 +13,7 @@ NetworkManager::NetworkManager()
     m_socket = -1;
     m_IDcounter = 0;
     m_port = -1;
+    m_server_ip = "";
 }
 
 bool NetworkManager::createServer(int *port)
@@ -24,7 +27,7 @@ bool NetworkManager::createServer(int *port)
     {
         m_port = *port;
         fprintf(stderr,"Stworzono socket!\n");
-        modifyNetworkDevicesList(NetworkManager::addDevice, m_IDcounter, &m_device, m_device.getIP(), m_device.getMAC(), Device::Server);
+        actionOnNetworkDevicesList(addDeviceToList, m_IDcounter, &m_device, m_device.getIP(), m_device.getMAC(), Device::Server);
         return true;
     }
 
@@ -37,6 +40,7 @@ bool NetworkManager::connectTo(std::string ip, const int &port)
     {
         m_port = port;
         m_device.setMode(Device::Client);
+        m_server_ip = ip;
         return true;
     }
 
@@ -62,14 +66,24 @@ void NetworkManager::checkMailBox(struct Message *msg)
     checkMessageBox(&m_socket, msg);
 }
 
-void NetworkManager::sendMsg(const Message *msg, const std::string &ip)
+void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
 {
-    sendMessage(&m_socket, msg, ip.c_str(), &m_port);
+    if(ip.empty() != false)
+        sendMessage(&m_socket, msg, m_device.getID(), ip.c_str(), &m_port);
+
+    else
+        sendMessage(&m_socket, msg, m_device.getID(), m_server_ip.c_str(), &m_port);
 }
 
 void NetworkManager::resetIDCounter()
 {
     m_IDcounter = 0;
+}
+
+void NetworkManager::resetServerIP(const std::string ip)
+{
+    if(ip != m_server_ip)
+        m_server_ip = ip;
 }
 
 bool NetworkManager::handleConnectionRequest(const struct Message *msg, Device &dev)
@@ -239,9 +253,153 @@ void NetworkManager::handleConnectionRefuseMessage()
     m_IDcounter = 0;
 }
 
-void NetworkManager::handleTimeRequest(const struct Message *msg)
+void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
+{
+    strcpy(msg -> message, "NetworkSize:");
+    strcat(msg -> message, std::to_string(m_deviceList.size()).c_str());
+    msg -> type = NetworkSize;
+    sendMsg(msg);
+}
+
+bool NetworkManager::getDevices(struct Message *msg, const int &size)
+{
+    //we ask for info about all devices. If we don't have a message in short time we shutdown a connection
+    std::string tmp;
+    Device dev;
+    int k = 0, deadline = 0;  //we count ';' with it.
+
+    for(int i = 0; i < size; i++)
+    {
+
+        msg -> type = DeviceInfoRequest;
+        strcpy(msg -> message, "ID:");
+        strcat(msg -> message, std::to_string(i).c_str());
+        sendMsg(msg);
+
+        msg -> type = EmptyMessage;
+        while(msg -> type != DeviceInfo)
+        {
+            checkMailBox(msg);
+            sleep(1);
+
+            if(deadline == 3)
+                return false;
+
+            deadline++;
+        }
+
+        deadline = 0;
+
+        for(unsigned j = 0; j < strlen(msg -> message); j++)
+        {
+            tmp += msg -> message[j];
+
+            if(k == 0 && tmp == "ID:")
+            {
+                tmp.clear();
+                k++;
+                continue;
+            }
+
+            else if(k == 1 && msg -> message[j] == ';')
+            {
+                dev.setID(std::atoi(tmp.c_str()));
+                tmp.clear();
+                k++;
+                continue;
+            }
+
+            else if(k == 2 && msg -> message[j] == ';')
+            {
+                dev.setIP(tmp);
+                tmp.clear();
+                k++;
+                continue;
+            }
+
+            else if(k == 3 && msg -> message[j] == ';')
+            {
+                dev.setMac(tmp);
+                tmp.clear();
+                k++;
+                continue;
+            }
+        }
+        //on the end set mode
+        dev.setModeFromString(tmp);
+        actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
+        dev.resetDevice();
+        tmp.clear();
+    }
+
+    return true;
+}
+
+int NetworkManager::handleNetworkSize(Message *msg)
+{
+    //first, get size of network from message.
+    std::string tmp;
+    bool gotSize = false;
+    for(int i = 0; msg -> message[i] != '\0'; i++)
+    {
+        tmp += msg -> message[i];
+        if(gotSize == false && tmp == "NetworkSize:")
+        {
+            tmp.clear();
+            gotSize = true;
+        }
+
+        else if (gotSize == true && std::isdigit(msg -> message[i]) == false)
+        {
+            gotSize = false;
+            break;
+        }
+    }
+
+    int size = 0;
+    if(gotSize == true)
+        size = atoi(tmp.c_str());
+
+    return size;
+}
+
+void NetworkManager::handleTimeRequest(struct Message *msg)
 {
     //to implement
+}
+
+void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
+{
+    std::string tmp;
+    bool is_ok = true;
+    for(unsigned i = 0; i < strlen(msg -> message); i++)
+    {
+        tmp += msg -> message[i];
+
+        if(i < 3 && tmp == "ID:")
+            tmp.clear();
+
+        else if(std::isdigit(tmp[i]) != true)
+            is_ok = false;
+    }
+
+    if(is_ok == true)
+    {
+        msg -> type = DeviceInfo;
+        strcpy(msg -> message, "ID:");
+        Device dev;
+        actionOnNetworkDevicesList(getDeviceFromList, std::atoi(tmp.c_str()), &dev);
+        strcat(msg -> message, std::to_string(dev.getID()).c_str());
+        strcat(msg -> message, ";IP:");
+        strcat(msg -> message, dev.getIP().c_str());
+        strcat(msg -> message, ";MAC:");
+        strcat(msg -> message, dev.getMAC().c_str());
+        strcat(msg -> message, ";MODE:");
+        strcat(msg -> message, dev.getModeStr().c_str());
+        sendMsg(msg, getIpFromList(msg ->sender_id));
+        msg -> type = EmptyMessage;
+    }
+
 }
 
 Device NetworkManager::getDevice() const
@@ -254,18 +412,18 @@ void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std:
     //Send confirmation of connection request.
     struct Message msg;
     msg.type = ConnectionAccepted;
-    msg.device_id = m_IDcounter;
+    msg.sender_id = m_IDcounter;
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
     sendMsg(&msg, ip);
 
     //Adding new device to list of devices in network.
-    modifyNetworkDevicesList(NetworkManager::addDevice, m_IDcounter, &dev, ip, mac, Device::Client);
+    actionOnNetworkDevicesList(addDeviceToList, m_IDcounter, &dev, ip, mac, Device::Client);
 }
 
-void NetworkManager::modifyNetworkDevicesList(NetworkManager::updateListAction action, const int &id, Device *dev, const std::string &ip, const std::string &mac, const Device::Mode mode)
+void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction action, const int &id, Device *dev, const std::string &ip, const std::string &mac, const Device::Mode mode)
 {
-    if(action == NetworkManager::addDevice)
+    if(action == NetworkManager::addDeviceToList)
     {
     dev -> setIP(ip);
     dev -> setMac(mac);
@@ -275,7 +433,7 @@ void NetworkManager::modifyNetworkDevicesList(NetworkManager::updateListAction a
     m_deviceList.push_back(*dev);
     }
 
-    else if(action == NetworkManager::removeDevice)
+    else if(action == NetworkManager::removeDeviceFromList)
     {
         for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         {
@@ -287,8 +445,31 @@ void NetworkManager::modifyNetworkDevicesList(NetworkManager::updateListAction a
         }
     }
 
+    else if(action == NetworkManager::getDeviceFromList)
+    {
+        for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        {
+            if(id == it -> getID())
+            {
+                *dev = *it;
+                return;
+            }
+        }
+    }
+
     else if(action == NetworkManager::clearList)
         m_deviceList.clear();
+}
+
+std::string NetworkManager::getIpFromList(const int &id)
+{
+    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+    {
+        if(id == it -> getID())
+            return it -> getIP();
+    }
+
+    return "There is no ID here!";
 }
 
 std::string NetworkManager::readMac(std::string ifc)

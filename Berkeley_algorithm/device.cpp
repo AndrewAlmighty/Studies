@@ -2,11 +2,7 @@
 
 Device::Device()
 {
-    m_ip = "Not Specified";
-    m_mac = "Not Specified";
-    m_ifc = "Not Spiecified";
-    m_ID = -1;
-    m_mode = NotSpecified;
+    resetDevice();
 }
 
 Device::Device(const Device &dev)
@@ -75,6 +71,27 @@ void Device::setMode(Mode m)
         return;
 
     m_mode = m;
+}
+
+void Device::setModeFromString(std::string mode)
+{
+    if(mode == "server")
+        m_mode = Server;
+
+    else if(mode == "client")
+        m_mode = Client;
+
+    else
+        m_mode = NotSpecified;
+}
+
+void Device::resetDevice()
+{
+    m_ip = "Not Specified";
+    m_mac = "Not Specified";
+    m_ifc = "Not Spiecified";
+    m_ID = -1;
+    m_mode = NotSpecified;
 }
 
 int Device::getID() const

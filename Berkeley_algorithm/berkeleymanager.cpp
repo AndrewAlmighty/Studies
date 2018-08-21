@@ -106,6 +106,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ConnectionAccepted:
         m_network -> handleConnectionAcceptedMessage(msg);
+        msg -> type = NetworkSizeRequest;
+        strcpy(msg -> message, "ID:");
+        strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
+        m_network -> sendMsg(msg);
         msg -> type = EmptyMessage;
         return true;
 
@@ -115,6 +119,27 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case Disconnect:
+        return false;
+
+    case NetworkSizeRequest:
+        m_network -> handleNetworkSizeRequest(msg);
+        msg -> type = EmptyMessage;
+        return false;
+
+    case NetworkSize:
+    {
+        int size = m_network -> handleNetworkSize(msg);
+        m_network -> getDevices(msg, size);
+        msg -> type = EmptyMessage;
+        return false;
+    }
+
+    case DeviceInfoRequest:
+        m_network -> handleDeviceInfoRequest(msg);
+        msg -> type = EmptyMessage;
+        return false;
+
+    case DeviceInfo:
         return false;
 
     case ClientsCheck:
@@ -222,5 +247,6 @@ bool BerkeleyManager::makingConnection(struct Message *msg)
         maxTime--;
     }
 
+    m_network -> resetServerIP();
     return false;
 }

@@ -22,9 +22,10 @@ enum MessageType
     ConnectionAccepted,     //Server accept client.
     ConnectionRefused,      //server refuse client's connection request.
     Disconnect,             //client is leaving the network.
-    DevicesListRequest,     //Request for list of devices which are in network
+    NetworkSizeRequest,     //Request for size of network
+    NetworkSize,            //Info with size of network
+    DeviceInfoRequest,      //Request for info about Device with ID
     DeviceInfo,             //Send info about Device
-    DeviceInfoConfirm,       //Confirmation of getting info about device
     ClientsCheck,           //Server checks if clients are connected.
     ClientConfirm,          //Client confirm that he is connected.
     ClientTime,             //client sends his time.
@@ -35,7 +36,7 @@ enum MessageType
 struct Message
 {
     enum MessageType type;
-    int device_id;
+    int sender_id;
     char message[64];
 };
 

@@ -122,13 +122,12 @@ enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip,
     //Prepare message for connection request.
     struct Message msg;
     msg.type = ConnectionRequest;
-    msg.device_id = 0;
     strcpy(msg.message, "IP:");
     strcat(msg.message, local_ip);
     strcat(msg.message, "_MAC:");
     strcat(msg.message, MAC);
 
-    sendMessage(client_socket, &msg, dest_ip, port);
+    sendMessage(client_socket, &msg, -1, dest_ip, port);
     return Working;
 }
 
@@ -141,8 +140,9 @@ void checkMessageBox(int *server_socket, struct Message *msg)
     recvfrom(*server_socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
 }
 
-void sendMessage(int *mySocket, const struct Message *msg, const char *ip, const int *port)
+void sendMessage(int *mySocket, struct Message *msg, const int id, const char *ip, const int *port)
 {
+    msg -> sender_id = id;
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
