@@ -259,11 +259,12 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
 
 void NetworkManager::handleClientReadyMsg(struct Message *msg)
 {
-    Device *dev = nullptr;
-    actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, dev);
-    dev -> setReady(true);
+    Device dev;
     fprintf(stderr, "WIADOMOSC OD KLIENTA %d", msg ->sender_id);
-    fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev -> getID(), dev -> isReady());
+    actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, &dev);
+    fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev.getID(), dev.isReady());
+    dev.setReady(true);
+    fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev.getID(), dev.isReady());
 }
 
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
