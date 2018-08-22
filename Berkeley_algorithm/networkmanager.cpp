@@ -422,6 +422,7 @@ void NetworkManager::prepare()
 {
     m_device.setIPandIfc(readIPandIfc());
     m_device.setMac(readMac(m_device.getInterface()));
+    m_device.setReady(true);
 }
 
 void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std::string &mac)
@@ -447,11 +448,18 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
     dev -> setMode(mode);
     dev -> setID(id);
     m_IDcounter++;
+
+    if(mode == Device::Server)
+        dev -> setReady(true);
+
     m_deviceList.push_back(*dev);
     }
 
     else if(action == addDeviceToList && dev -> getMode() != Device::NotSpecified)
     {
+        if(dev -> getMode() == Device::Server)
+            dev -> setReady(true);
+
         m_IDcounter++;
         m_deviceList.push_back(*dev);
     }

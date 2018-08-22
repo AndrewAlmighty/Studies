@@ -26,6 +26,7 @@ public:
     void setMode(Mode m);
     void setModeFromString(std::string mode);
     void resetDevice();
+    void setReady(bool isReady);
 
     int getID() const;
     std::string getIP() const;
@@ -33,12 +34,14 @@ public:
     std::string getModeStr() const;
     Device::Mode getMode() const;
     std::string getInterface() const;
+    bool isReady() const;
 
 private:
     enum Mode m_mode;
     std::string m_ip;
     std::string m_ifc;
     std::string m_mac;
+    bool m_ready;
     int m_ID;
 };
 

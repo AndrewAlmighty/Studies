@@ -12,6 +12,7 @@ Device::Device(const Device &dev)
     m_ifc = dev.getInterface();
     m_ID = dev.getID();
     m_mode = dev.getMode();
+    m_ready = dev.isReady();
 }
 
 bool Device::operator==(const Device &dev)
@@ -92,6 +93,13 @@ void Device::resetDevice()
     m_ifc = "Not Spiecified";
     m_ID = -1;
     m_mode = NotSpecified;
+    m_ready = false;
+}
+
+void Device::setReady(bool isReady)
+{
+    if(m_ready != isReady)
+        m_ready = isReady;
 }
 
 int Device::getID() const
@@ -129,4 +137,9 @@ Device::Mode Device::getMode() const
 std::string Device::getInterface() const
 {
     return m_ifc;
+}
+
+bool Device::isReady() const
+{
+    return m_ready;
 }

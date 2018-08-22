@@ -22,6 +22,7 @@ enum MessageType
     ConnectionAccepted,     //Server accept client.
     ConnectionRefused,      //server refuse client's connection request.
     Disconnect,             //client is leaving the network.
+    ClientReady,            //client is prepared to work
     NetworkSizeRequest,     //Request for size of network
     NetworkSize,            //Info with size of network
     DeviceInfoRequest,      //Request for info about Device with ID

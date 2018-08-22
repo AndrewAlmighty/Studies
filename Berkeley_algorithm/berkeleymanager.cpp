@@ -138,10 +138,22 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         m_network -> getDevices(msg, size);
         setGuiDevicesList();
         updateGui("Connected");
+        msg -> type = ClientReady;
+        m_network -> sendMsg(msg);
         msg -> type = EmptyMessage;
         return false;
     }
 
+    case ClientReady:
+    {
+        Device *dev = nullptr;
+        m_network -> actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, dev);
+        dev -> setReady(true);
+        msg -> type = EmptyMessage;
+        fprintf(stderr, "WIADOMOSC OD KLIENTA %d", msg ->sender_id);
+        fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev -> getID(), dev -> isReady());
+        return false;
+    }
     case DeviceInfoRequest:
         m_network -> handleDeviceInfoRequest(msg);
         msg -> type = EmptyMessage;
