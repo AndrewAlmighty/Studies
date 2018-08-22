@@ -8,6 +8,8 @@
 
 Clock::Clock()
 {
+    m_checkTime = 30;
+    m_timeToCheck = false;
     setSystemTime();
     run();
 }
@@ -22,12 +24,65 @@ bool Clock::setTime(std::string time)
 {
     //This method sets time in our clock. First we check if string got HH:MM:SS format, then if values are good, then we change clock.
 
-    std::string tmp;
-    int pos = 0;
     int h = 0,
         m = 0,
         s = 0;
 
+    if(getSecMinHour(s,m,h,time) == false)
+        return false;
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_hour = h;
+    m_min = m;
+    m_sec = s;
+
+    return true;
+}
+
+bool Clock::didCheckTimePassed()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if(m_timeToCheck == false)
+        return false;
+
+    else
+    {
+        m_timeToCheck = true;
+        return true;
+    }
+}
+
+bool Clock::isItTooLateForCheck()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if(m_timeToCheckPassed == true)
+    {
+        m_timeToCheckPassed = false;
+        return true;
+    }
+
+    else return false;
+}
+
+void Clock::setSystemTime()
+{
+    //Set clock to system time.
+
+    auto systemTime = std::chrono::system_clock::now();
+
+    time_t tt = std::chrono::system_clock::to_time_t(systemTime);
+    struct tm * tmp = localtime(&tt);
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_hour = tmp -> tm_hour;
+    m_min = tmp -> tm_min;
+    m_sec = tmp -> tm_sec;
+}
+
+bool Clock::getSecMinHour(int &s, int &m, int &h, std::string &time)
+{
+    std::string tmp;
+    int pos = 0;
     for(unsigned i = 0; i < time.length(); i++)
     {
         if(time[i] == ':' || isdigit(time[i]))
@@ -59,27 +114,7 @@ bool Clock::setTime(std::string time)
     if((s = std::stoi(tmp)) > 60)
         return false;
 
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_hour = h;
-    m_min = m;
-    m_sec = s;
-
     return true;
-}
-
-void Clock::setSystemTime()
-{
-    //Set clock to system time.
-
-    auto systemTime = std::chrono::system_clock::now();
-
-    time_t tt = std::chrono::system_clock::to_time_t(systemTime);
-    struct tm * tmp = localtime(&tt);
-
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_hour = tmp -> tm_hour;
-    m_min = tmp -> tm_min;
-    m_sec = tmp -> tm_sec;
 }
 
 void Clock::run()
@@ -87,6 +122,7 @@ void Clock::run()
     //This method runs in separate thread for all the time. It's responsible to keep clock running.
 
     std::thread threadObj([this]{
+        int stopwatch = 0;
         while(true)
         {
             sleep(1);
@@ -109,6 +145,16 @@ void Clock::run()
                 if(m_hour >= 24)
                     m_hour = 0;
 
+                if(stopwatch >= m_checkTime)
+                {
+                    m_timeToCheck = true;
+                    m_timeToCheckPassed = false;
+                }
+
+                if(stopwatch > 10)
+                    m_timeToCheckPassed = true;
+
+                stopwatch++;
             }
             updateGui();
         }

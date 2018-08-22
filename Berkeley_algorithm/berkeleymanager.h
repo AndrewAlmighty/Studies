@@ -27,7 +27,6 @@ public:
     void start();
     bool stop();
 
-    void setCheckTime(const int time);
     void setTime(std::string time);
     int getID() const;
     std::string getMode() const;
@@ -51,10 +50,17 @@ private:
     void updateDevicesList(updateListAction action, const Device &dev);
     void setGuiDevicesList();
     void breakAll();
+    bool checkIfAllClientsSendTime(const int &id);
+    void sendAdjustTimeRequest();
+    void RequestTimeFromClients();
+
 
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
-    int m_checkTime;                    //check time every x seconds
+    unsigned m_clientsCount;                 //Count how many clients has send time to server.
+    std::list<int> m_clientsID;         //This list contains ids of clients which has to send ID.
+    std::list<std::string> m_times;      //This list contains times from clients.
+    std::string m_time;                 //This field remembers time when we send a message
 };
 
 #endif // BERKELEYMANAGER_H

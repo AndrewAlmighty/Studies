@@ -3,11 +3,13 @@
 
 #include <thread>
 #include <unistd.h>
+#include <algorithm>
 
 BerkeleyManager::BerkeleyManager()
 {
     m_network = std::unique_ptr<NetworkManager>(new NetworkManager());
     m_clock = std::unique_ptr<Clock>(new Clock());
+    m_clientsCount = 0;
 }
 
 bool BerkeleyManager::prepareToRunAsServer(int port)
@@ -53,11 +55,6 @@ bool BerkeleyManager::stop()
 
     m_network -> reset();
     return true;
-}
-
-void BerkeleyManager::setCheckTime(const int time)
-{
-    m_checkTime = time;
 }
 
 void BerkeleyManager::setTime(std::string time)
@@ -165,10 +162,16 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientTime:
+        m_times.push_back(std::string(msg -> message));
+        fprintf(stderr, "WIADOMOSC OD %d, godzina:%s\n", msg -> sender_id, msg -> message);
+        if(checkIfAllClientsSendTime(msg -> sender_id) == true)
+            sendAdjustTimeRequest();
+
         return false;
 
     case TimeRequest:
-        m_network -> handleTimeRequest(msg);
+        fprintf(stderr, "Wysylamy godzine:%s\n", m_clock -> getTime().c_str());
+        m_network -> handleTimeRequest(msg, m_clock -> getTime());
         msg -> type = EmptyMessage;
         return false;
 
@@ -190,6 +193,8 @@ void BerkeleyManager::runAsServer()
         {
             m_network -> checkMailBox(&msg);
             handleMessage(&msg);
+            if(m_clock -> didCheckTimePassed() == true)
+                RequestTimeFromClients();
         }
    });
 
@@ -258,6 +263,67 @@ void BerkeleyManager::breakAll()
     fprintf(stderr, "Critical error. Stopping everything!!\n");
     GuiManager::GetInstance().finishJob();
     GuiManager::GetInstance().loadSetupWindow();
+}
+
+bool BerkeleyManager::checkIfAllClientsSendTime(const int &id)
+{
+    std::list<int>::iterator it;
+    if((it = std::find(m_clientsID.begin(), m_clientsID.end(), id)) != m_clientsID.end())
+    {
+        m_clientsCount++;
+        if(m_clientsCount == m_clientsID.size())
+            return true;
+    }
+
+    if(m_clock -> isItTooLateForCheck() == true)
+    {
+        //disconect late devices
+        return true;
+    }
+
+    return false;
+}
+
+void BerkeleyManager::sendAdjustTimeRequest()
+{
+    int n = 0, s_sum = 0, m_sum = 0, h_sum = 0, s, m, h;
+
+    for(auto it = m_times.begin(); it != m_times.end(); ++it)
+    {
+        m_clock -> getSecMinHour(s, m, h, *it);
+        n++;
+        s_sum += s;
+        m_sum += m;
+        h_sum += h;
+    }
+
+    s_sum = s_sum / n;
+    m_sum = m_sum / n;
+    h_sum = h_sum / n;
+
+    fprintf(stderr, "Srednia godzina:%d:%d:%d\n",h_sum,m_sum,s_sum);
+
+}
+
+void BerkeleyManager::RequestTimeFromClients()
+{
+    m_time.clear();
+    m_clientsCount = 0;
+    m_clientsID.clear();
+    m_times.clear();
+
+    int i = 0;
+    std::list<Device>::const_iterator it;
+    while(m_network -> getDevicesList(it, i) == true)
+    {
+        if(it -> isReady() == true && it -> getModeStr() == "client")
+            m_clientsID.push_back(it -> getID());
+
+        i++;
+    }
+
+    m_time = m_clock -> getTime();
+    m_network -> sendRequestTime();
 }
 
 bool BerkeleyManager::makingConnection(struct Message *msg)

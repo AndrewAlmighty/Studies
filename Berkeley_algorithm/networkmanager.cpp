@@ -70,6 +70,15 @@ void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
         sendMessage(&m_socket, msg, m_device.getID(), m_server_ip.c_str(), &m_port);
 }
 
+void NetworkManager::sendRequestTime()
+{
+    struct Message msg;
+    msg.type = TimeRequest;
+    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        if(it -> isReady() == true)
+            sendMsg(&msg, it -> getIP());
+}
+
 void NetworkManager::reset()
 {
     m_device.resetDevice();
@@ -260,11 +269,8 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
 void NetworkManager::handleClientReadyMsg(struct Message *msg)
 {
     Device dev;
-    fprintf(stderr, "WIADOMOSC OD KLIENTA %d", msg ->sender_id);
     actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, &dev);
-    fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev.getID(), dev.isReady());
     dev.setReady(true);
-    fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev.getID(), dev.isReady());
 }
 
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
@@ -367,9 +373,12 @@ int NetworkManager::handleNetworkSize(Message *msg)
     return size;
 }
 
-void NetworkManager::handleTimeRequest(struct Message *msg)
+void NetworkManager::handleTimeRequest(struct Message *msg, const std::string time)
 {
     //to implement
+    msg -> type = ClientTime;
+    strcpy(msg -> message, time.c_str());
+    sendMsg(msg);
 }
 
 void NetworkManager::handleDeviceInfoRequest(struct Message *msg)

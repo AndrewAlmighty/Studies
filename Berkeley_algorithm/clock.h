@@ -16,7 +16,10 @@ public:
 
     std::string getTime() const;
     bool setTime(std::string time);
+    bool didCheckTimePassed();
+    bool isItTooLateForCheck();
     void setSystemTime();
+    bool getSecMinHour(int &s, int &m, int &h, std::string &time);
 
 private:
     void run();
@@ -25,7 +28,11 @@ private:
     std::mutex m_mutex;
     int m_hour,
         m_min,
-        m_sec;
+        m_sec,
+        m_checkTime;    //we check time every x seconds.
+
+    bool m_timeToCheck;
+    bool m_timeToCheckPassed;
 };
 
 #endif // CLOCK_H
