@@ -110,7 +110,6 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         strcpy(msg -> message, "ID:");
         strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
         m_network -> sendMsg(msg);
-        fprintf(stderr, "--------------> koniec akcaptacji!");
         msg -> type = EmptyMessage;
         return true;
 
@@ -130,9 +129,8 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     case NetworkSize:
     {
         int size = m_network -> handleNetworkSize(msg);
-        fprintf(stderr, "--------------> Znamy rozmiar:%d", size);
         m_network -> getDevices(msg, size);
-        //setGuiDevicesList();
+        setGuiDevicesList();
         msg -> type = EmptyMessage;
         return false;
     }
@@ -230,14 +228,15 @@ void BerkeleyManager::updateDevicesList(BerkeleyManager::updateListAction action
 
 void BerkeleyManager::setGuiDevicesList()
 {
-    fprintf(stderr, "--------------> dodajemy urzadzenia!");
-    std::list<Device> *ptr = nullptr;
-    m_network -> getDevicesList(ptr);
-
-    for(auto it = ptr -> begin(); it != ptr -> end(); ++it)
+    fprintf(stderr, "_-------------asdf----------\n");
+    int i = 0;
+    std::list<Device>::const_iterator it;
+    while(m_network -> getDevicesList(it, i) == true)
     {
-        fprintf(stderr, "--------------> nowy device!");
+        fprintf(stderr, "_-----------------------\n");
+        fprintf(stderr, "NOWE URZADZENIE:%d - %s - %s - %s\n", it -> getID(), it -> getIP().c_str(), it -> getMAC().c_str(), it -> getModeStr().c_str());
         GuiManager::GetInstance().addDevice(it -> getID(), it -> getIP().c_str(), it -> getMAC().c_str(), it -> getModeStr().c_str());
+        i++;
     }
 }
 

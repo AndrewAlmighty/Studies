@@ -72,15 +72,13 @@ void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
         sendMessage(&m_socket, msg, m_device.getID(), ip.c_str(), &m_port);
 
     else
-    {
-        fprintf(stderr, "--------------> adres do wyslania:%s\n", ip.c_str());
         sendMessage(&m_socket, msg, m_device.getID(), m_server_ip.c_str(), &m_port);
-    }
 }
 
-void NetworkManager::resetIDCounter()
+void NetworkManager::resetDevicesList()
 {
     m_IDcounter = 0;
+    m_deviceList.clear();
 }
 
 void NetworkManager::resetServerIP(const std::string ip)
@@ -260,7 +258,6 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
     strcpy(msg -> message, "NetworkSize:");
     strcat(msg -> message, std::to_string(m_deviceList.size()).c_str());
     msg -> type = NetworkSize;
-    fprintf(stderr, "--------------> wysylamy rozmiar!");
     sendMsg(msg, getDeviceIp(msg -> sender_id));
 }
 
@@ -270,10 +267,9 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
     std::string tmp;
     Device dev;
     int k = 0, deadline = 0;  //we count ';' with it.
-       fprintf(stderr, "---------pobieramy liste!\n");
+
     for(int i = 0; i < size; i++)
     {
-        fprintf(stderr, "---------pobieramy liste!\n");
         msg -> type = DeviceInfoRequest;
         strcpy(msg -> message, "ID:");
         strcat(msg -> message, std::to_string(i).c_str());
@@ -290,27 +286,25 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
                 return false;
 
             deadline++;
-            fprintf(stderr, "---------dedlajn!!%d\n", msg -> type);
         }
 
         deadline = 0;
-        fprintf(stderr, "---------cos mamy!\n");
         for(unsigned j = 0; j < strlen(msg -> message); j++)
         {
-            tmp += msg -> message[j];
+            if(msg -> message[j] != ';')
+                tmp += msg -> message[j];
 
-            if(k == 0 && tmp == "ID:")
+            if(tmp == "ID:" || tmp == "IP:" || tmp == "MAC:" || tmp == "MODE:")
             {
-                tmp.clear();
                 k++;
+                tmp.clear();
                 continue;
             }
 
-            else if(k == 1 && msg -> message[j] == ';')
+            if(k == 1 && msg -> message[j] == ';')
             {
                 dev.setID(std::atoi(tmp.c_str()));
                 tmp.clear();
-                k++;
                 continue;
             }
 
@@ -318,7 +312,6 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
             {
                 dev.setIP(tmp);
                 tmp.clear();
-                k++;
                 continue;
             }
 
@@ -326,17 +319,15 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
             {
                 dev.setMac(tmp);
                 tmp.clear();
-                k++;
                 continue;
             }
         }
-        fprintf(stderr, "---------blad w ifach!\n");
         //on the end set mode
         dev.setModeFromString(tmp);
         actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
-        fprintf(stderr, "---------___DODANO:%d\n", dev.getID());
         dev.resetDevice();
         tmp.clear();
+        k = 0;
     }
 
     return true;
@@ -347,7 +338,6 @@ int NetworkManager::handleNetworkSize(Message *msg)
     //first, get size of network from message.
     std::string tmp;
     bool gotSize = false;
-    fprintf(stderr, "--------------> ogarniamy!");
     for(int i = 0; msg -> message[i] != '\0'; i++)
     {
         tmp += msg -> message[i];
@@ -355,23 +345,19 @@ int NetworkManager::handleNetworkSize(Message *msg)
         {
             tmp.clear();
             gotSize = true;
-            fprintf(stderr, "--------------> log!");
         }
 
         else if (gotSize == true && std::isdigit(msg -> message[i]) == false)
         {
             gotSize = false;
-            fprintf(stderr, "--------------> cos zlego 2!");
             break;
         }
     }
 
     int size = 0;
     if(gotSize == true)
-    {
-        fprintf(stderr, "--------------> cos mamy");
         size = atoi(tmp.c_str());
-}
+
     return size;
 }
 
@@ -384,7 +370,6 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
 {
     std::string tmp;
     bool is_ok = true;
-    fprintf(stderr, "---------ZAPYTANIE JEST!!\n");
     for(unsigned i = 0; i < strlen(msg -> message); i++)
     {
         tmp += msg -> message[i];
@@ -394,7 +379,6 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
 
         else if(i >= 3 && std::isdigit(msg -> message[i]) != true)
         {
-            fprintf(stderr, "---------%c!\n", tmp[i]);
             is_ok = false;
             break;
         }
@@ -402,7 +386,6 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
 
     if(is_ok == true)
     {
-        fprintf(stderr, "---------jestem tutaj!?!\n");
         msg -> type = DeviceInfo;
         strcpy(msg -> message, "ID:");
         Device dev;
@@ -414,7 +397,6 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
         strcat(msg -> message, dev.getMAC().c_str());
         strcat(msg -> message, ";MODE:");
         strcat(msg -> message, dev.getModeStr().c_str());
-        fprintf(stderr, "---------wysylamy informacje!\n");
         sendMsg(msg, getIpFromList(msg ->sender_id));
         msg -> type = EmptyMessage;
     }
@@ -426,9 +408,18 @@ Device NetworkManager::getDevice() const
     return m_device;
 }
 
-void NetworkManager::getDevicesList(const std::list<Device> *ptr) const
+bool NetworkManager::getDevicesList(std::list<Device>::const_iterator &it, const int &i) const
 {
-    ptr = &m_deviceList;
+    int j = 0;
+    for(it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+    {
+        if(j == i)
+            return true;
+
+        j++;
+    }
+
+    return false;
 }
 
 void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std::string &mac)
@@ -447,7 +438,7 @@ void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std:
 
 void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction action, const int &id, Device *dev, const std::string &ip, const std::string &mac, const Device::Mode mode)
 {
-    if(action == NetworkManager::addDeviceToList)
+    if(action == addDeviceToList && dev -> getMode() == Device::NotSpecified)
     {
     dev -> setIP(ip);
     dev -> setMac(mac);
@@ -457,7 +448,13 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
     m_deviceList.push_back(*dev);
     }
 
-    else if(action == NetworkManager::removeDeviceFromList)
+    else if(action == addDeviceToList && dev -> getMode() != Device::NotSpecified)
+    {
+        m_IDcounter++;
+        m_deviceList.push_back(*dev);
+    }
+
+    else if(action == removeDeviceFromList)
     {
         for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         {
@@ -469,7 +466,7 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
         }
     }
 
-    else if(action == NetworkManager::getDeviceFromList)
+    else if(action == getDeviceFromList)
     {
         for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         {
@@ -481,7 +478,7 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
         }
     }
 
-    else if(action == NetworkManager::clearList)
+    else if(action == clearList)
         m_deviceList.clear();
 }
 
@@ -536,4 +533,6 @@ std::string NetworkManager::getDeviceIp(const int &id) const
             return it -> getIP();
         }
     }
+
+    return "Not found";
 }

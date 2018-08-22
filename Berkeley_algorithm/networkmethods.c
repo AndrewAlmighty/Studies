@@ -149,7 +149,6 @@ void sendMessage(int *mySocket, struct Message *msg, const int id, const char *i
     addr.sin_addr.s_addr = inet_addr(ip);
     addr.sin_port = htons(*port);
     sendto(*mySocket, msg, sizeof(*msg), MSG_CONFIRM, (const struct sockaddr *)&addr,sizeof(addr));
-    fprintf(stderr, "\n------------ip:%s\n", ip);
 }
 
 int shutdownSocket(const int *socket)
