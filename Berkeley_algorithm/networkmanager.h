@@ -18,6 +18,7 @@ public:
     bool handleConnectionAcceptedMessage(const struct Message *msg);
     void handleConnectionRefuseMessage();
     void handleNetworkSizeRequest(struct Message *msg);
+    void handleClientReadyMsg(struct Message *msg);
     bool getDevices(struct Message *msg, const int& size);
     int handleNetworkSize(struct Message *msg);
     void handleTimeRequest(struct Message *msg);

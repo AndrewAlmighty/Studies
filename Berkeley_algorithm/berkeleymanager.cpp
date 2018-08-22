@@ -146,12 +146,8 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ClientReady:
     {
-        Device *dev = nullptr;
-        m_network -> actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, dev);
-        dev -> setReady(true);
+        m_network -> handleClientReadyMsg(msg);
         msg -> type = EmptyMessage;
-        fprintf(stderr, "WIADOMOSC OD KLIENTA %d", msg ->sender_id);
-        fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev -> getID(), dev -> isReady());
         return false;
     }
     case DeviceInfoRequest:

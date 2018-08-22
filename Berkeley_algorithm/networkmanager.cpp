@@ -257,6 +257,15 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
     sendMsg(msg, getDeviceIp(msg -> sender_id));
 }
 
+void NetworkManager::handleClientReadyMsg(struct Message *msg)
+{
+    Device *dev = nullptr;
+    actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, dev);
+    dev -> setReady(true);
+    fprintf(stderr, "WIADOMOSC OD KLIENTA %d", msg ->sender_id);
+    fprintf(stderr, "KLIENT Z ID %d jest gotowy - %d", dev -> getID(), dev -> isReady());
+}
+
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
 {
     //we ask for info about all devices. If we don't have a message in short time we shutdown a connection
