@@ -12,6 +12,8 @@ BerkeleyManager::BerkeleyManager()
 
 bool BerkeleyManager::prepareToRunAsServer(int port)
 {
+    m_network -> prepare();
+
     if(m_network -> createServer(&port))
         return true;
 
@@ -20,6 +22,8 @@ bool BerkeleyManager::prepareToRunAsServer(int port)
 
 bool BerkeleyManager::prepareToRunAsClient(std::string ip, int port)
 {
+    m_network -> prepare();
+
     if(m_network -> connectTo(ip, port) == true)
         return true;
 
@@ -47,7 +51,7 @@ bool BerkeleyManager::stop()
     if(m_network -> shutdownConnection() == false)
         return false;
 
-    m_network -> resetDevicesList();
+    m_network -> reset();
     return true;
 }
 
@@ -115,6 +119,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ConnectionRefused:
         m_network -> handleConnectionRefuseMessage();
+        breakAll();
         msg -> type = EmptyMessage;
         return false;
 
@@ -129,8 +134,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     case NetworkSize:
     {
         int size = m_network -> handleNetworkSize(msg);
+        updateGui("Connected ... getting devices list");
         m_network -> getDevices(msg, size);
         setGuiDevicesList();
+        updateGui("Connected");
         msg -> type = EmptyMessage;
         return false;
     }
@@ -228,13 +235,10 @@ void BerkeleyManager::updateDevicesList(BerkeleyManager::updateListAction action
 
 void BerkeleyManager::setGuiDevicesList()
 {
-    fprintf(stderr, "_-------------asdf----------\n");
     int i = 0;
     std::list<Device>::const_iterator it;
     while(m_network -> getDevicesList(it, i) == true)
     {
-        fprintf(stderr, "_-----------------------\n");
-        fprintf(stderr, "NOWE URZADZENIE:%d - %s - %s - %s\n", it -> getID(), it -> getIP().c_str(), it -> getMAC().c_str(), it -> getModeStr().c_str());
         GuiManager::GetInstance().addDevice(it -> getID(), it -> getIP().c_str(), it -> getMAC().c_str(), it -> getModeStr().c_str());
         i++;
     }
@@ -255,13 +259,13 @@ bool BerkeleyManager::makingConnection(struct Message *msg)
     while(maxTime > 0)
     {
         m_network -> checkMailBox(msg);
-        if(handleMessage(msg) == true)
+        if(handleMessage(msg) == true && GuiManager::GetInstance().running() == true)
             return true;
 
         sleep(1);
         maxTime--;
     }
 
-    m_network -> resetServerIP();
+    m_network -> reset();
     return false;
 }

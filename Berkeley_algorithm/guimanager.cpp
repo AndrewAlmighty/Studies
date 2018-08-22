@@ -23,14 +23,13 @@ GuiManager::GuiManager(QObject *parent) : QObject(parent)
 void GuiManager::restartConfiguration()
 {
     //Restart method. Do it before you click run.
-    m_mode = "Server";
-    m_time = "Not Specified";
-    m_ip = "Not Specified";
-    m_mac = "Not Specified";
-    m_ID = -1;
+    setMode("Server");
+    setTime("Not Specified");
+    setIp("Not Specified");
+    setMAC("Not Specified");
+    setID(-1);
     setQmlFile("SetupWindow.qml");
     setStatus("Not working");
-
     removeAllDevices();
 }
 
@@ -275,7 +274,7 @@ void GuiManager::onAddDevice(int id, QString ip, QString mac, QString mode)
     //This method adds device to DeviceModel.    
     m_deviceModel.append(new DeviceModel(id, ip, mac, mode));
     emit modelChanged();
-    qDebug() << "New device connected! ID: " + QString::number(id) + " IP:" + ip + " MAC:" + mac + " Mode:" + mode;
+    qDebug() << "New device on list! ID: " + QString::number(id) + " IP:" + ip + " MAC:" + mac + " Mode:" + mode;
 }
 
 bool GuiManager::removeDevice(int id)

@@ -24,10 +24,11 @@ public:
     void handleDeviceInfoRequest(struct Message *msg);
     void checkMailBox(struct Message *msg);
     void sendMsg(struct Message *msg, const std::string &ip = "");
-    void resetDevicesList();
+    void reset();
     void resetServerIP(const std::string ip = "");
     Device getDevice() const;
     bool getDevicesList(std::list<Device>::const_iterator &it, const int &i) const;
+    void prepare();
 
 private:
     enum listAction

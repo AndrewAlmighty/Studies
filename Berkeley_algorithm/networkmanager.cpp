@@ -8,12 +8,7 @@
 
 NetworkManager::NetworkManager()
 {
-    m_device.setIPandIfc(readIPandIfc());
-    m_device.setMac(readMac(m_device.getInterface()));
-    m_socket = -1;
-    m_IDcounter = 0;
-    m_port = -1;
-    m_server_ip.clear();
+    reset();
 }
 
 bool NetworkManager::createServer(int *port)
@@ -75,9 +70,13 @@ void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
         sendMessage(&m_socket, msg, m_device.getID(), m_server_ip.c_str(), &m_port);
 }
 
-void NetworkManager::resetDevicesList()
+void NetworkManager::reset()
 {
+    m_device.resetDevice();
+    m_socket = -1;
     m_IDcounter = 0;
+    m_port = -1;
+    m_server_ip.clear();
     m_deviceList.clear();
 }
 
@@ -247,10 +246,7 @@ bool NetworkManager::handleConnectionAcceptedMessage(const struct Message *msg)
 
 void NetworkManager::handleConnectionRefuseMessage()
 {
-    m_port = -1;
-    m_device.setMode(Device::NotSpecified);
-    m_device.setID(-1);
-    m_IDcounter = 0;
+    reset();
 }
 
 void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
@@ -420,6 +416,12 @@ bool NetworkManager::getDevicesList(std::list<Device>::const_iterator &it, const
     }
 
     return false;
+}
+
+void NetworkManager::prepare()
+{
+    m_device.setIPandIfc(readIPandIfc());
+    m_device.setMac(readMac(m_device.getInterface()));
 }
 
 void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std::string &mac)
