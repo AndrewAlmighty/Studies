@@ -47,7 +47,7 @@ bool BerkeleyManager::stop()
     if(m_network -> shutdownConnection() == false)
         return false;
 
-    m_network -> resetIDCounter();
+    m_network -> resetDevicesList();
     return true;
 }
 
