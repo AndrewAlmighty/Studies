@@ -75,7 +75,7 @@ void NetworkManager::sendRequestTime()
     struct Message msg;
     msg.type = TimeRequest;
     for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-        if(it -> isReady() == true)
+        if(it -> isReady() == true && it -> getMode() == Device::Client)
             sendMsg(&msg, it -> getIP());
 }
 
@@ -268,9 +268,9 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
 
 void NetworkManager::handleClientReadyMsg(struct Message *msg)
 {
-    Device dev;
-    actionOnNetworkDevicesList(NetworkManager::getDeviceFromList, msg -> sender_id, &dev);
-    dev.setReady(true);
+    std::list<Device>::iterator it;
+    getIterFromDevicesList(msg -> sender_id, it);
+    it -> setReady(true);
 }
 
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
@@ -375,7 +375,6 @@ int NetworkManager::handleNetworkSize(Message *msg)
 
 void NetworkManager::handleTimeRequest(struct Message *msg, const std::string time)
 {
-    //to implement
     msg -> type = ClientTime;
     strcpy(msg -> message, time.c_str());
     sendMsg(msg);
@@ -510,6 +509,14 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
     else if(action == clearList)
         m_deviceList.clear();
 }
+
+void NetworkManager::getIterFromDevicesList(const int &id, std::list<Device>::iterator &it)
+{
+    for(it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        if(id == it -> getID())
+            return;
+}
+
 
 std::string NetworkManager::getIpFromList(const int &id)
 {

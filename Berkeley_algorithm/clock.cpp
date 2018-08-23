@@ -10,6 +10,7 @@ Clock::Clock()
 {
     m_checkTime = 30;
     m_timeToCheck = false;
+    m_timeToCheckPassed = false;
     setSystemTime();
     run();
 }
@@ -47,7 +48,7 @@ bool Clock::didCheckTimePassed()
 
     else
     {
-        m_timeToCheck = true;
+        m_timeToCheck = false;
         return true;
     }
 }
@@ -77,6 +78,7 @@ void Clock::setSystemTime()
     m_hour = tmp -> tm_hour;
     m_min = tmp -> tm_min;
     m_sec = tmp -> tm_sec;
+    m_timeToCheck = false;
 }
 
 bool Clock::getSecMinHour(int &s, int &m, int &h, std::string &time)
@@ -149,9 +151,10 @@ void Clock::run()
                 {
                     m_timeToCheck = true;
                     m_timeToCheckPassed = false;
+                    stopwatch = 0;
                 }
 
-                if(stopwatch > 10)
+                if(stopwatch > 10 && m_timeToCheck == true)
                     m_timeToCheckPassed = true;
 
                 stopwatch++;
@@ -170,3 +173,5 @@ void Clock::updateGui()
     if(GuiManager::GetInstance().running() == true)
         GuiManager::GetInstance().setTime(QString(getTime().c_str()));
 }
+
+

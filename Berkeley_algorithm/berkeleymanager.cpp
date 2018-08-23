@@ -163,14 +163,14 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ClientTime:
         m_times.push_back(std::string(msg -> message));
-        fprintf(stderr, "WIADOMOSC OD %d, godzina:%s\n", msg -> sender_id, msg -> message);
         if(checkIfAllClientsSendTime(msg -> sender_id) == true)
             sendAdjustTimeRequest();
+
+        msg -> type = EmptyMessage;
 
         return false;
 
     case TimeRequest:
-        fprintf(stderr, "Wysylamy godzine:%s\n", m_clock -> getTime().c_str());
         m_network -> handleTimeRequest(msg, m_clock -> getTime());
         msg -> type = EmptyMessage;
         return false;
@@ -295,6 +295,7 @@ void BerkeleyManager::sendAdjustTimeRequest()
         s_sum += s;
         m_sum += m;
         h_sum += h;
+        fprintf(stderr, "GODZINA:%d:%d:%d\n",h,m,s);
     }
 
     s_sum = s_sum / n;
@@ -302,12 +303,10 @@ void BerkeleyManager::sendAdjustTimeRequest()
     h_sum = h_sum / n;
 
     fprintf(stderr, "Srednia godzina:%d:%d:%d\n",h_sum,m_sum,s_sum);
-
 }
 
 void BerkeleyManager::RequestTimeFromClients()
 {
-    m_time.clear();
     m_clientsCount = 0;
     m_clientsID.clear();
     m_times.clear();
@@ -322,7 +321,7 @@ void BerkeleyManager::RequestTimeFromClients()
         i++;
     }
 
-    m_time = m_clock -> getTime();
+    m_times.push_back(m_clock -> getTime());
     m_network -> sendRequestTime();
 }
 

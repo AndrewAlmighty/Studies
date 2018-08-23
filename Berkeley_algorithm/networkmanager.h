@@ -43,6 +43,7 @@ private:
 
     void acceptClient(Device &dev, const std::string &ip, const std::string &mac);
     void actionOnNetworkDevicesList(listAction action, const int &id, Device *dev = nullptr, const std::string &ip = "", const std::string &mac = "",  const Device::Mode mode = Device::NotSpecified);
+    void getIterFromDevicesList(const int &id, std::list<Device>::iterator &it);
     std::string getIpFromList(const int &id);
     std::string readMac(std::string ifc);
     std::string readIPandIfc();

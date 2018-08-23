@@ -60,7 +60,6 @@ private:
     unsigned m_clientsCount;                 //Count how many clients has send time to server.
     std::list<int> m_clientsID;         //This list contains ids of clients which has to send ID.
     std::list<std::string> m_times;      //This list contains times from clients.
-    std::string m_time;                 //This field remembers time when we send a message
 };
 
 #endif // BERKELEYMANAGER_H
