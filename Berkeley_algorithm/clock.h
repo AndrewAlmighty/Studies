@@ -16,7 +16,7 @@ public:
 
     std::string getTime() const;
     bool setTime(std::string time);
-    bool didCheckTimePassed();
+    bool isItTimeToCheckTime();
     bool isItTooLateForCheck();
     void setSystemTime();
     bool getSecMinHour(int &s, int &m, int &h, std::string &time);

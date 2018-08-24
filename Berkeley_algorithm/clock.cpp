@@ -40,17 +40,17 @@ bool Clock::setTime(std::string time)
     return true;
 }
 
-bool Clock::didCheckTimePassed()
+bool Clock::isItTimeToCheckTime()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    if(m_timeToCheck == false)
-        return false;
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if(m_timeToCheck == false)
+            return false;
 
-    else
-    {
-        m_timeToCheck = false;
-        return true;
-    }
+        else
+        {
+            m_timeToCheck = false;
+            return true;
+        }
 }
 
 bool Clock::isItTooLateForCheck()

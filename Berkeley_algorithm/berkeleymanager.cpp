@@ -9,6 +9,8 @@ BerkeleyManager::BerkeleyManager()
 {
     m_network = std::unique_ptr<NetworkManager>(new NetworkManager());
     m_clock = std::unique_ptr<Clock>(new Clock());
+    m_clientsCheck = false;
+    m_timeCheck = false;
 }
 
 bool BerkeleyManager::prepareToRunAsServer(int port)
@@ -98,7 +100,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     {
         Device newDevice;
         if(m_network -> handleConnectionRequest(msg, newDevice) == true)
-            updateDevicesList(addDevice, newDevice);
+            addDeviceToGuiDevicesList(newDevice);
 
         msg -> type = EmptyMessage;
         return true;
@@ -192,14 +194,29 @@ void BerkeleyManager::runAsServer()
     std::thread threadObj([&]{
 
         updateGui("Working");
-        updateDevicesList(BerkeleyManager::addDevice, m_network -> getDevice());
+        addDeviceToGuiDevicesList(m_network -> getDevice());
         struct Message msg;
         while(GuiManager::GetInstance().running() == true)
         {
             m_network -> checkMailBox(&msg);
             handleMessage(&msg);
-            if(m_clock -> didCheckTimePassed() == true)
-                RequestTimeFromClients();
+
+            if(m_timeCheck == false)
+            {
+                if(m_clock -> isItTimeToCheckTime() == true)
+                    RequestTimeFromClients();
+            }
+
+            else if(m_timeCheck == true)
+            {
+                    if(isItTimeToAdjustTime() == true)
+                        sendAdjustTimeRequest();
+            }
+
+            if(m_clientsCheck == false)
+            {
+
+            }
         }
    });
 
@@ -239,16 +256,19 @@ void BerkeleyManager::updateGui(std::string status)
         GuiManager::GetInstance().setStatus(QString::fromStdString(status));
 }
 
-void BerkeleyManager::updateDevicesList(BerkeleyManager::updateListAction action, const Device &dev)
+void BerkeleyManager::addDeviceToGuiDevicesList(const Device &dev)
 {
-    if(action == addDevice)
-        GuiManager::GetInstance().addDevice(dev.getID(), dev.getIP().c_str(), dev.getMAC().c_str(), dev.getModeStr().c_str());
+    GuiManager::GetInstance().addDevice(dev.getID(), dev.getIP().c_str(), dev.getMAC().c_str(), dev.getModeStr().c_str());
+}
 
-    else if(action == removeDevice)
-        GuiManager::GetInstance().removeDevice(dev.getID());
+void BerkeleyManager::removeDeviceFromGuiDevicesList(const int &id)
+{
+    GuiManager::GetInstance().removeDevice(id);
+}
 
-    else
-        GuiManager::GetInstance().removeAllDevices();
+void BerkeleyManager::clearGuiDevicesList()
+{
+     GuiManager::GetInstance().removeAllDevices();
 }
 
 void BerkeleyManager::setGuiDevicesList()
@@ -280,13 +300,8 @@ bool BerkeleyManager::checkIfAllClientsSendTime(const int &id)
             return true;
     }
 
-    if(m_clock -> isItTooLateForCheck() == true)
-    {
-        for(it = m_clientsID.begin(); it != m_clientsID.end(); ++it)
-            m_network -> disconnectDevice(*it);
-
+    if(isItTimeToAdjustTime() == true)
         return true;
-    }
 
     return false;
 }
@@ -318,12 +333,15 @@ void BerkeleyManager::sendAdjustTimeRequest()
     newTime += std::to_string(s);
     m_clock -> setTime(newTime);
     m_network -> sendAdjustTimeRequest(newTime);
+    m_timeCheck = false;
 }
 
 void BerkeleyManager::RequestTimeFromClients()
 {
     m_clientsID.clear();
     m_times.clear();
+    m_timeCheck = true;
+    m_clientsCheck = false;
 
     int i = 0;
     std::list<Device>::const_iterator it;
@@ -337,6 +355,22 @@ void BerkeleyManager::RequestTimeFromClients()
 
     m_times.push_back(m_clock -> getTime());
     m_network -> sendRequestTime();
+}
+
+bool BerkeleyManager::isItTimeToAdjustTime()
+{
+    if(m_clock -> isItTooLateForCheck() == true)
+    {
+        for(auto it = m_clientsID.begin(); it != m_clientsID.end(); ++it)
+        {
+            m_network -> disconnectDevice(*it);
+            removeDeviceFromGuiDevicesList(*it);
+
+        }
+        return true;
+    }
+
+    return false;
 }
 
 bool BerkeleyManager::makingConnection(struct Message *msg)

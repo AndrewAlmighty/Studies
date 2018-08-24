@@ -101,6 +101,7 @@ bool NetworkManager::disconnectDevice(const int &id)
     Device dev;
     actionOnNetworkDevicesList(getDeviceFromList, id, &dev);
     sendMsg(&msg, dev.getIP());
+    actionOnNetworkDevicesList(removeDeviceFromList, id);
     return true;
 }
 

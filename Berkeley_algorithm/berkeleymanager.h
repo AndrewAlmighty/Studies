@@ -47,18 +47,22 @@ private:
     void runAsServer();
     void runAsClient();
     void updateGui(std::string status);
-    void updateDevicesList(updateListAction action, const Device &dev);
+    void addDeviceToGuiDevicesList(const Device &dev);
+    void removeDeviceFromGuiDevicesList(const int &id);
+    void clearGuiDevicesList();
     void setGuiDevicesList();
     void breakAll();
     bool checkIfAllClientsSendTime(const int &id);
     void sendAdjustTimeRequest();
     void RequestTimeFromClients();
+    bool isItTimeToAdjustTime();
 
 
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
     std::list<int> m_clientsID;         //This list contains ids of clients which has to send ID.
     std::list<std::string> m_times;      //This list contains times from clients.
+    bool m_timeCheck, m_clientsCheck;
 };
 
 #endif // BERKELEYMANAGER_H
