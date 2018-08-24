@@ -27,7 +27,7 @@ enum MessageType
     NetworkSize,            //Info with size of network
     DeviceInfoRequest,      //Request for info about Device with ID
     DeviceInfo,             //Send info about Device
-    ClientsCheck,           //Server checks if clients are connected.
+    ClientCheckRequest,           //Server checks if clients are connected.
     ClientConfirm,          //Client confirm that he is connected.
     ClientTime,             //client sends his time.
     TimeRequest,            //server ask clients to send him time.

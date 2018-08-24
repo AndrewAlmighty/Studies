@@ -81,7 +81,7 @@ void NetworkManager::sendRequestTime()
 void NetworkManager::sendRequestCheckIn()
 {
     struct Message msg;
-    msg.type = ClientsCheck;
+    msg.type = ClientCheckRequest;
     for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         if(it -> isReady() == true && it -> getMode() == Device::Client)
             sendMsg(&msg, it -> getIP());

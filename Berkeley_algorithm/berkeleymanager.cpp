@@ -159,7 +159,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     case DeviceInfo:
         return false;
 
-    case ClientsCheck:
+    case ClientCheckRequest:
         m_network -> handleCheckRequest(msg);
         msg -> type = EmptyMessage;
         return false;
@@ -205,7 +205,7 @@ void BerkeleyManager::runAsServer()
             m_network -> checkMailBox(&msg);
             handleMessage(&msg);
 
-            if(m_timeCheck == false && m_clientsCheck)
+            if(m_timeCheck == false && m_clientsCheck == false)
             {
                 if(m_clock -> isItTimeToCheckTime() == true)
                     requestTimeFromClients();
