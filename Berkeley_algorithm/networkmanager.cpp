@@ -94,6 +94,16 @@ void NetworkManager::sendAdjustTimeRequest(const std::string &time)
     }
 }
 
+bool NetworkManager::disconnectDevice(const int &id)
+{
+    struct Message msg;
+    msg.type = Disconnect;
+    Device dev;
+    actionOnNetworkDevicesList(getDeviceFromList, id, &dev);
+    sendMsg(&msg, dev.getIP());
+    return true;
+}
+
 void NetworkManager::reset()
 {
     m_device.resetDevice();

@@ -9,7 +9,6 @@ BerkeleyManager::BerkeleyManager()
 {
     m_network = std::unique_ptr<NetworkManager>(new NetworkManager());
     m_clock = std::unique_ptr<Clock>(new Clock());
-    m_clientsCount = 0;
 }
 
 bool BerkeleyManager::prepareToRunAsServer(int port)
@@ -121,6 +120,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case Disconnect:
+        m_network -> shutdownConnection();
+        m_network -> reset();
+        msg -> type = EmptyMessage;
+        breakAll();
         return false;
 
     case NetworkSizeRequest:
@@ -272,14 +275,16 @@ bool BerkeleyManager::checkIfAllClientsSendTime(const int &id)
     std::list<int>::iterator it;
     if((it = std::find(m_clientsID.begin(), m_clientsID.end(), id)) != m_clientsID.end())
     {
-        m_clientsCount++;
-        if(m_clientsCount == m_clientsID.size())
+        m_clientsID.remove(*it);
+        if(m_clientsID.empty() == true)
             return true;
     }
 
     if(m_clock -> isItTooLateForCheck() == true)
     {
-        //disconect late devices
+        for(it = m_clientsID.begin(); it != m_clientsID.end(); ++it)
+            m_network -> disconnectDevice(*it);
+
         return true;
     }
 
@@ -317,7 +322,6 @@ void BerkeleyManager::sendAdjustTimeRequest()
 
 void BerkeleyManager::RequestTimeFromClients()
 {
-    m_clientsCount = 0;
     m_clientsID.clear();
     m_times.clear();
 
