@@ -79,6 +79,23 @@ void NetworkManager::sendRequestTime()
             sendMsg(&msg, it -> getIP());
 }
 
+void NetworkManager::sendAdjustTimeRequest(const std::string &time)
+{
+    fprintf(stderr, "Wysylamy godzine :%s\n", time.c_str());
+    struct Message msg;
+    msg.type = TimeAdjustRequest;
+    msg.sender_id = m_device.getID();
+    strcpy(msg.message, time.c_str());
+
+    for(std::list<Device>::const_iterator it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+    {
+        if(it -> getMode() == Device::Server || it -> isReady() == false)
+            continue;
+
+        sendMsg(&msg, it -> getIP());
+    }
+}
+
 void NetworkManager::reset()
 {
     m_device.resetDevice();

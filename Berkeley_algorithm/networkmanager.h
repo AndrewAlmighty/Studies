@@ -26,6 +26,7 @@ public:
     void checkMailBox(struct Message *msg);
     void sendMsg(struct Message *msg, const std::string &ip = "");
     void sendRequestTime();
+    void sendAdjustTimeRequest(const std::string &time);
     void reset();
     void resetServerIP(const std::string ip = "");
     Device getDevice() const;
