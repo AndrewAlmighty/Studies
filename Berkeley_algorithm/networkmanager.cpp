@@ -78,6 +78,15 @@ void NetworkManager::sendRequestTime()
             sendMsg(&msg, it -> getIP());
 }
 
+void NetworkManager::sendRequestCheckIn()
+{
+    struct Message msg;
+    msg.type = ClientsCheck;
+    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        if(it -> isReady() == true && it -> getMode() == Device::Client)
+            sendMsg(&msg, it -> getIP());
+}
+
 void NetworkManager::sendAdjustTimeRequest(const std::string &time)
 {
     struct Message msg;
@@ -282,6 +291,12 @@ bool NetworkManager::handleConnectionAcceptedMessage(const struct Message *msg)
 void NetworkManager::handleConnectionRefuseMessage()
 {
     reset();
+}
+
+void NetworkManager::handleCheckRequest(Message *msg)
+{
+    msg -> type = ClientConfirm;
+    sendMsg(msg);
 }
 
 void NetworkManager::handleNetworkSizeRequest(struct Message *msg)

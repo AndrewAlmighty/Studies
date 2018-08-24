@@ -147,11 +147,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     }
 
     case ClientReady:
-    {
         m_network -> handleClientReadyMsg(msg);
         msg -> type = EmptyMessage;
         return false;
-    }
+
     case DeviceInfoRequest:
         m_network -> handleDeviceInfoRequest(msg);
         msg -> type = EmptyMessage;
@@ -161,9 +160,15 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientsCheck:
+        m_network -> handleCheckRequest(msg);
+        msg -> type = EmptyMessage;
         return false;
 
     case ClientConfirm:
+        if(checkIfAllClientsSendConfirm(msg -> sender_id) == true)
+            sendRequestCheckIn();
+
+        msg -> type = EmptyMessage;
         return false;
 
     case ClientTime:
@@ -172,7 +177,6 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
             sendAdjustTimeRequest();
 
         msg -> type = EmptyMessage;
-
         return false;
 
     case TimeRequest:
@@ -201,21 +205,25 @@ void BerkeleyManager::runAsServer()
             m_network -> checkMailBox(&msg);
             handleMessage(&msg);
 
-            if(m_timeCheck == false)
+            if(m_timeCheck == false && m_clientsCheck)
             {
                 if(m_clock -> isItTimeToCheckTime() == true)
-                    RequestTimeFromClients();
+                    requestTimeFromClients();
+
+                if(m_clock -> isItTimeToCheckClients() == true)
+                    requestClientsCheckIn();
             }
 
             else if(m_timeCheck == true)
             {
-                    if(isItTimeToAdjustTime() == true)
-                        sendAdjustTimeRequest();
+                if(isItTimeToAdjustTime() == true)
+                    sendAdjustTimeRequest();
             }
 
-            if(m_clientsCheck == false)
+            else if(m_clientsCheck == true)
             {
-
+                if(isItTimeToCheckClients() == true)
+                    sendRequestCheckIn();
             }
         }
    });
@@ -306,6 +314,22 @@ bool BerkeleyManager::checkIfAllClientsSendTime(const int &id)
     return false;
 }
 
+bool BerkeleyManager::checkIfAllClientsSendConfirm(const int &id)
+{
+    std::list<int>::iterator it;
+    if((it = std::find(m_clientsID.begin(), m_clientsID.end(), id)) != m_clientsID.end())
+    {
+        m_clientsID.remove(*it);
+        if(m_clientsID.empty() == true)
+            return true;
+    }
+
+    if(isItTimeToCheckClients() == true)
+        return true;
+
+    return false;
+}
+
 void BerkeleyManager::sendAdjustTimeRequest()
 {
     int n = 0, s_sum = 0, s, m, h;
@@ -336,13 +360,34 @@ void BerkeleyManager::sendAdjustTimeRequest()
     m_timeCheck = false;
 }
 
-void BerkeleyManager::RequestTimeFromClients()
+void BerkeleyManager::sendRequestCheckIn()
+{
+    m_network -> sendRequestCheckIn();
+    m_clientsCheck = false;
+}
+
+void BerkeleyManager::requestTimeFromClients()
 {
     m_clientsID.clear();
     m_times.clear();
     m_timeCheck = true;
     m_clientsCheck = false;
+    setListOfActiveClients();
+    m_times.push_back(m_clock -> getTime());
+    m_network -> sendRequestTime();
+}
 
+void BerkeleyManager::requestClientsCheckIn()
+{
+    m_timeCheck = false;
+    m_clientsCheck = true;
+    m_clientsID.clear();
+    setListOfActiveClients();
+    m_network -> sendRequestCheckIn();
+}
+
+void BerkeleyManager::setListOfActiveClients()
+{
     int i = 0;
     std::list<Device>::const_iterator it;
     while(m_network -> getDevicesList(it, i) == true)
@@ -352,25 +397,34 @@ void BerkeleyManager::RequestTimeFromClients()
 
         i++;
     }
-
-    m_times.push_back(m_clock -> getTime());
-    m_network -> sendRequestTime();
 }
 
 bool BerkeleyManager::isItTimeToAdjustTime()
 {
     if(m_clock -> isItTooLateForCheck() == true)
-    {
-        for(auto it = m_clientsID.begin(); it != m_clientsID.end(); ++it)
-        {
-            m_network -> disconnectDevice(*it);
-            removeDeviceFromGuiDevicesList(*it);
-
-        }
+        disconnectAllInactiveClients();
         return true;
-    }
 
     return false;
+}
+
+bool BerkeleyManager::isItTimeToCheckClients()
+{
+    if(m_clock -> isItTimeToCheckClients() == true)
+        disconnectAllInactiveClients();
+        return true;
+
+    return false;
+}
+
+void BerkeleyManager::disconnectAllInactiveClients()
+{
+    for(auto it = m_clientsID.begin(); it != m_clientsID.end(); ++it)
+    {
+        m_network -> disconnectDevice(*it);
+        removeDeviceFromGuiDevicesList(*it);
+
+    }
 }
 
 bool BerkeleyManager::makingConnection(struct Message *msg)

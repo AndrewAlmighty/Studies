@@ -18,6 +18,8 @@ public:
     bool setTime(std::string time);
     bool isItTimeToCheckTime();
     bool isItTooLateForCheck();
+    bool isItTimeToCheckClients();
+    bool isTimeToCheckClientsPassed();
     void setSystemTime();
     bool getSecMinHour(int &s, int &m, int &h, std::string &time);
 
@@ -29,10 +31,13 @@ private:
     int m_hour,
         m_min,
         m_sec,
-        m_checkTime;    //we check time every x seconds.
+        m_checkTime,    //we call all clients to send server their time every x seconds.
+        m_checkClient;  //we call all clients to report if they are online to know who is still in our network.
 
     bool m_timeToCheck;
     bool m_timeToCheckPassed;
+    bool m_timeToCheckClients;
+    bool m_timeToCheckClientsPassed;
 };
 
 #endif // CLOCK_H

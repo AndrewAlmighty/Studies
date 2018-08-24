@@ -8,7 +8,8 @@
 
 Clock::Clock()
 {
-    m_checkTime = 30;
+    m_checkTime = 120;
+    m_checkClient = 30;
     m_timeToCheck = false;
     m_timeToCheckPassed = false;
     setSystemTime();
@@ -42,15 +43,15 @@ bool Clock::setTime(std::string time)
 
 bool Clock::isItTimeToCheckTime()
 {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if(m_timeToCheck == false)
-            return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if(m_timeToCheck == false)
+        return false;
 
-        else
-        {
-            m_timeToCheck = false;
-            return true;
-        }
+    else
+    {
+        m_timeToCheck = false;
+        return true;
+    }
 }
 
 bool Clock::isItTooLateForCheck()
@@ -59,6 +60,31 @@ bool Clock::isItTooLateForCheck()
     if(m_timeToCheckPassed == true)
     {
         m_timeToCheckPassed = false;
+        return true;
+    }
+
+    else return false;
+}
+
+bool Clock::isItTimeToCheckClients()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if(m_timeToCheckClients == false)
+        return false;
+
+    else
+    {
+        m_timeToCheckClients = false;
+        return true;
+    }
+}
+
+bool Clock::isTimeToCheckClientsPassed()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if(m_timeToCheckClientsPassed == true)
+    {
+        m_timeToCheckClientsPassed = false;
         return true;
     }
 
@@ -121,7 +147,8 @@ bool Clock::getSecMinHour(int &s, int &m, int &h, std::string &time)
 
 void Clock::run()
 {
-    //This method runs in separate thread for all the time. It's responsible to keep clock running.
+    //This method runs in separate thread for all the time. It's responsible to keep clock running and checking if it's time to check if clients are online
+    // or if it's time to call for time from clients.
 
     std::thread threadObj([this]{
         int stopwatch = 0;
@@ -147,7 +174,7 @@ void Clock::run()
                 if(m_hour >= 24)
                     m_hour = 0;
 
-                if(stopwatch >= m_checkTime)
+                if(stopwatch >= m_checkTime && m_timeToCheckClients == false)
                 {
                     m_timeToCheck = true;
                     m_timeToCheckPassed = false;
@@ -156,6 +183,12 @@ void Clock::run()
 
                 if(stopwatch > 10 && m_timeToCheck == true)
                     m_timeToCheckPassed = true;
+
+                if(stopwatch % m_checkClient < 5 && m_timeToCheck == false)
+                {
+                    m_timeToCheckClients = true;
+                    m_timeToCheckClientsPassed = false;
+                }
 
                 stopwatch++;
             }

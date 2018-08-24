@@ -53,9 +53,16 @@ private:
     void setGuiDevicesList();
     void breakAll();
     bool checkIfAllClientsSendTime(const int &id);
+    bool checkIfAllClientsSendConfirm(const int &id);
     void sendAdjustTimeRequest();
-    void RequestTimeFromClients();
+    void sendRequestCheckIn();
+    void requestTimeFromClients();
+    void requestClientsCheckIn();
+    void setListOfActiveClients();
     bool isItTimeToAdjustTime();
+    bool isItTimeToCheckClients();
+    void disconnectAllInactiveClients();
+
 
 
     std::unique_ptr<NetworkManager> m_network;

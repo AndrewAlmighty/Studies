@@ -17,6 +17,7 @@ public:
     bool handleConnectionRequest(const struct Message *msg, Device &dev);
     bool handleConnectionAcceptedMessage(const struct Message *msg);
     void handleConnectionRefuseMessage();
+    void handleCheckRequest(struct Message *msg);
     void handleNetworkSizeRequest(struct Message *msg);
     void handleClientReadyMsg(struct Message *msg);
     bool getDevices(struct Message *msg, const int& size);
@@ -26,6 +27,7 @@ public:
     void checkMailBox(struct Message *msg);
     void sendMsg(struct Message *msg, const std::string &ip = "");
     void sendRequestTime();
+    void sendRequestCheckIn();
     void sendAdjustTimeRequest(const std::string &time);
     bool disconnectDevice(const int &id);
     void reset();
