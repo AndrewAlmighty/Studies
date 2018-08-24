@@ -288,27 +288,29 @@ bool BerkeleyManager::checkIfAllClientsSendTime(const int &id)
 
 void BerkeleyManager::sendAdjustTimeRequest()
 {
-    int n = 0, s_sum = 0, m_sum = 0, h_sum = 0, s, m, h;
+    int n = 0, s_sum = 0, s, m, h;
 
     for(auto it = m_times.begin(); it != m_times.end(); ++it)
     {
         m_clock -> getSecMinHour(s, m, h, *it);
         n++;
         s_sum += s;
-        m_sum += m;
-        h_sum += h;
+        s_sum += (m * 60);
+        s_sum += (h * 60 * 60);
     }
 
     s_sum = s_sum / n;
-    m_sum = m_sum / n;
-    h_sum = h_sum / n;
+    h = s_sum / (60 * 60);
+    s_sum -= (h * 60 * 60);
+    m = s_sum / 60;
+    s = s_sum % 60;
 
     std::string newTime;
-    newTime = std::to_string(h_sum);
+    newTime = std::to_string(h);
     newTime += ':';
-    newTime += std::to_string(m_sum);
+    newTime += std::to_string(m);
     newTime += ':';
-    newTime += std::to_string(s_sum);
+    newTime += std::to_string(s);
     m_clock -> setTime(newTime);
     m_network -> sendAdjustTimeRequest(newTime);
 }

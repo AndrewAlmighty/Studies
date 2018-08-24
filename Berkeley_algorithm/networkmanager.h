@@ -27,6 +27,7 @@ public:
     void sendMsg(struct Message *msg, const std::string &ip = "");
     void sendRequestTime();
     void sendAdjustTimeRequest(const std::string &time);
+    bool disconnectDevice(const int &id);
     void reset();
     void resetServerIP(const std::string ip = "");
     Device getDevice() const;
