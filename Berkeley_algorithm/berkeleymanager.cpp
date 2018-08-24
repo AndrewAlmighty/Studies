@@ -165,9 +165,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientConfirm:
-        if(checkIfAllClientsSendConfirm(msg -> sender_id) == true)
-            sendRequestCheckIn();
-
+        checkIfAllClientsSendConfirm(msg -> sender_id);
         msg -> type = EmptyMessage;
         return false;
 
@@ -221,10 +219,7 @@ void BerkeleyManager::runAsServer()
             }
 
             else if(m_clientsCheck == true)
-            {
-                if(isItTimeToCheckClients() == true)
-                    sendRequestCheckIn();
-            }
+                isItTimeToCheckClients();
         }
    });
 
