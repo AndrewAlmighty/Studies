@@ -21,7 +21,6 @@ bool NetworkManager::createServer(int *port)
     if(createAndBindSocket(&m_socket, port) == Working)
     {
         m_port = *port;
-        fprintf(stderr,"Stworzono socket!\n");
         actionOnNetworkDevicesList(addDeviceToList, m_IDcounter, &m_device, m_device.getIP(), m_device.getMAC(), Device::Server);
         return true;
     }
@@ -81,7 +80,6 @@ void NetworkManager::sendRequestTime()
 
 void NetworkManager::sendAdjustTimeRequest(const std::string &time)
 {
-    fprintf(stderr, "Wysylamy godzine :%s\n", time.c_str());
     struct Message msg;
     msg.type = TimeAdjustRequest;
     msg.sender_id = m_device.getID();

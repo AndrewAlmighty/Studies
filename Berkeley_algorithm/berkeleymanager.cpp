@@ -176,7 +176,6 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case TimeAdjustRequest:
-        fprintf(stderr, "ADJUST TIME REQUEST: TIME:%s\n", msg -> message);
         m_clock -> setTime(msg -> message);
         msg -> type = EmptyMessage;
         return false;
@@ -298,19 +297,19 @@ void BerkeleyManager::sendAdjustTimeRequest()
         s_sum += s;
         m_sum += m;
         h_sum += h;
-        fprintf(stderr, "GODZINA:%d:%d:%d\n",h,m,s);
     }
 
     s_sum = s_sum / n;
     m_sum = m_sum / n;
     h_sum = h_sum / n;
-    fprintf(stderr, "Srednia godzina:%d:%d:%d\n",h_sum,m_sum,s_sum);
+
     std::string newTime;
     newTime = std::to_string(h_sum);
     newTime += ':';
     newTime += std::to_string(m_sum);
     newTime += ':';
     newTime += std::to_string(s_sum);
+    m_clock -> setTime(newTime);
     m_network -> sendAdjustTimeRequest(newTime);
 }
 
