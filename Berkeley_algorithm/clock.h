@@ -15,6 +15,7 @@ public:
     Clock();
 
     std::string getTime() const;
+    bool setIsAppRunning(bool turnOn);
     bool setTime(std::string time);
     bool isItTimeToCheckTime();
     bool isItTooLateForCheck();
@@ -34,10 +35,11 @@ private:
         m_checkTime,    //we call all clients to send server their time every x seconds.
         m_checkClient;  //we call all clients to report if they are online to know who is still in our network.
 
-    bool m_timeToCheck;
-    bool m_timeToCheckPassed;
-    bool m_timeToCheckClients;
-    bool m_timeToCheckClientsPassed;
+    bool m_appIsRunning;    //with this I turn on all things thich I need when app is working
+    bool m_timeToCheck;     //time to check what time is it
+    bool m_timeToCheckPassed;   //time to send client's time passed.
+    bool m_timeToCheckClients;  //time to check if clients are still online
+    bool m_timeToCheckClientsPassed;    //time to send confirmation of being online passed
 };
 
 #endif // CLOCK_H

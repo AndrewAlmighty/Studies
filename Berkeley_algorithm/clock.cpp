@@ -9,9 +9,11 @@
 Clock::Clock()
 {
     m_checkTime = 120;
-    m_checkClient = 30;
+    m_checkClient = 15;
     m_timeToCheck = false;
     m_timeToCheckPassed = false;
+    m_timeToCheckClientsPassed = false;
+    m_appIsRunning = false;
     setSystemTime();
     run();
 }
@@ -20,6 +22,14 @@ std::string Clock::getTime() const
 {
     //Returns time in HH:MM:SS format.
     return std::string(std::to_string(m_hour) + ":" + std::to_string((m_min)) + ":" + std::to_string(m_sec));
+}
+
+bool Clock::setIsAppRunning(bool turnOn)
+{
+    if(m_appIsRunning != turnOn)
+        m_appIsRunning = turnOn;
+
+    return true;
 }
 
 bool Clock::setTime(std::string time)
@@ -81,6 +91,7 @@ bool Clock::isItTimeToCheckClients()
 
 bool Clock::isTimeToCheckClientsPassed()
 {
+    fprintf(stderr, " isTimeToCheckClientsPassed!\n");
     std::lock_guard<std::mutex> lock(m_mutex);
     if(m_timeToCheckClientsPassed == true)
     {
@@ -151,7 +162,8 @@ void Clock::run()
     // or if it's time to call for time from clients.
 
     std::thread threadObj([this]{
-        int stopwatch = 0;
+        int stopwatch_1 = 0, stopwatch_2 = 0;
+        bool checking_time = false, checking_client = false;
         while(true)
         {
             sleep(1);
@@ -174,23 +186,46 @@ void Clock::run()
                 if(m_hour >= 24)
                     m_hour = 0;
 
-                if(stopwatch >= m_checkTime && m_timeToCheckClients == false)
+                if(m_appIsRunning == true)
                 {
-                    m_timeToCheck = true;
-                    m_timeToCheckPassed = false;
-                    stopwatch = 0;
+                    if(stopwatch_1 >= m_checkTime && m_timeToCheckClients == false)
+                    {
+                        m_timeToCheck = true;
+                        m_timeToCheckPassed = false;
+                        checking_time = true;
+                        stopwatch_1 = 0;
+                    }
+
+                    if(stopwatch_1 > 10 && checking_time == true && m_timeToCheckPassed == false)
+                    {
+                        checking_time = false;
+                        m_timeToCheckPassed = true;
+                    }
+
+                    if(stopwatch_2 >= m_checkClient && m_timeToCheck == false && m_timeToCheckClients == false)
+                    {
+                        m_timeToCheckClients = true;
+                        m_timeToCheckClientsPassed = false;
+                        checking_client = true;
+                        stopwatch_2 = 0;
+                    }
+                    fprintf(stderr, "STOPWATCH2:%d, timeToCheckCLients:%d, m_timeToCheck:%d, m_checklient:%d, checking_client:%d, m_timeToCheckClientsPassed:%d \n", stopwatch_2, m_timeToCheckClients, m_timeToCheck, m_checkClient, checking_client, m_timeToCheckClientsPassed);
+                    if(stopwatch_2 > 5 && checking_client == true && m_timeToCheckClientsPassed == false)
+                    {
+                        checking_client = false;
+                        m_timeToCheckClientsPassed = true;
+                    }
+
+                    stopwatch_1++;
+                    stopwatch_2++;
                 }
 
-                if(stopwatch > 10 && m_timeToCheck == true)
-                    m_timeToCheckPassed = true;
-
-                if(stopwatch % m_checkClient < 5 && m_timeToCheck == false)
+                else
                 {
-                    m_timeToCheckClients = true;
-                    m_timeToCheckClientsPassed = false;
+                    stopwatch_1 = 0;
+                    stopwatch_2 = 0;
                 }
 
-                stopwatch++;
             }
             updateGui();
         }

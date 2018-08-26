@@ -41,6 +41,7 @@ void BerkeleyManager::detectServers()
 void BerkeleyManager::start()
 {
     m_clock -> setSystemTime();
+    m_clock -> setIsAppRunning(true);
 
     if(m_network -> getDevice().getModeStr().compare("server") == 0)
         runAsServer();
@@ -51,6 +52,8 @@ void BerkeleyManager::start()
 
 bool BerkeleyManager::stop()
 {
+    m_clock -> setIsAppRunning(false);
+
     if(m_network -> shutdownConnection() == false)
         return false;
 
@@ -165,6 +168,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientConfirm:
+        fprintf(stderr, "KLIENT MELDUJE SIE\n");
         checkIfAllClientsSendConfirm(msg -> sender_id);
         msg -> type = EmptyMessage;
         return false;
@@ -316,7 +320,10 @@ bool BerkeleyManager::checkIfAllClientsSendConfirm(const int &id)
     {
         m_clientsID.remove(*it);
         if(m_clientsID.empty() == true)
+        {
+            m_clientsCheck = false;
             return true;
+        }
     }
 
     if(isItTimeToCheckClients() == true)
@@ -355,12 +362,6 @@ void BerkeleyManager::sendAdjustTimeRequest()
     m_timeCheck = false;
 }
 
-void BerkeleyManager::sendRequestCheckIn()
-{
-    m_network -> sendRequestCheckIn();
-    m_clientsCheck = false;
-}
-
 void BerkeleyManager::requestTimeFromClients()
 {
     m_clientsID.clear();
@@ -374,6 +375,7 @@ void BerkeleyManager::requestTimeFromClients()
 
 void BerkeleyManager::requestClientsCheckIn()
 {
+    fprintf(stderr, "wzywamy klientow\n");
     m_timeCheck = false;
     m_clientsCheck = true;
     m_clientsID.clear();
@@ -406,9 +408,12 @@ bool BerkeleyManager::isItTimeToAdjustTime()
 bool BerkeleyManager::isItTimeToCheckClients()
 {
     if(m_clock -> isItTimeToCheckClients() == true)
+    {
+         fprintf(stderr, "CZAS WYLACZYC NIEAKTYWNYCH\n");
         disconnectAllInactiveClients();
+        m_clientsCheck = false;
         return true;
-
+    }
     return false;
 }
 

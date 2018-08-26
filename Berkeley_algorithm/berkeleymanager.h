@@ -55,7 +55,6 @@ private:
     bool checkIfAllClientsSendTime(const int &id);
     bool checkIfAllClientsSendConfirm(const int &id);
     void sendAdjustTimeRequest();
-    void sendRequestCheckIn();
     void requestTimeFromClients();
     void requestClientsCheckIn();
     void setListOfActiveClients();
