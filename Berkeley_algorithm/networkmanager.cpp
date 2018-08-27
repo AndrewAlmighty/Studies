@@ -103,6 +103,25 @@ void NetworkManager::sendAdjustTimeRequest(const std::string &time)
     }
 }
 
+void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev)
+{
+    msg -> type = DeviceInfo;
+    strcpy(msg -> message, "ID:");
+    strcat(msg -> message, std::to_string(dev -> getID()).c_str());
+    strcat(msg -> message, ";IP:");
+    strcat(msg -> message, dev -> getIP().c_str());
+    strcat(msg -> message, ";MAC:");
+    strcat(msg -> message, dev -> getMAC().c_str());
+    strcat(msg -> message, ";MODE:");
+    strcat(msg -> message, dev -> getModeStr().c_str());
+
+    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+    {
+        if(it -> getMode() == Device::Client)
+            sendMsg(msg, it -> getIP());
+    }
+}
+
 bool NetworkManager::disconnectDevice(const int &id)
 {
     struct Message msg;
@@ -314,12 +333,18 @@ void NetworkManager::handleClientReadyMsg(struct Message *msg)
     it -> setReady(true);
 }
 
+Device NetworkManager::handleDeviceInfo(struct Message *msg)
+{
+    Device dev;
+    getDeviceInfoFromMsg(msg -> message, &dev);
+    return dev;
+}
+
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
 {
     //we ask for info about all devices. If we don't have a message in short time we shutdown a connection
-    std::string tmp;
     Device dev;
-    int k = 0, deadline = 0;  //we count ';' with it.
+    int deadline = 0;
 
     for(int i = 0; i < size; i++)
     {
@@ -342,45 +367,9 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
         }
 
         deadline = 0;
-        for(unsigned j = 0; j < strlen(msg -> message); j++)
-        {
-            if(msg -> message[j] != ';')
-                tmp += msg -> message[j];
-
-            if(tmp == "ID:" || tmp == "IP:" || tmp == "MAC:" || tmp == "MODE:")
-            {
-                k++;
-                tmp.clear();
-                continue;
-            }
-
-            if(k == 1 && msg -> message[j] == ';')
-            {
-                dev.setID(std::atoi(tmp.c_str()));
-                tmp.clear();
-                continue;
-            }
-
-            else if(k == 2 && msg -> message[j] == ';')
-            {
-                dev.setIP(tmp);
-                tmp.clear();
-                continue;
-            }
-
-            else if(k == 3 && msg -> message[j] == ';')
-            {
-                dev.setMac(tmp);
-                tmp.clear();
-                continue;
-            }
-        }
-        //on the end set mode
-        dev.setModeFromString(tmp);
+        getDeviceInfoFromMsg(msg -> message, &dev);
         actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
         dev.resetDevice();
-        tmp.clear();
-        k = 0;
     }
 
     return true;
@@ -489,7 +478,6 @@ void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std:
     //Send confirmation of connection request.
     struct Message msg;
     msg.type = ConnectionAccepted;
-    msg.sender_id = m_IDcounter;
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
     sendMsg(&msg, ip);
@@ -502,16 +490,16 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
 {
     if(action == addDeviceToList && dev -> getMode() == Device::NotSpecified)
     {
-    dev -> setIP(ip);
-    dev -> setMac(mac);
-    dev -> setMode(mode);
-    dev -> setID(id);
-    m_IDcounter++;
+        dev -> setIP(ip);
+        dev -> setMac(mac);
+        dev -> setMode(mode);
+        dev -> setID(id);
+        m_IDcounter++;
 
-    if(mode == Device::Server)
-        dev -> setReady(true);
+        if(mode == Device::Server)
+            dev -> setReady(true);
 
-    m_deviceList.push_back(*dev);
+        m_deviceList.push_back(*dev);
     }
 
     else if(action == addDeviceToList && dev -> getMode() != Device::NotSpecified)
@@ -556,6 +544,48 @@ void NetworkManager::getIterFromDevicesList(const int &id, std::list<Device>::it
     for(it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         if(id == it -> getID())
             return;
+}
+
+void NetworkManager::getDeviceInfoFromMsg(const char *msg, Device *dev)
+{
+    std::string tmp;
+    int k = 0;
+    for(unsigned j = 0; j < strlen(msg); j++)
+    {
+        if(msg[j]!= ';')
+            tmp += msg[j];
+
+        if(tmp == "ID:" || tmp == "IP:" || tmp == "MAC:" || tmp == "MODE:")
+        {
+            k++;
+            tmp.clear();
+            continue;
+        }
+
+        if(k == 1 && msg[j] == ';')
+        {
+            dev -> setID(std::atoi(tmp.c_str()));
+            tmp.clear();
+            continue;
+        }
+
+        else if(k == 2 && msg[j] == ';')
+        {
+            dev -> setIP(tmp);
+            tmp.clear();
+            continue;
+        }
+
+        else if(k == 3 && msg[j] == ';')
+        {
+            dev -> setMac(tmp);
+            tmp.clear();
+            continue;
+        }
+    }
+
+    //on the end set mode
+    dev -> setModeFromString(tmp);
 }
 
 

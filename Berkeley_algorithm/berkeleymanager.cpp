@@ -103,8 +103,10 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     {
         Device newDevice;
         if(m_network -> handleConnectionRequest(msg, newDevice) == true)
+        {
             addDeviceToGuiDevicesList(newDevice);
-
+            m_network -> sendDeviceInfo(msg, &newDevice);
+        }
         msg -> type = EmptyMessage;
         return true;
     }
@@ -160,6 +162,8 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case DeviceInfo:
+        addDeviceToGuiDevicesList(m_network -> handleDeviceInfo(msg));
+        msg -> type = EmptyMessage;
         return false;
 
     case ClientCheckRequest:

@@ -20,6 +20,7 @@ public:
     void handleCheckRequest(struct Message *msg);
     void handleNetworkSizeRequest(struct Message *msg);
     void handleClientReadyMsg(struct Message *msg);
+    Device handleDeviceInfo(struct Message *msg);
     bool getDevices(struct Message *msg, const int& size);
     int handleNetworkSize(struct Message *msg);
     void handleTimeRequest(struct Message *msg, const std::string time);
@@ -29,6 +30,7 @@ public:
     void sendRequestTime();
     void sendRequestCheckIn();
     void sendAdjustTimeRequest(const std::string &time);
+    void sendDeviceInfo(struct Message *msg, const Device *dev);
     bool disconnectDevice(const int &id);
     void reset();
     void resetServerIP(const std::string ip = "");
@@ -48,6 +50,7 @@ private:
     void acceptClient(Device &dev, const std::string &ip, const std::string &mac);
     void actionOnNetworkDevicesList(listAction action, const int &id, Device *dev = nullptr, const std::string &ip = "", const std::string &mac = "",  const Device::Mode mode = Device::NotSpecified);
     void getIterFromDevicesList(const int &id, std::list<Device>::iterator &it);
+    void getDeviceInfoFromMsg(const char* msg, Device *dev);
     std::string getIpFromList(const int &id);
     std::string readMac(std::string ifc);
     std::string readIPandIfc();
