@@ -20,7 +20,6 @@ public:
     bool isItTimeToCheckTime();
     bool isItTooLateForCheck();
     bool isItTimeToCheckClients();
-    bool isTimeToCheckClientsPassed();
     void setSystemTime();
     bool getSecMinHour(int &s, int &m, int &h, std::string &time);
 
@@ -39,7 +38,6 @@ private:
     bool m_timeToCheck;     //time to check what time is it
     bool m_timeToCheckPassed;   //time to send client's time passed.
     bool m_timeToCheckClients;  //time to check if clients are still online
-    bool m_timeToCheckClientsPassed;    //time to send confirmation of being online passed
 };
 
 #endif // CLOCK_H

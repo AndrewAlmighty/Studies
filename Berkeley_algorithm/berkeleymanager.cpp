@@ -168,7 +168,6 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientConfirm:
-        fprintf(stderr, "KLIENT MELDUJE SIE\n");
         checkIfAllClientsSendConfirm(msg -> sender_id);
         msg -> type = EmptyMessage;
         return false;
@@ -375,7 +374,6 @@ void BerkeleyManager::requestTimeFromClients()
 
 void BerkeleyManager::requestClientsCheckIn()
 {
-    fprintf(stderr, "wzywamy klientow\n");
     m_timeCheck = false;
     m_clientsCheck = true;
     m_clientsID.clear();
@@ -399,9 +397,10 @@ void BerkeleyManager::setListOfActiveClients()
 bool BerkeleyManager::isItTimeToAdjustTime()
 {
     if(m_clock -> isItTooLateForCheck() == true)
+    {
         disconnectAllInactiveClients();
         return true;
-
+    }
     return false;
 }
 
@@ -409,7 +408,6 @@ bool BerkeleyManager::isItTimeToCheckClients()
 {
     if(m_clock -> isItTimeToCheckClients() == true)
     {
-         fprintf(stderr, "CZAS WYLACZYC NIEAKTYWNYCH\n");
         disconnectAllInactiveClients();
         m_clientsCheck = false;
         return true;
@@ -423,7 +421,6 @@ void BerkeleyManager::disconnectAllInactiveClients()
     {
         m_network -> disconnectDevice(*it);
         removeDeviceFromGuiDevicesList(*it);
-
     }
 }
 

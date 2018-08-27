@@ -12,7 +12,6 @@ Clock::Clock()
     m_checkClient = 15;
     m_timeToCheck = false;
     m_timeToCheckPassed = false;
-    m_timeToCheckClientsPassed = false;
     m_appIsRunning = false;
     setSystemTime();
     run();
@@ -87,19 +86,6 @@ bool Clock::isItTimeToCheckClients()
         m_timeToCheckClients = false;
         return true;
     }
-}
-
-bool Clock::isTimeToCheckClientsPassed()
-{
-    fprintf(stderr, " isTimeToCheckClientsPassed!\n");
-    std::lock_guard<std::mutex> lock(m_mutex);
-    if(m_timeToCheckClientsPassed == true)
-    {
-        m_timeToCheckClientsPassed = false;
-        return true;
-    }
-
-    else return false;
 }
 
 void Clock::setSystemTime()
@@ -202,18 +188,18 @@ void Clock::run()
                         m_timeToCheckPassed = true;
                     }
 
-                    if(stopwatch_2 >= m_checkClient && m_timeToCheck == false && m_timeToCheckClients == false)
+                    if(checking_time == false && stopwatch_2 > m_checkClient && m_timeToCheck == false && m_timeToCheckClients == false)
                     {
                         m_timeToCheckClients = true;
-                        m_timeToCheckClientsPassed = false;
                         checking_client = true;
                         stopwatch_2 = 0;
                     }
-                    fprintf(stderr, "STOPWATCH2:%d, timeToCheckCLients:%d, m_timeToCheck:%d, m_checklient:%d, checking_client:%d, m_timeToCheckClientsPassed:%d \n", stopwatch_2, m_timeToCheckClients, m_timeToCheck, m_checkClient, checking_client, m_timeToCheckClientsPassed);
-                    if(stopwatch_2 > 5 && checking_client == true && m_timeToCheckClientsPassed == false)
+
+                    if(stopwatch_2 > 5 && checking_client == true && m_timeToCheckClients == false)
                     {
                         checking_client = false;
-                        m_timeToCheckClientsPassed = true;
+                        m_timeToCheckClients = true;
+                        stopwatch_2 = 0;
                     }
 
                     stopwatch_1++;
