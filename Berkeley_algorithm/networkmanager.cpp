@@ -493,7 +493,7 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
         msg -> type = DeviceInfo;
         strcpy(msg -> message, "ID:");
         Device dev;
-        actionOnNetworkDevicesList(getDeviceFromList, std::atoi(tmp.c_str()), &dev);
+        actionOnNetworkDevicesList(getNextDeviceFromList, std::atoi(tmp.c_str()), &dev);
         strcat(msg -> message, std::to_string(dev.getID()).c_str());
         strcat(msg -> message, ";IP:");
         strcat(msg -> message, dev.getIP().c_str());
@@ -595,6 +595,21 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
                 *dev = *it;
                 return;
             }
+        }
+    }
+
+    else if(action == getNextDeviceFromList)
+    {
+        auto it = m_deviceList.begin();
+        for(int i = 0; i <= id; i++)
+        {
+            if(it == m_deviceList.end())
+                return;
+
+            if(i == id)
+                *dev = *it;
+
+            ++it;
         }
     }
 

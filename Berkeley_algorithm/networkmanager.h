@@ -47,6 +47,7 @@ private:
         addDeviceToList,
         removeDeviceFromList,
         getDeviceFromList,
+        getNextDeviceFromList,
         clearList
     };
 
