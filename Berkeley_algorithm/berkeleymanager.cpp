@@ -137,8 +137,6 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
    case ServerBrokeConnection:
-        m_network -> shutdownConnection();
-        m_network -> reset();
         msg -> type = EmptyMessage;
         breakAll();
         return false;
@@ -326,7 +324,7 @@ void BerkeleyManager::setGuiDevicesList()
 void BerkeleyManager::breakAll()
 {
     //Something went wrong. Stop everything. Restart
-    fprintf(stderr, "Critical error. Stopping everything!!\n");
+    fprintf(stderr, "Stopping everything!!\n");
     GuiManager::GetInstance().finishJob();
     GuiManager::GetInstance().loadSetupWindow();
 }
