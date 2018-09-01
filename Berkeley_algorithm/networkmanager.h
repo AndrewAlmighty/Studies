@@ -20,13 +20,14 @@ public:
     void handleCheckRequest(struct Message *msg);
     void handleNetworkSizeRequest(struct Message *msg);
     void handleClientReadyMsg(struct Message *msg);
+    void handleClientDisconnect(struct Message *msg);
     Device handleDeviceInfo(struct Message *msg);
     bool getDevices(struct Message *msg, const int& size);
     int handleNetworkSize(struct Message *msg);
     void handleTimeRequest(struct Message *msg, const std::string time);
     void handleDeviceInfoRequest(struct Message *msg);
     void checkMailBox(struct Message *msg);
-    void sendMsg(struct Message *msg, const std::string &ip = "");
+    void send(struct Message *msg, const std::string &ip = "");
     void sendRequestTime();
     void sendRequestCheckIn();
     void sendAdjustTimeRequest(const std::string &time);

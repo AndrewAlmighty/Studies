@@ -10,6 +10,7 @@ Clock::Clock()
 {
     m_checkTime = 120;
     m_checkClient = 15;
+    m_clientsStopwatch = 0;
     m_timeToCheck = false;
     m_timeToCheckPassed = false;
     m_appIsRunning = false;
@@ -86,6 +87,17 @@ bool Clock::isItTimeToCheckClients()
         m_timeToCheckClients = false;
         return true;
     }
+}
+
+void Clock::restartClientsStopwatch()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_clientsStopwatch = 0;
+}
+
+bool Clock::isServerIsOffline() const
+{
+    return m_serverIsSilentTooLong;
 }
 
 void Clock::setSystemTime()
@@ -202,14 +214,20 @@ void Clock::run()
                         stopwatch_2 = 0;
                     }
 
+                    if(m_clientsStopwatch > 20)
+                        m_serverIsSilentTooLong = true;
+
                     stopwatch_1++;
                     stopwatch_2++;
+                    m_clientsStopwatch++;
                 }
 
                 else
                 {
                     stopwatch_1 = 0;
                     stopwatch_2 = 0;
+                    m_clientsStopwatch = 0;
+                    m_serverIsSilentTooLong = false;
                 }
 
             }

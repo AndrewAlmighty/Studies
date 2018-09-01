@@ -20,6 +20,8 @@ public:
     bool isItTimeToCheckTime();
     bool isItTooLateForCheck();
     bool isItTimeToCheckClients();
+    void restartClientsStopwatch();
+    bool isServerIsOffline() const;
     void setSystemTime();
     bool getSecMinHour(int &s, int &m, int &h, std::string &time);
 
@@ -32,12 +34,14 @@ private:
         m_min,
         m_sec,
         m_checkTime,    //we call all clients to send server their time every x seconds.
-        m_checkClient;  //we call all clients to report if they are online to know who is still in our network.
+        m_checkClient,  //we call all clients to report if they are online to know who is still in our network.
+        m_clientsStopwatch;
 
     bool m_appIsRunning;    //with this I turn on all things thich I need when app is working
     bool m_timeToCheck;     //time to check what time is it
     bool m_timeToCheckPassed;   //time to send client's time passed.
     bool m_timeToCheckClients;  //time to check if clients are still online
+    bool m_serverIsSilentTooLong;    //if server is silent for too long time, it means that he is shut down.
 };
 
 #endif // CLOCK_H

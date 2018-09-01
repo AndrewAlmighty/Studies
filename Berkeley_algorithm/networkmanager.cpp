@@ -60,7 +60,7 @@ void NetworkManager::checkMailBox(struct Message *msg)
     checkMessageBox(&m_socket, msg);
 }
 
-void NetworkManager::sendMsg(struct Message *msg, const std::string &ip)
+void NetworkManager::send(struct Message *msg, const std::string &ip)
 {
     if(ip.empty() == false)
         sendMessage(&m_socket, msg, m_device.getID(), ip.c_str(), &m_port);
@@ -75,7 +75,7 @@ void NetworkManager::sendRequestTime()
     msg.type = TimeRequest;
     for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         if(it -> isReady() == true && it -> getMode() == Device::Client)
-            sendMsg(&msg, it -> getIP());
+            send(&msg, it -> getIP());
 }
 
 void NetworkManager::sendRequestCheckIn()
@@ -84,7 +84,7 @@ void NetworkManager::sendRequestCheckIn()
     msg.type = ClientCheckRequest;
     for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
         if(it -> isReady() == true && it -> getMode() == Device::Client)
-            sendMsg(&msg, it -> getIP());
+            send(&msg, it -> getIP());
 }
 
 void NetworkManager::sendAdjustTimeRequest(const std::string &time)
@@ -99,7 +99,7 @@ void NetworkManager::sendAdjustTimeRequest(const std::string &time)
         if(it -> getMode() == Device::Server || it -> isReady() == false)
             continue;
 
-        sendMsg(&msg, it -> getIP());
+        send(&msg, it -> getIP());
     }
 }
 
@@ -118,18 +118,22 @@ void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev)
     for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
     {
         if(it -> getMode() == Device::Client)
-            sendMsg(msg, it -> getIP());
+            send(msg, it -> getIP());
     }
 }
 
 bool NetworkManager::disconnectDevice(const int &id)
 {
     struct Message msg;
-    msg.type = Disconnect;
-    Device dev;
-    actionOnNetworkDevicesList(getDeviceFromList, id, &dev);
-    sendMsg(&msg, dev.getIP());
+    msg.type = ServerBrokeConnection;
+    std::list<Device>::iterator it;
+    getIterFromDevicesList(id, it);
+    send(&msg, it -> getIP());
     actionOnNetworkDevicesList(removeDeviceFromList, id);
+
+    for(it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        send(&msg, it -> getIP());
+
     return true;
 }
 
@@ -315,7 +319,7 @@ void NetworkManager::handleConnectionRefuseMessage()
 void NetworkManager::handleCheckRequest(Message *msg)
 {
     msg -> type = ClientConfirm;
-    sendMsg(msg);
+    send(msg);
 }
 
 void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
@@ -323,7 +327,7 @@ void NetworkManager::handleNetworkSizeRequest(struct Message *msg)
     strcpy(msg -> message, "NetworkSize:");
     strcat(msg -> message, std::to_string(m_deviceList.size()).c_str());
     msg -> type = NetworkSize;
-    sendMsg(msg, getDeviceIp(msg -> sender_id));
+    send(msg, getDeviceIp(msg -> sender_id));
 }
 
 void NetworkManager::handleClientReadyMsg(struct Message *msg)
@@ -333,10 +337,49 @@ void NetworkManager::handleClientReadyMsg(struct Message *msg)
     it -> setReady(true);
 }
 
+void NetworkManager::handleClientDisconnect(struct Message *msg)
+{
+    actionOnNetworkDevicesList(removeDeviceFromList, msg -> sender_id);
+    msg -> type = DeviceInfo;
+    strcpy(msg -> message, "Action:Remove;ID:");
+    strcat(msg -> message, std::to_string(msg -> sender_id).c_str());
+
+    for(std::list<Device>::iterator it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+        send(msg, it -> getIP());
+}
+
 Device NetworkManager::handleDeviceInfo(struct Message *msg)
 {
+    //first we have to know what we have to do with this info - remove or add device.
+    std::string tmp;
     Device dev;
-    getDeviceInfoFromMsg(msg -> message, &dev);
+
+    for(unsigned i = 0; i < strlen(msg -> message); i++)
+    {
+        tmp += msg -> message[i];
+
+        if(i < 7 && tmp == "Action:")
+            tmp.clear();
+
+        else if(tmp == "add")
+        {
+            memmove(msg -> message, &(msg -> message[i + 1]), strlen(msg -> message));
+            getDeviceInfoFromMsg(msg -> message, &dev);
+            actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
+            return dev;
+        }
+
+        else if(tmp == "remove")
+        {
+            memmove(msg -> message, &(msg -> message[i + 1]), strlen(msg -> message));
+            getDeviceInfoFromMsg(msg -> message, &dev);
+            actionOnNetworkDevicesList(removeDeviceFromList, dev.getID());
+            return dev;
+        }
+    }
+
+    //if something is broken send ID -1 - it's signal that this message is invalid.
+    dev.setID(-1);
     return dev;
 }
 
@@ -351,13 +394,12 @@ bool NetworkManager::getDevices(struct Message *msg, const int &size)
         msg -> type = DeviceInfoRequest;
         strcpy(msg -> message, "ID:");
         strcat(msg -> message, std::to_string(i).c_str());
-        sendMsg(msg);
+        send(msg);
 
         msg -> type = EmptyMessage;
         while(msg -> type != DeviceInfo)
         {
             checkMailBox(msg);
-
             sleep(1);
 
             if(deadline == 7)
@@ -407,7 +449,7 @@ void NetworkManager::handleTimeRequest(struct Message *msg, const std::string ti
 {
     msg -> type = ClientTime;
     strcpy(msg -> message, time.c_str());
-    sendMsg(msg);
+    send(msg);
 }
 
 void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
@@ -441,7 +483,7 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
         strcat(msg -> message, dev.getMAC().c_str());
         strcat(msg -> message, ";MODE:");
         strcat(msg -> message, dev.getModeStr().c_str());
-        sendMsg(msg, getIpFromList(msg ->sender_id));
+        send(msg, getIpFromList(msg -> sender_id));
         msg -> type = EmptyMessage;
     }
 
@@ -480,7 +522,7 @@ void NetworkManager::acceptClient(Device &dev, const std::string &ip, const std:
     msg.type = ConnectionAccepted;
     strcpy(msg.message, "ID:");
     strcat(msg.message, std::to_string(m_IDcounter).c_str());
-    sendMsg(&msg, ip);
+    send(&msg, ip);
 
     //Adding new device to list of devices in network.
     actionOnNetworkDevicesList(addDeviceToList, m_IDcounter, &dev, ip, mac, Device::Client);
@@ -490,6 +532,10 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
 {
     if(action == addDeviceToList && dev -> getMode() == Device::NotSpecified)
     {
+        for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+            if(it -> getID() == id)
+                break;
+
         dev -> setIP(ip);
         dev -> setMac(mac);
         dev -> setMode(mode);
@@ -503,7 +549,7 @@ void NetworkManager::actionOnNetworkDevicesList(NetworkManager::listAction actio
     }
 
     else if(action == addDeviceToList && dev -> getMode() != Device::NotSpecified)
-    {
+    {        
         if(dev -> getMode() == Device::Server)
             dev -> setReady(true);
 

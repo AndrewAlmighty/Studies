@@ -103,10 +103,8 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     {
         Device newDevice;
         if(m_network -> handleConnectionRequest(msg, newDevice) == true)
-        {
             addDeviceToGuiDevicesList(newDevice);
-            m_network -> sendDeviceInfo(msg, &newDevice);
-        }
+
         msg -> type = EmptyMessage;
         return true;
     }
@@ -116,7 +114,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         msg -> type = NetworkSizeRequest;
         strcpy(msg -> message, "ID:");
         strcat(msg -> message, std::to_string(m_network -> getDevice().getID()).c_str());
-        m_network -> sendMsg(msg);
+        m_network -> send(msg);
         msg -> type = EmptyMessage;
         return true;
 
@@ -126,7 +124,11 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         msg -> type = EmptyMessage;
         return false;
 
-    case Disconnect:
+    case ClientDisconnect:
+        msg -> type = EmptyMessage;
+        return false;
+
+   case ServerBrokeConnection:
         m_network -> shutdownConnection();
         m_network -> reset();
         msg -> type = EmptyMessage;
@@ -146,7 +148,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         setGuiDevicesList();
         updateGui("Connected");
         msg -> type = ClientReady;
-        m_network -> sendMsg(msg);
+        m_network -> send(msg);
         msg -> type = EmptyMessage;
         return false;
     }
@@ -162,9 +164,20 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case DeviceInfo:
-        addDeviceToGuiDevicesList(m_network -> handleDeviceInfo(msg));
+    {
+        Device dev = m_network -> handleDeviceInfo(msg);
+        if(dev.getID() >= 0)
+        {
+            if(dev.getMode() == Device::NotSpecified)
+                removeDeviceFromGuiDevicesList(dev.getID());
+
+            else
+                addDeviceToGuiDevicesList(dev);
+        }
+
         msg -> type = EmptyMessage;
         return false;
+    }
 
     case ClientCheckRequest:
         m_network -> handleCheckRequest(msg);
@@ -246,7 +259,17 @@ void BerkeleyManager::runAsClient()
             while(GuiManager::GetInstance().running() == true)
             {
                 m_network -> checkMailBox(&msg);
+                if(msg.type != EmptyMessage)
+                    m_clock -> restartClientsStopwatch();
+
                 handleMessage(&msg);
+
+                if(m_clock -> isServerIsOffline() == true)
+                {
+                    m_network -> shutdownConnection();
+                    m_network -> reset();
+                    breakAll();
+                }
             }
         }
 

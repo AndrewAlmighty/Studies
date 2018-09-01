@@ -21,13 +21,14 @@ enum MessageType
     ConnectionRequest,      //client is asking to join the network.
     ConnectionAccepted,     //Server accept client.
     ConnectionRefused,      //server refuse client's connection request.
-    Disconnect,             //client is leaving the network.
+    ClientDisconnect,       //client is leaving the network.
+    ServerBrokeConnection,  //server tells client that he is disconnect.
     ClientReady,            //client is prepared to work
     NetworkSizeRequest,     //Request for size of network
     NetworkSize,            //Info with size of network
     DeviceInfoRequest,      //Request for info about Device with ID
     DeviceInfo,             //Send info about Device
-    ClientCheckRequest,           //Server checks if clients are connected.
+    ClientCheckRequest,     //Server checks if clients are connected.
     ClientConfirm,          //Client confirm that he is connected.
     ClientTime,             //client sends his time.
     TimeRequest,            //server ask clients to send him time.
