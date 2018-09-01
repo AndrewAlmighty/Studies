@@ -132,6 +132,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ClientDisconnect:
         m_network -> handleClientDisconnect(msg);
+        removeDeviceFromGuiDevicesList(msg -> sender_id);
         msg -> type = EmptyMessage;
         return false;
 
