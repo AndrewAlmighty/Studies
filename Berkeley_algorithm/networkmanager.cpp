@@ -116,10 +116,8 @@ void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev)
     strcat(msg -> message, dev -> getModeStr().c_str());
 
     for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-    {
         if(it -> getMode() == Device::Client)
             send(msg, it -> getIP());
-    }
 }
 
 bool NetworkManager::disconnectDevice(const int &id)
@@ -132,7 +130,8 @@ bool NetworkManager::disconnectDevice(const int &id)
     actionOnNetworkDevicesList(removeDeviceFromList, id);
 
     for(it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-        send(&msg, it -> getIP());
+        if(it -> getMode() == Device::Client)
+            send(&msg, it -> getIP());
 
     return true;
 }
@@ -311,6 +310,24 @@ bool NetworkManager::handleConnectionAcceptedMessage(const struct Message *msg)
     return true;
 }
 
+void NetworkManager::disconnectAll()
+{
+    struct Message msg;
+    msg.type = ServerBrokeConnection;
+    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+    {
+        if(it -> getMode() == Device::Client)
+            send(&msg, it -> getIP());
+    }
+}
+
+void NetworkManager::disconnect()
+{
+    struct Message msg;
+    msg.type = ClientDisconnect;
+    send(&msg);
+}
+
 void NetworkManager::handleConnectionRefuseMessage()
 {
     reset();
@@ -345,7 +362,8 @@ void NetworkManager::handleClientDisconnect(struct Message *msg)
     strcat(msg -> message, std::to_string(msg -> sender_id).c_str());
 
     for(std::list<Device>::iterator it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-        send(msg, it -> getIP());
+        if(it -> getMode() == Device::Client)
+            send(msg, it -> getIP());
 }
 
 Device NetworkManager::handleDeviceInfo(struct Message *msg)
@@ -486,7 +504,6 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
         send(msg, getIpFromList(msg -> sender_id));
         msg -> type = EmptyMessage;
     }
-
 }
 
 Device NetworkManager::getDevice() const

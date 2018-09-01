@@ -16,6 +16,8 @@ public:
     bool shutdownConnection();
     bool handleConnectionRequest(const struct Message *msg, Device &dev);
     bool handleConnectionAcceptedMessage(const struct Message *msg);
+    void disconnectAll();
+    void disconnect();
     void handleConnectionRefuseMessage();
     void handleCheckRequest(struct Message *msg);
     void handleNetworkSizeRequest(struct Message *msg);

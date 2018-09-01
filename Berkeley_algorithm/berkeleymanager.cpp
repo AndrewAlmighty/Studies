@@ -54,6 +54,12 @@ bool BerkeleyManager::stop()
 {
     m_clock -> setIsAppRunning(false);
 
+    if(m_network -> getDevice().getMode() == Device::Server)
+        m_network -> disconnectAll();
+
+    else
+        m_network -> disconnect();
+
     if(m_network -> shutdownConnection() == false)
         return false;
 
@@ -125,6 +131,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientDisconnect:
+        m_network -> handleClientDisconnect(msg);
         msg -> type = EmptyMessage;
         return false;
 
