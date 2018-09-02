@@ -323,7 +323,7 @@ void BerkeleyManager::setGuiDevicesList()
 
 void BerkeleyManager::breakAll()
 {
-    //Something went wrong. Stop everything. Restart
+    //Stop everything. Restart
     fprintf(stderr, "Stopping everything!!\n");
     GuiManager::GetInstance().finishJob();
     GuiManager::GetInstance().loadSetupWindow();
