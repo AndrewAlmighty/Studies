@@ -14,7 +14,7 @@ public:
     bool createServer(int *port);
     bool connectTo(std::string ip, const int &port);
     bool shutdownConnection();
-    bool handleConnectionRequest(const struct Message *msg, Device &dev);
+    bool handleConnectionRequest(struct Message *msg, Device &dev);
     bool handleConnectionAcceptedMessage(const struct Message *msg);
     void disconnectAll();
     void disconnect();
@@ -33,7 +33,6 @@ public:
     void sendRequestTime();
     void sendRequestCheckIn();
     void sendAdjustTimeRequest(const std::string &time);
-    void sendDeviceInfo(struct Message *msg, const Device *dev);
     bool disconnectDevice(const int &id);
     void reset();
     void resetServerIP(const std::string ip = "");
@@ -51,8 +50,16 @@ private:
         clearList
     };
 
+    enum deviceInfoAction
+    {
+        addDevice,
+        removeDevice,
+        requestedInfo
+    };
+
     void acceptClient(Device &dev, const std::string &ip, const std::string &mac);
     void actionOnNetworkDevicesList(listAction action, const int &id, Device *dev = nullptr, const std::string &ip = "", const std::string &mac = "",  const Device::Mode mode = Device::NotSpecified);
+    void sendDeviceInfo(struct Message *msg, const Device *dev, deviceInfoAction action);
     void getIterFromDevicesList(const int &id, std::list<Device>::iterator &it);
     void getDeviceInfoFromMsg(const char* msg, Device *dev);
     std::string getIpFromList(const int &id);

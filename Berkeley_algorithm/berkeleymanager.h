@@ -62,8 +62,6 @@ private:
     bool isItTimeToCheckClients();
     void disconnectAllInactiveClients();
 
-
-
     std::unique_ptr<NetworkManager> m_network;
     std::unique_ptr<Clock> m_clock;
     std::list<int> m_clientsID;         //This list contains ids of clients which has to send ID.

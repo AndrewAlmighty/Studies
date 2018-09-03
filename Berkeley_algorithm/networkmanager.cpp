@@ -103,10 +103,21 @@ void NetworkManager::sendAdjustTimeRequest(const std::string &time)
     }
 }
 
-void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev)
+void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev, deviceInfoAction action)
 {
     msg -> type = DeviceInfo;
-    strcpy(msg -> message, "ID:");
+    if(action == addDevice)
+        strcpy(msg -> message, "Action:add");
+
+    else if (action == removeDevice)
+        strcpy(msg -> message, "Action:remove");
+
+
+    else
+        strcpy(msg -> message, "");
+
+        fprintf(stderr, "wysylamy device info - po ifach:%s\n", msg ->message);
+    strcat(msg -> message, "ID:");
     strcat(msg -> message, std::to_string(dev -> getID()).c_str());
     strcat(msg -> message, ";IP:");
     strcat(msg -> message, dev -> getIP().c_str());
@@ -115,9 +126,19 @@ void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev)
     strcat(msg -> message, ";MODE:");
     strcat(msg -> message, dev -> getModeStr().c_str());
 
-    for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-        if(it -> getMode() == Device::Client)
-            send(msg, it -> getIP());
+    fprintf(stderr, "wysylamy device info:%s\n", msg ->message);
+
+    if(action != requestedInfo)
+        for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
+            if(it -> getMode() == Device::Client && it -> getID() != dev -> getID())
+            {
+                fprintf(stderr, "--> wysylamy do:%d - jego tryb:%s, jego ip:%s\n", it -> getID(), it ->getModeStr().c_str(), it -> getIP().c_str());
+                send(msg, it -> getIP());
+            }
+
+
+    else
+        send(msg, getIpFromList(msg -> sender_id));
 }
 
 bool NetworkManager::disconnectDevice(const int &id)
@@ -152,7 +173,7 @@ void NetworkManager::resetServerIP(const std::string ip)
         m_server_ip = ip;
 }
 
-bool NetworkManager::handleConnectionRequest(const struct Message *msg, Device &dev)
+bool NetworkManager::handleConnectionRequest(struct Message *msg, Device &dev)
 {
     /* Here we handle client's request for connection.
      * First, we check if in message there is IP and MAC of client. All this magic is in the for loop which is below.
@@ -285,6 +306,7 @@ bool NetworkManager::handleConnectionRequest(const struct Message *msg, Device &
     if(foundIp == true && foundMac == true)
     {
         acceptClient(dev, ip, mac);
+        sendDeviceInfo(msg, &dev, addDevice);
         return true;
     }
 
@@ -325,6 +347,7 @@ void NetworkManager::disconnect()
 {
     struct Message msg;
     msg.type = ClientDisconnect;
+    fprintf(stderr, "MOJE ID:%d\n", m_device.getID());
     send(&msg);
 }
 
@@ -358,7 +381,7 @@ void NetworkManager::handleClientDisconnect(struct Message *msg)
 {
     actionOnNetworkDevicesList(removeDeviceFromList, msg -> sender_id);
     msg -> type = DeviceInfo;
-    strcpy(msg -> message, "Action:Remove;ID:");
+    strcpy(msg -> message, "Action:remove;ID:");
     strcat(msg -> message, std::to_string(msg -> sender_id).c_str());
 
     for(std::list<Device>::iterator it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
@@ -383,6 +406,7 @@ Device NetworkManager::handleDeviceInfo(struct Message *msg)
         {
             memmove(msg -> message, &(msg -> message[i + 1]), strlen(msg -> message));
             getDeviceInfoFromMsg(msg -> message, &dev);
+            fprintf(stderr, "przerobiona wiadomosc:%s\n", msg -> message);
             actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
             return dev;
         }
@@ -390,6 +414,7 @@ Device NetworkManager::handleDeviceInfo(struct Message *msg)
         else if(tmp == "remove")
         {
             memmove(msg -> message, &(msg -> message[i + 1]), strlen(msg -> message));
+                 fprintf(stderr, "przerobiona wiadomosc:%s\n", msg -> message);
             getDeviceInfoFromMsg(msg -> message, &dev);
             actionOnNetworkDevicesList(removeDeviceFromList, dev.getID());
             return dev;

@@ -107,6 +107,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case ConnectionRequest:
     {
+        fprintf(stderr, "-->przyszło zgłoszenie\n");
         Device newDevice;
         if(m_network -> handleConnectionRequest(msg, newDevice) == true)
             addDeviceToGuiDevicesList(newDevice);
@@ -116,6 +117,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
     }
 
     case ConnectionAccepted:
+        fprintf(stderr, "-->Zaakceptowano\n");
         m_network -> handleConnectionAcceptedMessage(msg);
         msg -> type = NetworkSizeRequest;
         strcpy(msg -> message, "ID:");
@@ -131,8 +133,9 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
         return false;
 
     case ClientDisconnect:
-        m_network -> handleClientDisconnect(msg);
+        fprintf(stderr, "Klient sie rozlaczyl, id: %d\n", msg -> sender_id);
         removeDeviceFromGuiDevicesList(msg -> sender_id);
+        m_network -> handleClientDisconnect(msg);        
         msg -> type = EmptyMessage;
         return false;
 
@@ -171,6 +174,7 @@ bool BerkeleyManager::handleMessage(struct Message *msg)
 
     case DeviceInfo:
     {
+        fprintf(stderr, "otrzymano Device info:%s\n", msg -> message);
         Device dev = m_network -> handleDeviceInfo(msg);
         if(dev.getID() >= 0)
         {
@@ -272,7 +276,6 @@ void BerkeleyManager::runAsClient()
 
                 if(m_clock -> isServerIsOffline() == true)
                 {
-                    m_network -> shutdownConnection();
                     m_network -> reset();
                     breakAll();
                 }
