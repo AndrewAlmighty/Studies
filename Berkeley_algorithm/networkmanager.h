@@ -23,7 +23,7 @@ public:
     void handleNetworkSizeRequest(struct Message *msg);
     void handleClientReadyMsg(struct Message *msg);
     void handleClientDisconnect(struct Message *msg);
-    Device handleDeviceInfo(struct Message *msg);
+    void handleDeviceInfo(struct Message *msg, Device &dev);
     bool getDevices(struct Message *msg, const int& size);
     int handleNetworkSize(struct Message *msg);
     void handleTimeRequest(struct Message *msg, const std::string time);
@@ -59,7 +59,7 @@ private:
 
     void acceptClient(Device &dev, const std::string &ip, const std::string &mac);
     void actionOnNetworkDevicesList(listAction action, const int &id, Device *dev = nullptr, const std::string &ip = "", const std::string &mac = "",  const Device::Mode mode = Device::NotSpecified);
-    void sendDeviceInfo(struct Message *msg, const Device *dev, deviceInfoAction action);
+    void sendDeviceInfo(struct Message *msg, deviceInfoAction action, const int id, const Device *dev = nullptr);
     void getIterFromDevicesList(const int &id, std::list<Device>::iterator &it);
     void getDeviceInfoFromMsg(const char* msg, Device *dev);
     std::string getIpFromList(const int &id);

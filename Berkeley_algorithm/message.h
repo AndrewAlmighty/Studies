@@ -39,7 +39,7 @@ struct Message
 {
     enum MessageType type;
     int sender_id;
-    char message[64];
+    char message[128];
 };
 
 #ifdef __cplusplus

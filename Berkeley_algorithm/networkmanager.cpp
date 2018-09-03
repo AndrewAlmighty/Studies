@@ -103,8 +103,12 @@ void NetworkManager::sendAdjustTimeRequest(const std::string &time)
     }
 }
 
-void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev, deviceInfoAction action)
+void NetworkManager::sendDeviceInfo(struct Message *msg, deviceInfoAction action, const int id, const Device *dev)
 {
+    //if we provide dev, that's mean we want to send whole Device info, so we dont need int id - we can add here a random value.
+    //When we want to remove device, we need just id, so dev is nullptr
+    //action request info is for begin step when device is downloading from server info about devices in network. Here we need dev but don't need id
+
     msg -> type = DeviceInfo;
     if(action == addDevice)
         strcpy(msg -> message, "Action:add");
@@ -112,30 +116,37 @@ void NetworkManager::sendDeviceInfo(struct Message *msg, const Device *dev, devi
     else if (action == removeDevice)
         strcpy(msg -> message, "Action:remove");
 
-
     else
         strcpy(msg -> message, "");
 
-        fprintf(stderr, "wysylamy device info - po ifach:%s\n", msg ->message);
-    strcat(msg -> message, "ID:");
-    strcat(msg -> message, std::to_string(dev -> getID()).c_str());
-    strcat(msg -> message, ";IP:");
-    strcat(msg -> message, dev -> getIP().c_str());
-    strcat(msg -> message, ";MAC:");
-    strcat(msg -> message, dev -> getMAC().c_str());
-    strcat(msg -> message, ";MODE:");
-    strcat(msg -> message, dev -> getModeStr().c_str());
+    strcat(msg -> message, ";ID:");
 
-    fprintf(stderr, "wysylamy device info:%s\n", msg ->message);
+    if(dev == nullptr)
+    {
+        strcat(msg -> message, std::to_string(id).c_str());
+        strcat(msg -> message, ";");
+    }
+
+    else
+    {
+        strcat(msg -> message, std::to_string(dev -> getID()).c_str());
+        strcat(msg -> message, ";IP:");
+        strcat(msg -> message, dev -> getIP().c_str());
+        strcat(msg -> message, ";MAC:");
+        strcat(msg -> message, dev -> getMAC().c_str());
+        strcat(msg -> message, ";MODE:");
+        strcat(msg -> message, dev -> getModeStr().c_str());
+    }
 
     if(action != requestedInfo)
+    {
         for(auto it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-            if(it -> getMode() == Device::Client && it -> getID() != dev -> getID())
-            {
-                fprintf(stderr, "--> wysylamy do:%d - jego tryb:%s, jego ip:%s\n", it -> getID(), it ->getModeStr().c_str(), it -> getIP().c_str());
+        {
+            if((action == addDevice && it -> getMode() == Device::Client && it -> getID() != dev -> getID()) ||
+                    (action == removeDevice && it -> getMode() == Device::Client && it -> getID() != id))
                 send(msg, it -> getIP());
-            }
-
+        }
+    }
 
     else
         send(msg, getIpFromList(msg -> sender_id));
@@ -148,12 +159,8 @@ bool NetworkManager::disconnectDevice(const int &id)
     std::list<Device>::iterator it;
     getIterFromDevicesList(id, it);
     send(&msg, it -> getIP());
-    actionOnNetworkDevicesList(removeDeviceFromList, id);
-
-    for(it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-        if(it -> getMode() == Device::Client)
-            send(&msg, it -> getIP());
-
+    actionOnNetworkDevicesList(removeDeviceFromList, id);    
+    sendDeviceInfo(&msg, removeDevice, id);
     return true;
 }
 
@@ -306,7 +313,7 @@ bool NetworkManager::handleConnectionRequest(struct Message *msg, Device &dev)
     if(foundIp == true && foundMac == true)
     {
         acceptClient(dev, ip, mac);
-        sendDeviceInfo(msg, &dev, addDevice);
+        sendDeviceInfo(msg, addDevice, -1, &dev);
         return true;
     }
 
@@ -347,7 +354,6 @@ void NetworkManager::disconnect()
 {
     struct Message msg;
     msg.type = ClientDisconnect;
-    fprintf(stderr, "MOJE ID:%d\n", m_device.getID());
     send(&msg);
 }
 
@@ -380,20 +386,13 @@ void NetworkManager::handleClientReadyMsg(struct Message *msg)
 void NetworkManager::handleClientDisconnect(struct Message *msg)
 {
     actionOnNetworkDevicesList(removeDeviceFromList, msg -> sender_id);
-    msg -> type = DeviceInfo;
-    strcpy(msg -> message, "Action:remove;ID:");
-    strcat(msg -> message, std::to_string(msg -> sender_id).c_str());
-
-    for(std::list<Device>::iterator it = m_deviceList.begin(); it != m_deviceList.end(); ++it)
-        if(it -> getMode() == Device::Client)
-            send(msg, it -> getIP());
+    sendDeviceInfo(msg, removeDevice, msg -> sender_id);
 }
 
-Device NetworkManager::handleDeviceInfo(struct Message *msg)
+void NetworkManager::handleDeviceInfo(struct Message *msg, Device &dev)
 {
     //first we have to know what we have to do with this info - remove or add device.
     std::string tmp;
-    Device dev;
 
     for(unsigned i = 0; i < strlen(msg -> message); i++)
     {
@@ -402,28 +401,25 @@ Device NetworkManager::handleDeviceInfo(struct Message *msg)
         if(i < 7 && tmp == "Action:")
             tmp.clear();
 
-        else if(tmp == "add")
+        else if(tmp == "add;")
         {
             memmove(msg -> message, &(msg -> message[i + 1]), strlen(msg -> message));
             getDeviceInfoFromMsg(msg -> message, &dev);
-            fprintf(stderr, "przerobiona wiadomosc:%s\n", msg -> message);
             actionOnNetworkDevicesList(addDeviceToList, dev.getID(), &dev);
-            return dev;
+            return;
         }
 
-        else if(tmp == "remove")
+        else if(tmp == "remove;")
         {
             memmove(msg -> message, &(msg -> message[i + 1]), strlen(msg -> message));
-                 fprintf(stderr, "przerobiona wiadomosc:%s\n", msg -> message);
             getDeviceInfoFromMsg(msg -> message, &dev);
             actionOnNetworkDevicesList(removeDeviceFromList, dev.getID());
-            return dev;
+            return;
         }
     }
 
     //if something is broken send ID -1 - it's signal that this message is invalid.
     dev.setID(-1);
-    return dev;
 }
 
 bool NetworkManager::getDevices(struct Message *msg, const int &size)
@@ -515,18 +511,9 @@ void NetworkManager::handleDeviceInfoRequest(struct Message *msg)
 
     if(is_ok == true)
     {
-        msg -> type = DeviceInfo;
-        strcpy(msg -> message, "ID:");
         Device dev;
         actionOnNetworkDevicesList(getNextDeviceFromList, std::atoi(tmp.c_str()), &dev);
-        strcat(msg -> message, std::to_string(dev.getID()).c_str());
-        strcat(msg -> message, ";IP:");
-        strcat(msg -> message, dev.getIP().c_str());
-        strcat(msg -> message, ";MAC:");
-        strcat(msg -> message, dev.getMAC().c_str());
-        strcat(msg -> message, ";MODE:");
-        strcat(msg -> message, dev.getModeStr().c_str());
-        send(msg, getIpFromList(msg -> sender_id));
+        sendDeviceInfo(msg, requestedInfo, -1, &dev);
         msg -> type = EmptyMessage;
     }
 }
