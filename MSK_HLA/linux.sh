@@ -38,7 +38,7 @@ fi
 if [ $1 = "clean" ]
 then
 	echo "deleting example federate jar file and left over logs"
-	rm src/*.class
+	rm src/msk_project/*.class
 	rm artifacts/java-msk.jar
 	rm -Rf logs/logs
 	exit;
@@ -51,7 +51,7 @@ if [ $1 = "compile" ]
 then
 	echo "compiling example federate"
 	cd src
-	javac -cp ./:$RTI_HOME/lib/portico.jar *.java
+	javac -cp ./:$RTI_HOME/lib/portico.jar msk_project/*.java
 	jar -cf ../artifacts/java-msk.jar *.class
 	cd ../
 	exit;	
