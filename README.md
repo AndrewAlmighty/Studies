@@ -1,1 +1,1 @@
-Projects from my master degree studies.
+Implement Tanenbaum algorith
