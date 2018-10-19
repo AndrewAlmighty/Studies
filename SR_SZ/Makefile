@@ -4,8 +4,8 @@ LD = gcc
 
 BUILDDIR = build
 OBJDIR = obj
-OBJS = $(addprefix $(OBJDIR)/, main.o)
-HEADERS = 
+OBJS = $(addprefix $(OBJDIR)/, main.o networkmethods.o ui.o tanenbaum.o)
+HEADERS = message.h ui.h tanenbaum.h
 
 vpath %.c src
 vpath %.h src
