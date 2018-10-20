@@ -48,7 +48,7 @@ enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip,
     return Working;
 }
 
-void checkMessageBox(int *socket, struct Message *msg)
+void checkMessageBox(const int *socket, struct Message *msg)
 {
     //check if we have messages in our messagebox.
     struct sockaddr_in client_addr;
@@ -57,10 +57,10 @@ void checkMessageBox(int *socket, struct Message *msg)
     recvfrom(*socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
 
     if(msg -> type == ConnectionRequest)
-        strcpy(msg -> message, inet_ntoa(client_addr.sin_addr));
+        strcpy(msg -> ip, inet_ntoa(client_addr.sin_addr));
 }
 
-void sendMessage(int *mySocket, struct Message *msg, const int id, const char *ip, const unsigned *port)
+void sendMessage(const int *mySocket, struct Message *msg, const int id, const char *ip, const unsigned *port)
 {
     msg -> sender_id = id;
     struct sockaddr_in addr;

@@ -14,15 +14,20 @@ enum MessageType
     CheckConnection,        //Leader calls for checking connection.
     ConnectionsConfirm,     //Process confirms that he is online
     AddProcess,             //Add process to list
-    RemoveProcess           //Remove process from the list
+    RemoveProcess,          //Remove process from the list
+    RequestRingInfo,        //Request for list of processes in our ring. Used when we join the ring.
+    SomeRingInfo,           //Process send info about one process. Exactly one ID and it's IP.
 };
 
 struct Message
 {
     enum MessageType type;
     int sender_id;
-    int original_sender;
-    char message[MESSAGE_MAX_LENGTH];       //We will not send message longer than ipv4 - xxx.xxx.xxx.xxx
+    int original_sender_id;         //First process which has send message. If its ConnectionAccepted msg,
+                                    //we send here id for new process.
+    char ip[MESSAGE_MAX_LENGTH];    //We will not send message longer than ip address - xxx.xxx.xxx.xxx
+                                    //Sometimes used to send other info than ip address
+
 };
 
 #endif // MESSAGE_H

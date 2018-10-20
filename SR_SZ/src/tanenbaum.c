@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "networkmethods.h"
 #include "tanenbaum.h"
 
 bool add_new_process_to_ring(const char* ip)
@@ -25,6 +24,32 @@ bool add_new_process_to_ring(const char* ip)
     ring_info.id_counter += 1;
     print_added_new_process(ip);
     return true;
+}
+
+void call_for_info_about_other_processes(const char *ip)
+{
+    struct Message msg;
+    msg.type = EmptyMessage;
+    unsigned i;
+    bool break_loop;
+
+    for (i = 0; i < ring_info.process_counter; i++)
+    {
+        msg.type = RequestRingInfo;
+        convert_int_to_string(msg.ip, i);
+        sendMessage(&ring_info.socket, &msg, ring_info.process_id, ip, &ring_info.port);
+        msg.type = EmptyMessage;
+        break_loop = false;
+
+        while(!break_loop)
+        {
+            checkMessageBox(&ring_info.socket, &msg);
+            if (msg.type == SomeRingInfo)
+                break_loop = true;
+
+            handle_message(&msg);
+        }
+    }
 }
 
 void find_ip(unsigned id, char* ip)
@@ -63,16 +88,54 @@ void find_ip(unsigned id, char* ip)
     ip[j - 1] = '\0';
 }
 
-void prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned port)
+void handle_message(struct Message *msg)
+{
+    switch (msg -> type)
+    {
+    case EmptyMessage:
+        return;
+
+    case ConnectionRequest:
+        return;
+
+        //Shouldn't be here, put it here just in case. It's handled in other place.
+    case ConnectionAccepted:
+        return;
+
+    case Election:
+        return;
+
+    case CheckConnection:
+        return;
+
+    case ConnectionsConfirm:
+        return;
+
+    case AddProcess:
+        return;
+
+    case RemoveProcess:
+        return;
+
+    case RequestRingInfo:
+        return;
+
+        //It's also handled in other place.
+    case SomeRingInfo:
+        return;
+    }
+}
+
+bool prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned *port)
 {
     //At start we don't have any process in the ring.
     ring_info.process_counter = 0;
     ring_info.id_counter = 0;
+    ring_info.port = *port;
 
     //1.Create a socket
-    int socket;
-    if (createAndBindSocket(&socket, &port) == NotWorking)
-        return;
+    if (createAndBindSocket(&ring_info.socket, port) == NotWorking)
+        return false;
 
     //2. Create a message which will handle the first message.
     struct Message msg;
@@ -89,11 +152,21 @@ void prepare_process(bool is_start_node, const unsigned time, const char *ip, co
 
         while(1)
         {
-            checkMessageBox(&socket, &msg);
+            checkMessageBox(&ring_info.socket, &msg);
 
             if(msg.type == ConnectionRequest)
             {
-                add_new_process_to_ring(msg.message);
+                if(add_new_process_to_ring(msg.ip))
+                {
+                    msg.type = ConnectionAccepted;
+                    msg.original_sender_id = ring_info.id_arr[ring_info.process_counter];
+                    convert_int_to_string(msg.ip, ring_info.process_counter);
+                    //we use ip field to send how many processes are in the ring.
+                    find_ip(ring_info.id_arr[ring_info.process_counter], ring_info.tmp_ip);
+                    sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, port);
+                    msg.type = EmptyMessage;
+                }
+
                 break;
             }
         }
@@ -105,22 +178,24 @@ void prepare_process(bool is_start_node, const unsigned time, const char *ip, co
     else
     {
         ring_info.is_leader = false;
-        sendConnectionRequest(&socket, ip, &port);
+        sendConnectionRequest(&ring_info.socket, ip, port);
 
         while(1)
         {
-            checkMessageBox(&socket, &msg);
+            checkMessageBox(&ring_info.socket, &msg);
 
             if(msg.type == ConnectionAccepted)
             {
+                ring_info.process_id = msg.original_sender_id;
+                //Because ip field is unsued in this case, it's used to send other info.
+                ring_info.process_counter = atoi(msg.ip);
+                call_for_info_about_other_processes(ip);
                 break;
             }
         }
     }
 
-    //4. On the end run process.
-    print_process_works(port);
-    run();
+    return true;
 }
 
 void remove_all_processes_from_ring()
@@ -237,5 +312,5 @@ bool remove_process_from_ring(const unsigned id)
 
 void run()
 {
-
+    print_process_works(ring_info.port);
 }

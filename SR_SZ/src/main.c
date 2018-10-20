@@ -17,6 +17,7 @@ int main(int argc, char** argv)
         bool got_port = false;
         bool got_time = false;
         bool is_start_node = false;
+        bool can_run = false;
 
         char *ip = NULL;
         unsigned port = 9000;
@@ -74,13 +75,16 @@ int main(int argc, char** argv)
         }
 
         if (is_start_node)
-            prepare_process(true, time, ip, port);
+            can_run = prepare_process(true, time, ip, &port);
 
         else if (got_ip)
-            prepare_process(true, time, ip, port);
+            can_run = prepare_process(true, time, ip, &port);
 
         else
             print_help();
+
+        if(can_run)
+            run();
     }
 
     return 0;

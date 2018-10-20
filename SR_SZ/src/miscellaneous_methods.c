@@ -78,6 +78,11 @@ bool check_time(const char *arg_time, unsigned *time)
     return true;
 }
 
+void convert_int_to_string(char* str, int integer)
+{
+    sprintf(str, "%d", integer);
+}
+
 void print_added_new_process(const char *ip)
 {
     printf("!-> New process joined the ring! It's adress is:%s\n", ip);
