@@ -8,28 +8,21 @@ bool add_new_process_to_ring(const char* ip)
 {
     //inc the count of processes in the ring.
     ring_info.process_counter += 1;
-    //raise the memory reserved by ptr for ids array and add new ID to array.
+    //raise the memory reserved by ptr for ids array and add new ID and ip to array.
     ring_info.id_arr = (unsigned*) realloc(ring_info.id_arr, ring_info.process_counter * sizeof (unsigned));
-
-    if (ring_info.id_arr == NULL)
-    {
-        print_allocate_failed();
-        return false;
-    }
-
-    ring_info.id_arr[ring_info.process_counter - 1] = ring_info.process_counter - 1;
-    //raise the memory reserver by ptr for ips array and add new ip to array.
     ring_info.ip_arr = (char*) realloc(ring_info.ip_arr, ring_info.process_counter * sizeof (char) * MESSAGE_MAX_LENGTH);
 
-    if (ring_info.ip_arr == NULL)
+    if (ring_info.id_arr == NULL || ring_info.ip_arr == NULL)
     {
+        ring_info.process_counter -= 1;
         print_allocate_failed();
         return false;
     }
 
+    ring_info.id_arr[ring_info.process_counter - 1] = ring_info.id_counter;
     strcat(ring_info.ip_arr, ip);
     strcat(ring_info.ip_arr, ";");
-
+    ring_info.id_counter += 1;
     return true;
 }
 
@@ -73,6 +66,7 @@ void prepare_process(bool is_start_node, const unsigned time, const char *ip, co
 {
     //At start we don't have any process in the ring.
     ring_info.process_counter = 0;
+    ring_info.id_counter = 0;
 
     //1.Create a socket
     int socket;
@@ -131,7 +125,7 @@ void remove_all_processes_from_ring()
 {
     int i;
     for (i = 0; i < ring_info.process_counter; i++)
-        remove_process_from_ring(i);
+        remove_process_from_ring(ring_info.id_arr[i]);
 }
 
 bool remove_process_from_ring(const unsigned id)
@@ -145,12 +139,15 @@ bool remove_process_from_ring(const unsigned id)
     }
 
     //if not, rewrite arrays.
-    int i;
+    unsigned i, ip_pos;
     bool found_pos = false;
     for (i = 0; i < ring_info.process_counter; i++)
     {
         if (ring_info.id_arr[i] == id)
+        {
             found_pos = true;
+            ip_pos = i;
+        }
 
         //if id is not on last pos.
         if (found_pos == true && i < ring_info.process_counter - 1)
@@ -161,13 +158,21 @@ bool remove_process_from_ring(const unsigned id)
         }
     }
 
+    if (!found_pos)
+    {
+        //if there is not such id in array, terminate process, something is wrong.
+        free(ring_info.id_arr);
+        free(ring_info.ip_arr);
+        return false;
+    }
+
     //find a place where ip to remove starts, when we find it, start rewriting from that pos.
     unsigned counter = 0, start_pos1 = 0, start_pos2 = 0;
     found_pos = false;
 
     for (i = 0; ring_info.ip_arr[i] != '\0'; i++)
     {
-        if (id == counter && found_pos == false)
+        if (ip_pos == counter && found_pos == false)
         {
             start_pos1 = i;
             found_pos = true;
@@ -176,7 +181,7 @@ bool remove_process_from_ring(const unsigned id)
         if (ring_info.ip_arr[i] == ';')
             counter += 1;
 
-        else if (counter > id)
+        else if (counter > ip_pos)
         {
             start_pos2 = i;
             break;

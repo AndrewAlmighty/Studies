@@ -6,6 +6,7 @@
 struct RingInfo
 {
     unsigned process_id;        //id of this process.
+    unsigned id_counter;        //This varriable sets id of every process.
     unsigned process_counter;   //counts how many processes are in the ring.
     unsigned *id_arr;           //keeps IDs of processes in the ring
     bool is_leader;             //is this process is a leader

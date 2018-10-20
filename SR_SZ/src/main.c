@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "miscellaneous_methods.h"
 #include "tanenbaum.h"
