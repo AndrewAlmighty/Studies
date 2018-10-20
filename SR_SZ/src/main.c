@@ -1,85 +1,12 @@
 #include <stdbool.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
 
-#include "ui.h"
+#include "miscellaneous_methods.h"
 #include "tanenbaum.h"
-
-bool check_ip(const char* ip_from_arg, char** ip)
-{
-    unsigned i, k = 0, l = 0, len = strlen(ip_from_arg);   //k is used to count numbers between '.', l is used to count '.'.
-    bool ip_is_bad = false;
-
-    for (i = 0; i < len; i++)
-    {
-        //if char is not '.' or digit, break.
-        if(*(ip_from_arg + i) != '.' && !isdigit(*(ip_from_arg + i)))
-        {
-            ip_is_bad = true;
-            break;
-        }
-
-        //If it's number, inc k. Then check we got more than 3 numbers between '.'.
-        if (isdigit(*(ip_from_arg + i)))
-        {
-            k++;
-            if (k > 3)
-            {
-                ip_is_bad = true;
-                break;
-            }
-
-            continue;
-        }
-
-        //if we got '..', to many '.' or '.' is on the end.
-        if ((k == 0 || l > 3 || i == len - 1) && *(ip_from_arg + i) == '.')
-        {
-            ip_is_bad = true;
-            break;
-        }
-
-        //if it's '.', inc l and k = 0.
-        if (*(ip_from_arg + i) == '.')
-        {
-            k = 0;
-            l++;
-        }
-    }
-
-    if(ip_is_bad)
-        return false;
-
-    *ip = (char*) malloc(sizeof(char) * len);
-    strcpy(*ip, ip_from_arg);
-    return true;
-}
-
-bool check_port(const char *arg_port, unsigned *port)
-{
-    int tmp = atoi(arg_port);
-
-    if(tmp <= 0)
-        return false;
-
-    *port = tmp;
-    return true;
-}
-
-bool check_time(const char *arg_time, unsigned *time)
-{
-    int tmp = atoi(arg_time);
-
-    if (tmp < 1)
-        return false;
-
-    *time = tmp;
-    return true;
-}
 
 int main(int argc, char** argv)
 {
+    //check arguments. We need ip and port or single mode on. If something is wrong, print help and terminate.
     if (argc < 2)
         print_help();
 
@@ -92,7 +19,7 @@ int main(int argc, char** argv)
         bool is_start_node = false;
 
         char *ip = NULL;
-        unsigned port = 0;
+        unsigned port = 9000;
         unsigned time = 10;
 
         for (idx = 1; idx < argc; idx++)
@@ -147,10 +74,10 @@ int main(int argc, char** argv)
         }
 
         if (is_start_node)
-            wait_for_others(time);
+            prepare_process(true, time, ip, port);
 
-        else if (got_ip && got_port)
-            join_the_ring(ip, port);
+        else if (got_ip)
+            prepare_process(true, time, ip, port);
 
         else
             print_help();

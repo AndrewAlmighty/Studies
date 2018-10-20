@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-enum socketStatus createAndBindSocket(int *server_socket, const int *port)
+enum socketStatus createAndBindSocket(int *server_socket, const unsigned *port)
 {
     //create socket
     if((*server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -35,86 +35,7 @@ enum socketStatus createAndBindSocket(int *server_socket, const int *port)
     return Working;
 }
 
-enum ipStatus getIPAndIFACE(char *ip_addr, char *iface)
-{
-    //This method read ip address and MAC of our machine. We read the first ip address with is not 127.0.0.1. If We read more or none we return error.
-    //If interface name will be longer than 5 characters we will also get error.
-    struct ifaddrs *ifaddr, *ifa;
-    int family, s, addr_number = 0;
-    char host[NI_MAXHOST];
-
-    //Get list of network interfaces and ip addresses. Something like ifconfig.
-    if (getifaddrs(&ifaddr) == -1)
-    {
-        fprintf(stderr, "Cannot get list of ip interfaces! Errno: %d", errno);
-        return CannotGetIP;
-    }
-
-    //Iterate over all founded addresses and found the right one
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa -> ifa_next)
-    {
-        family = ifa -> ifa_addr -> sa_family;
-
-        if (family == AF_INET) {
-            s = getnameinfo(ifa -> ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-            if (s != 0)
-            {
-                fprintf(stderr, "GetNameInfo() failed. Errno: %d", errno);
-                return CannotGetIP;
-            }
-
-            if(addr_number == 0 && strcmp("127.0.0.1", host) != 0)
-            {
-                //get ip address and interface. Interface is needed to get MAC.
-                strcpy(ip_addr, host);
-                addr_number += 1;
-                fprintf(stderr, "Found IP address: %s\n", ip_addr);
-                strcpy(iface, ifa -> ifa_name);
-                fprintf(stderr, "Interface: %s\n", iface);
-                continue;
-            }
-
-            if(addr_number != 0 && strcmp("127.0.0.1", host) != 0)
-            {
-                fprintf(stderr, "Found more than one ip address!\n");
-                return MoreThanOneIp;
-            }
-        }
-    }
-
-    return IPFound;
-}
-
-enum macStatus getMacAddr(char *mac_addr, const char *ifc)
-{
-    //Get MAC address. Need Interface name to get it.
-    int fd;
-    struct ifreq ifr;
-    unsigned char *mac;
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name , ifc, IFNAMSIZ-1);
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
-    close(fd);
-    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
-
-    //translate address
-    static const char* hex_lookup = "0123456789ABCDEF";
-
-    for (int i = 0 ; i < 6 ; i++)
-    {
-        *mac_addr++ = hex_lookup[mac[i] >> 4];
-        *mac_addr++ = hex_lookup[mac[i] & 0x0F];
-
-        if ((i+1)%16 && i != 5)
-            *mac_addr++ = ':';
-    }
-
-    *mac_addr = '\0';
-    return MacAddrFound;
-}
-
-enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip, const int *port, const char *local_ip, const char *MAC)
+enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip, const unsigned *port)
 {
     if(createAndBindSocket(client_socket, port) == NotWorking)
         return NotWorking;
@@ -122,25 +43,24 @@ enum socketStatus sendConnectionRequest(int *client_socket, const char *dest_ip,
     //Prepare message for connection request.
     struct Message msg;
     msg.type = ConnectionRequest;
-    strcpy(msg.message, "IP:");
-    strcat(msg.message, local_ip);
-    strcat(msg.message, "_MAC:");
-    strcat(msg.message, MAC);
 
     sendMessage(client_socket, &msg, -1, dest_ip, port);
     return Working;
 }
 
-void checkMessageBox(int *server_socket, struct Message *msg)
+void checkMessageBox(int *socket, struct Message *msg)
 {
     //check if we have messages in our messagebox.
     struct sockaddr_in client_addr;
     unsigned int socket_len = sizeof(client_addr);
     memset(&client_addr, 0, sizeof(client_addr));
-    recvfrom(*server_socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
+    recvfrom(*socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
+
+    if(msg -> type == ConnectionRequest)
+        strcpy(msg -> message, inet_ntoa(client_addr.sin_addr));
 }
 
-void sendMessage(int *mySocket, struct Message *msg, const int id, const char *ip, const int *port)
+void sendMessage(int *mySocket, struct Message *msg, const int id, const char *ip, const unsigned *port)
 {
     msg -> sender_id = id;
     struct sockaddr_in addr;
