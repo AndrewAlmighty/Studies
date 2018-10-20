@@ -96,8 +96,3 @@ void print_process_works(unsigned port)
 {
     printf("Tanenbaum algorithm process just started working! We use port:%u\n", port);
 }
-
-void print_remove_from_arr_failed()
-{
-    printf("!->Removing from array failed because we reached end of it! Terminating ...\n");
-}

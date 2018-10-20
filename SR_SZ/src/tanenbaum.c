@@ -35,21 +35,38 @@ bool add_new_process_to_ring(const char* ip)
 
 void find_ip(unsigned id, char* ip)
 {
-    unsigned i, j = 0, counter = 0; //counter counts how many ; we got.
+    /* Because array of ids can look like [1,3,5] and array of ips is like <ip>;<ip>;<ip>;
+     * we have to iterate through id array and when we find right id, then ip is in the place,
+     * which which correspond to index of that id in array.
+     */
+    unsigned i, pos, j = 0, counter = 0; //counter counts how many ; we got.
+
+    for (i = 0; i < ring_info.process_counter; i++)
+    {
+        if (ring_info.id_arr[i] == id)
+        {
+            pos = i;
+            break;
+        }
+    }
+
     for (i = 0; ring_info.ip_arr[i] != '\0'; i++)
     {
+        if (pos == counter)
+        {
+            ip[j] = ring_info.ip_arr[i];
+            j += 1;
+        }
+
        if (ring_info.ip_arr[i] == ';')
             counter += 1;
-
-       if (id == counter)
-       {
-           ip[j] = ring_info.ip_arr[i];
-           j += 1;
-       }
 
        else if (counter > id)
            break;
     }
+
+    //In the end remove ';' from the end of string.
+    ip[j - 1] = '\0';
 }
 
 void prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned port)
