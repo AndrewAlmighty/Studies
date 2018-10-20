@@ -15,7 +15,7 @@ all: $(BUILDDIR)/Tanenbaum_Algorithm
 $(BUILDDIR)/Tanenbaum_Algorithm: $(OBJS) | $(BUILDDIR)
 	$(LD) $^ -o $@
 
-$(OBJS) : $(OBJDIR)/%.o : %.c $(HEADERS) | $(OBJDIR)
+$(OBJS): $(OBJDIR)/%.o : %.c $(HEADERS) | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR):

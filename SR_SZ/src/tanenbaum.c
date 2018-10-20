@@ -23,6 +23,7 @@ bool add_new_process_to_ring(const char* ip)
     strcat(ring_info.ip_arr, ip);
     strcat(ring_info.ip_arr, ";");
     ring_info.id_counter += 1;
+    print_added_new_process(ip);
     return true;
 }
 
@@ -54,7 +55,7 @@ void find_ip(unsigned id, char* ip)
        if (ring_info.ip_arr[i] == ';')
             counter += 1;
 
-       else if (counter > id)
+       if (counter > id)
            break;
     }
 
@@ -92,6 +93,7 @@ void prepare_process(bool is_start_node, const unsigned time, const char *ip, co
 
             if(msg.type == ConnectionRequest)
             {
+                add_new_process_to_ring(msg.message);
                 break;
             }
         }
@@ -168,11 +170,12 @@ bool remove_process_from_ring(const unsigned id)
 
     //find a place where ip to remove starts, when we find it, start rewriting from that pos.
     unsigned counter = 0, start_pos1 = 0, start_pos2 = 0;
+    char ip_to_remove[16];
     found_pos = false;
 
     for (i = 0; ring_info.ip_arr[i] != '\0'; i++)
     {
-        if (ip_pos == counter && found_pos == false)
+        if (ip_pos == counter && !found_pos)
         {
             start_pos1 = i;
             found_pos = true;
@@ -181,11 +184,14 @@ bool remove_process_from_ring(const unsigned id)
         if (ring_info.ip_arr[i] == ';')
             counter += 1;
 
-        else if (counter > ip_pos)
+        if (counter > ip_pos)
         {
             start_pos2 = i;
             break;
         }
+
+        if (found_pos)
+            ip_to_remove[i - start_pos1] = ring_info.ip_arr[i];
     }
 
     //if i is pointing to end of string, just remove last ip address.
@@ -225,6 +231,7 @@ bool remove_process_from_ring(const unsigned id)
         return false;
     }
 
+    print_remove_process(&id, ip_to_remove);
     return true;
 }
 

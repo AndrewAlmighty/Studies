@@ -78,6 +78,11 @@ bool check_time(const char *arg_time, unsigned *time)
     return true;
 }
 
+void print_added_new_process(const char *ip)
+{
+    printf("!-> New process joined the ring! It's adress is:%s\n", ip);
+}
+
 void print_allocate_failed()
 {
     printf("!-> Error! Cannot allocate memory! Errno:%d\n", errno);
@@ -95,4 +100,9 @@ void print_help()
 void print_process_works(unsigned port)
 {
     printf("Tanenbaum algorithm process just started working! We use port:%u\n", port);
+}
+
+void print_remove_process(const unsigned *id, const char *ip)
+{
+    printf("!-> Process was removed from ring! It's ID is:%u, it's ip adress is:%s\n", *id, ip);
 }
