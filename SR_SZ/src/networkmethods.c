@@ -1,12 +1,7 @@
 #include "networkmethods.h"
 
 #include <stdio.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>

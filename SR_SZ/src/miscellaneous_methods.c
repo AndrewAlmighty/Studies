@@ -102,6 +102,11 @@ void print_help()
            "-time <sec>     -- set the time of frequency of checking connection\n");
 }
 
+void print_message_should_not_be_handled()
+{
+    printf("!-> Warning! There was a message which shouldn't be handled in message handler!\n");
+}
+
 void print_process_works(unsigned port)
 {
     printf("Tanenbaum algorithm process just started working! We use port:%u\n", port);

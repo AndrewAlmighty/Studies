@@ -10,6 +10,7 @@ void convert_int_to_string(char* str, int integer);
 void print_added_new_process(const char *ip);
 void print_allocate_failed();
 void print_help();
+void print_message_should_not_be_handled();
 void print_process_works(unsigned port);
 void print_remove_process(const unsigned *id, const char *ip);
 

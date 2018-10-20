@@ -100,6 +100,7 @@ void handle_message(struct Message *msg)
 
         //Shouldn't be here, put it here just in case. It's handled in other place.
     case ConnectionAccepted:
+        print_message_should_not_be_handled();
         return;
 
     case Election:
@@ -122,6 +123,7 @@ void handle_message(struct Message *msg)
 
         //It's also handled in other place.
     case SomeRingInfo:
+        print_message_should_not_be_handled();
         return;
     }
 }
