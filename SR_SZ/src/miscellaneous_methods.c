@@ -180,3 +180,13 @@ void print_sending_message_to(const unsigned id, const char *ip, const int type)
     get_str_of_message_type(msgType, type);
     printf("!-> Message has been send to process with ID:%u. It's IP is:%s. Type of message:%s\n", id, ip, msgType);
 }
+
+void print_terminate()
+{
+    printf("Terminating this process ...\n");
+}
+
+void print_timeout_reached()
+{
+    printf("!!!-> Error! Timeout reached! Didn't get any response from process to which we have send message!\n");
+}

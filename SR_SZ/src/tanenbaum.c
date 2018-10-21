@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "tanenbaum.h"
 
@@ -112,6 +113,7 @@ void handle_message(struct Message *msg)
         return;
 
     case ConnectionRequest:
+        handle_connection_request(msg);
         msg -> type = EmptyMessage;
         return;
 
@@ -134,10 +136,12 @@ void handle_message(struct Message *msg)
         return;
 
     case AddProcess:
+        handle_add_process(msg);
         msg -> type = EmptyMessage;
         return;
 
     case RemoveProcess:
+        handle_remove_process(msg);
         msg -> type = EmptyMessage;
         return;
 
@@ -150,6 +154,50 @@ void handle_message(struct Message *msg)
         print_message_should_not_be_handled();
         return;
     }
+}
+
+bool handle_add_process(struct Message *msg)
+{
+    send_message_to_next_process(msg);
+    if (!add_new_process_to_ring(msg -> ip))
+    {
+        msg -> type = RemoveProcess;
+        msg -> original_sender_id = ring_info.process_id;
+        convert_int_to_string(msg -> ip, ring_info.id_counter);
+        send_message_to_next_process(msg);
+        wait_for_specific_message(10, RemoveProcess, msg);
+        return false;
+    }
+
+    return true;
+}
+
+bool handle_connection_request(struct Message *msg)
+{
+    if (add_new_process_to_ring(msg -> ip))
+    {
+        msg -> type = AddProcess;
+        msg -> original_sender_id = ring_info.process_id;
+        send_message_to_next_process(msg);
+    }
+
+    if (wait_for_specific_message(10, AddProcess, msg))
+    {
+        msg -> type = ConnectionAccepted;
+        sendMessage(&ring_info.socket, msg, ring_info.process_id, msg->ip, &ring_info.port);
+        return true;
+    }
+
+    return false;
+}
+
+bool handle_remove_process(struct Message *msg)
+{
+    send_message_to_next_process(msg);
+    if (remove_process_from_ring(atoi(msg -> ip)))
+        return true;
+
+    return false;
 }
 
 bool prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned *port)
@@ -267,9 +315,7 @@ bool remove_process_from_ring(const unsigned id)
 
     if (!found_pos)
     {
-        //if there is not such id in array, terminate process, something is wrong.
-        free(ring_info.id_arr);
-        free(ring_info.ip_arr);
+        //if there is not such id in array, just return false. Maybe AddProcess didn't reach this process.
         return false;
     }
 
@@ -347,7 +393,7 @@ void run()
 
 void send_message_to_next_process(struct Message *msg)
 {
-    if (ring_info.process_id != msg -> original_sender_id)
+    if (msg -> original_sender_id == ring_info.process_id)
     {
         //Jump to the beggining  of array if this process is the last process in array.
         if(get_idx_from_id_arr(ring_info.process_id) == (ring_info.process_counter - 1))
@@ -359,10 +405,31 @@ void send_message_to_next_process(struct Message *msg)
         //Otherwise just send it to the next process in array
         else
         {
-           find_ip((get_idx_from_id_arr(ring_info.process_id) + 1), ring_info.tmp_ip);
-           print_sending_message_to((ring_info.process_id + 1), ring_info.tmp_ip, msg -> type);
+            find_ip((get_idx_from_id_arr(ring_info.process_id) + 1), ring_info.tmp_ip);
+            print_sending_message_to((ring_info.process_id + 1), ring_info.tmp_ip, msg -> type);
+        }
+    }
+
+    sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+}
+
+bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Message *msg)
+{
+    int i = 0;
+    for (i = 0; i < sec; i++)
+    {
+        while(msg -> type != EmptyMessage)
+        {
+            checkMessageBox(&ring_info.socket, msg);
+
+            if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
+                return true;
+
+            handle_message(msg);
         }
 
-        sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+        sleep(1);
     }
+
+    return false;
 }

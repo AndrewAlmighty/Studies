@@ -11,6 +11,7 @@ struct RingInfo
     unsigned process_counter;   //counts how many processes are in the ring.
     int socket;                 //socket which we use for communication.
     unsigned port;              //port which we use for communication.
+    unsigned time;              //check connection every [time] seconds.
     unsigned *id_arr;           //keeps IDs of processes in the ring
     bool is_leader;             //is this process is a leader
     char tmp_ip[16];            //here we keep ip for short time. We avoid to create other pointers.
@@ -34,6 +35,14 @@ int get_idx_from_id_arr(unsigned id);
 //Handle incoming message
 void handle_message(struct Message *msg);
 
+// --------------- Message handlers ---------------------------
+
+bool handle_add_process(struct Message *msg);
+bool handle_connection_request(struct Message *msg);
+bool handle_remove_process(struct Message *msg);
+
+//---------------- Message handlers ---------------------------
+
 //This method creates socket and do everything what is needed before we join/create the ring.
 bool prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned *port);
 
@@ -48,5 +57,8 @@ void run();
 
 //If the message has not gone through all processes, send it to next process.
 void send_message_to_next_process(struct Message *msg);
+
+//Wait for x seconds for specific message. Handle others messages meanwhile.
+bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Message *msg);
 
 #endif
