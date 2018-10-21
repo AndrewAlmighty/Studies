@@ -113,7 +113,7 @@ void handle_message(struct Message *msg)
         return;
 
     case ConnectionRequest:
-        handle_connection_request(msg);
+        handle_ConnectionRequest(msg);
         msg -> type = EmptyMessage;
         return;
 
@@ -136,16 +136,17 @@ void handle_message(struct Message *msg)
         return;
 
     case AddProcess:
-        handle_add_process(msg);
+        handle_AddProcess(msg);
         msg -> type = EmptyMessage;
         return;
 
     case RemoveProcess:
-        handle_remove_process(msg);
+        handle_RemoveProcess(msg);
         msg -> type = EmptyMessage;
         return;
 
     case RequestRingInfo:
+        handle_RequestRingInfo(msg);
         msg -> type = EmptyMessage;
         return;
 
@@ -156,7 +157,7 @@ void handle_message(struct Message *msg)
     }
 }
 
-bool handle_add_process(struct Message *msg)
+bool handle_AddProcess(struct Message *msg)
 {
     if (!send_message_to_next_process(msg))
         return false;
@@ -174,7 +175,7 @@ bool handle_add_process(struct Message *msg)
     return true;
 }
 
-bool handle_connection_request(struct Message *msg)
+bool handle_ConnectionRequest(struct Message *msg)
 {
     if (add_new_process_to_ring(msg -> ip))
     {
@@ -193,7 +194,7 @@ bool handle_connection_request(struct Message *msg)
     return false;
 }
 
-bool handle_remove_process(struct Message *msg)
+bool handle_RemoveProcess(struct Message *msg)
 {
     if (!send_message_to_next_process(msg))
         return false;
@@ -202,6 +203,23 @@ bool handle_remove_process(struct Message *msg)
         return true;
 
     return false;
+}
+
+bool handle_RequestRingInfo(struct Message *msg)
+{
+    //it could be removed meanwhile.
+    if (!get_idx_from_id_arr(msg -> sender_id))
+        return false;
+
+    int tmp = get_idx_from_id_arr(atoi(msg -> ip));
+    if (tmp == -1)
+        return false;
+
+    find_ip((unsigned)tmp, msg -> ip);
+    find_ip(msg -> sender_id, ring_info.tmp_ip);
+    sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+    return true;
+
 }
 
 bool prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned *port)
