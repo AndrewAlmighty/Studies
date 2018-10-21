@@ -28,6 +28,9 @@ void call_for_info_about_other_processes(const char* ip);
 //Find ip of process with a specific identifier. IP is null when we don't find it.
 void find_ip(unsigned id, char* ip);
 
+//Sometimes we need to know which place in id_arr has our process.
+int get_idx_from_id_arr(unsigned id);
+
 //Handle incoming message
 void handle_message(struct Message *msg);
 
@@ -42,5 +45,8 @@ bool remove_process_from_ring(const unsigned id);
 
 //Main loop. Here algorithm works.
 void run();
+
+//If the message has not gone through all processes, send it to next process.
+void send_message_to_next_process(struct Message *msg);
 
 #endif

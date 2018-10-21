@@ -83,6 +83,56 @@ void convert_int_to_string(char* str, int integer)
     sprintf(str, "%d", integer);
 }
 
+void get_str_of_message_type(char *str, const int type)
+{
+    switch (type)
+    {
+    case 1:
+        strcpy(str, "EmptyMessage");
+        break;
+
+    case 2:
+        strcpy(str, "ConnectionRequest");
+        break;
+
+    case 3:
+        strcpy(str, "ConnectionAccepted");
+        break;
+
+    case 4:
+        strcpy(str, "Election");
+        break;
+
+    case 5:
+        strcpy(str, "CheckConnection");
+        break;
+
+    case 6:
+        strcpy(str, "ConnectionsConfirm");
+        break;
+
+    case 7:
+        strcpy(str, "AddProcess");
+        break;
+
+    case 8:
+        strcpy(str, "RemoveProcess");
+        break;
+
+    case 9:
+        strcpy(str, "RequestRingInfo");
+        break;
+
+    case 10:
+        strcpy(str, "SomeRingInfo");
+        break;
+
+    default:
+        strcpy(str, "Unknown message type");
+        break;
+    }
+}
+
 void print_added_new_process(const char *ip)
 {
     printf("!-> New process joined the ring! It's adress is:%s\n", ip);
@@ -90,7 +140,7 @@ void print_added_new_process(const char *ip)
 
 void print_allocate_failed()
 {
-    printf("!-> Error! Cannot allocate memory! Errno:%d\n", errno);
+    printf("!!!-> Error! Cannot allocate memory! Errno:%d\n", errno);
 }
 
 void print_help()
@@ -104,15 +154,29 @@ void print_help()
 
 void print_message_should_not_be_handled()
 {
-    printf("!-> Warning! There was a message which shouldn't be handled in message handler!\n");
+    printf("!!!-> Warning! There was a message which shouldn't be handled in message handler!\n");
 }
 
-void print_process_works(unsigned port)
+void print_process_works(unsigned port, unsigned id)
 {
-    printf("Tanenbaum algorithm process just started working! We use port:%u\n", port);
+    printf("!-> Tanenbaum algorithm process just started working! Process ID:%u. Port:%u\n", id, port);
+}
+
+void print_received_message_from(const unsigned id, const char *ip, const int type)
+{
+    char msgType[20];
+    get_str_of_message_type(msgType, type);
+    printf("!-> Received message from process with ID:%u. It's IP is:%s. Type of message:%s\n", id, ip, msgType);
 }
 
 void print_remove_process(const unsigned *id, const char *ip)
 {
     printf("!-> Process was removed from ring! It's ID is:%u, it's ip adress is:%s\n", *id, ip);
+}
+
+void print_sending_message_to(const unsigned id, const char *ip, const int type)
+{
+    char msgType[20];
+    get_str_of_message_type(msgType, type);
+    printf("!-> Message has been send to process with ID:%u. It's IP is:%s. Type of message:%s\n", id, ip, msgType);
 }

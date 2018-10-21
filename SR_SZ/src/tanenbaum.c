@@ -88,37 +88,61 @@ void find_ip(unsigned id, char* ip)
     ip[j - 1] = '\0';
 }
 
+int get_idx_from_id_arr(unsigned id)
+{
+    //we return idx if we find id in array, otherwise we return -1.
+    int i;
+    for (i = 0; i < ring_info.process_counter; i++)
+    {
+        if (id == ring_info.id_arr[i])
+            return i;
+    }
+
+    return -1;
+}
+
 void handle_message(struct Message *msg)
 {
+    find_ip(msg -> sender_id, ring_info.tmp_ip);
+    print_received_message_from(msg -> sender_id, ring_info.tmp_ip, msg -> type);
+
     switch (msg -> type)
     {
     case EmptyMessage:
         return;
 
     case ConnectionRequest:
+        msg -> type = EmptyMessage;
         return;
 
         //Shouldn't be here, put it here just in case. It's handled in other place.
     case ConnectionAccepted:
         print_message_should_not_be_handled();
+        msg -> type = EmptyMessage;
         return;
 
     case Election:
+        msg -> type = EmptyMessage;
         return;
 
     case CheckConnection:
+        msg -> type = EmptyMessage;
         return;
 
     case ConnectionsConfirm:
+        msg -> type = EmptyMessage;
         return;
 
     case AddProcess:
+        msg -> type = EmptyMessage;
         return;
 
     case RemoveProcess:
+        msg -> type = EmptyMessage;
         return;
 
     case RequestRingInfo:
+        msg -> type = EmptyMessage;
         return;
 
         //It's also handled in other place.
@@ -159,13 +183,15 @@ bool prepare_process(bool is_start_node, const unsigned time, const char *ip, co
             if(msg.type == ConnectionRequest)
             {
                 if(add_new_process_to_ring(msg.ip))
-                {
-                    msg.type = ConnectionAccepted;
+                {                    
                     msg.original_sender_id = ring_info.id_arr[ring_info.process_counter];
+                    print_received_message_from(msg.original_sender_id, msg.ip, msg.type);
+                    msg.type = ConnectionAccepted;
                     convert_int_to_string(msg.ip, ring_info.process_counter);
                     //we use ip field to send how many processes are in the ring.
                     find_ip(ring_info.id_arr[ring_info.process_counter], ring_info.tmp_ip);
                     sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, port);
+                    print_sending_message_to(ring_info.id_arr[ring_info.process_counter], ring_info.tmp_ip, msg.type);
                     msg.type = EmptyMessage;
                 }
 
@@ -188,10 +214,12 @@ bool prepare_process(bool is_start_node, const unsigned time, const char *ip, co
 
             if(msg.type == ConnectionAccepted)
             {
+                print_received_message_from(msg.sender_id, "Not known yet", msg.type);
                 ring_info.process_id = msg.original_sender_id;
                 //Because ip field is unsued in this case, it's used to send other info.
                 ring_info.process_counter = atoi(msg.ip);
                 call_for_info_about_other_processes(ip);
+                msg.type = EmptyMessage;
                 break;
             }
         }
@@ -314,5 +342,27 @@ bool remove_process_from_ring(const unsigned id)
 
 void run()
 {
-    print_process_works(ring_info.port);
+    print_process_works(ring_info.port, ring_info.process_id);
+}
+
+void send_message_to_next_process(struct Message *msg)
+{
+    if (ring_info.process_id != msg -> original_sender_id)
+    {
+        //Jump to the beggining  of array if this process is the last process in array.
+        if(get_idx_from_id_arr(ring_info.process_id) == (ring_info.process_counter - 1))
+        {
+            find_ip(ring_info.id_arr[0], ring_info.tmp_ip);
+            print_sending_message_to(ring_info.id_arr[0], ring_info.tmp_ip, msg -> type);
+        }
+
+        //Otherwise just send it to the next process in array
+        else
+        {
+           find_ip((get_idx_from_id_arr(ring_info.process_id) + 1), ring_info.tmp_ip);
+           print_sending_message_to((ring_info.process_id + 1), ring_info.tmp_ip, msg -> type);
+        }
+
+        sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+    }
 }

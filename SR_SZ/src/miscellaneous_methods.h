@@ -7,11 +7,14 @@ bool check_ip(const char* ip_from_arg, char** ip);
 bool check_port(const char *arg_port, unsigned *port);
 bool check_time(const char *arg_time, unsigned *time);
 void convert_int_to_string(char* str, int integer);
+void get_str_of_message_type(char *str, const int type);
 void print_added_new_process(const char *ip);
 void print_allocate_failed();
 void print_help();
 void print_message_should_not_be_handled();
-void print_process_works(unsigned port);
+void print_process_works(unsigned port, unsigned id);
+void print_received_message_from(const unsigned id, const char *ip, const int type);
 void print_remove_process(const unsigned *id, const char *ip);
+void print_sending_message_to(const unsigned id, const char *ip, const int type);
 
 #endif
