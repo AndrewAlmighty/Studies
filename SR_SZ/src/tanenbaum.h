@@ -56,7 +56,7 @@ bool remove_process_from_ring(const unsigned id);
 void run();
 
 //If the message has not gone through all processes, send it to next process.
-void send_message_to_next_process(struct Message *msg);
+bool send_message_to_next_process(struct Message *msg);
 
 //Wait for x seconds for specific message. Handle others messages meanwhile.
 bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Message *msg);
