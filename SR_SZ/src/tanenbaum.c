@@ -45,7 +45,6 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
 
         while(!break_loop)
         {
-            sleep(1);
             checkMessageBox(&ring_info.socket, &msg);
             if (msg.type == SomeRingInfo)
                 break_loop = true;
@@ -436,12 +435,14 @@ void run()
     msg.type = EmptyMessage;
 
     bool checking_connection = false;
-   // bool checking_leader = false;
+    // bool checking_leader = false;
     unsigned stopwatch_cc = 0;
-  //  unsigned stopwatch_cl = 0;
+    //  unsigned stopwatch_cl = 0;
+    bool mailbox_checked;
 
     while (1)
     {
+        mailbox_checked = false;
         if (ring_info.is_leader)
         {
             if (!checking_connection && stopwatch_cc >= ring_info.checkConnection_time)
@@ -449,7 +450,12 @@ void run()
                 checking_connection = true;
                 msg.type = CheckConnection;
                 msg.original_sender_id = ring_info.process_id;
-                send_message_to_next_process(&msg);
+                unsigned node_id = (unsigned)get_idx_from_id_arr(ring_info.process_id);
+                node_id = ring_info.id_arr[node_id + 1];
+                find_ip(node_id, ring_info.tmp_ip);
+                sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+                print_sending_message_to(node_id, ring_info.tmp_ip, msg.type);
+                msg.type = EmptyMessage;
             }
 
             else if (!checking_connection && stopwatch_cc < ring_info.checkConnection_time)
@@ -462,10 +468,11 @@ void run()
             }
         }
 
-        while (msg.type != EmptyMessage)
+        while(msg.type != EmptyMessage || !mailbox_checked)
         {
-            checkMessageBox(&ring_info.socket, &msg);
             handle_message(&msg, true);
+            checkMessageBox(&ring_info.socket, &msg);
+            mailbox_checked = true;
         }
 
         sleep(1);
@@ -479,10 +486,12 @@ bool send_message_to_next_process(struct Message *msg)
 
     unsigned tmp_id;
 
+    printf("hujowo\n");
     //Jump to the beggining  of array if this process is the last process in array.
-    if (get_idx_from_id_arr(ring_info.process_id) == (ring_info.process_counter - 1))
+    if (ring_info.id_arr[get_idx_from_id_arr(ring_info.process_id)] == ring_info.id_arr[ring_info.process_counter - 1])
     {
-        tmp_id = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_id + 1, msg -> ip);
+        printf("tu 1\n");
+        tmp_id = check_if_to_avoid_process(ring_info.id_arr, 0, msg -> ip);
         find_ip(tmp_id, ring_info.tmp_ip);
         print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
     }
@@ -490,12 +499,14 @@ bool send_message_to_next_process(struct Message *msg)
     //Otherwise just send it to the next process in array
     else
     {
+        printf("tu 2\n");
         tmp_id = check_if_to_avoid_process(ring_info.id_arr, (get_idx_from_id_arr(ring_info.process_id) + 1), msg -> ip);
         find_ip(tmp_id, ring_info.tmp_ip);
         print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
     }
 
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+    msg -> type = EmptyMessage;
     return true;
 }
 
@@ -512,6 +523,7 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
                 return true;
 
             handle_message(msg, true);
+            printf("--TU jest prlbmes");
         }
 
         sleep(1);
