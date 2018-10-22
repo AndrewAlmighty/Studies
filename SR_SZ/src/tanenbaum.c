@@ -31,15 +31,16 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
 {
     struct Message msg;
     msg.type = EmptyMessage;
-    unsigned i;
+    unsigned i, nodes_in_ring = ring_info.process_counter;
+    ring_info.process_counter = 0;
     bool break_loop;
 
-    for (i = 0; i < ring_info.process_counter; i++)
+    for (i = 0; i < nodes_in_ring; i++)
     {
         msg.type = RequestRingInfo;
         convert_int_to_string(msg.ip, i);
         sendMessage(&ring_info.socket, &msg, ring_info.process_id, ip, &ring_info.port);
-        print_sending_message_to(node_id, ip, msg.type);
+ //       print_sending_message_to(node_id, ip, msg.type);
         msg.type = EmptyMessage;
         break_loop = false;
 
@@ -228,6 +229,7 @@ bool handle_RequestRingInfo(struct Message *msg)
     find_ip(msg -> sender_id, ring_info.tmp_ip);
     msg -> type = SomeRingInfo;
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+    print_sending_message_to((unsigned)tmp, ring_info.tmp_ip, msg -> type);
     return true;
 }
 
@@ -276,7 +278,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
                     msg.original_sender_id = ring_info.id_arr[ring_info.process_counter - 1];
                     print_received_message_from(msg.original_sender_id, msg.ip, msg.type);
                     msg.type = ConnectionAccepted;
-                    convert_int_to_string(msg.ip, ring_info.process_counter - 1);
+                    convert_int_to_string(msg.ip, ring_info.process_counter);
                     //we use ip field to send how many processes are in the ring.
                     find_ip(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip);
                     sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, port);
