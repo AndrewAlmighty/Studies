@@ -103,39 +103,39 @@ void get_str_of_message_type(char *str, const int type)
 {
     switch (type)
     {
-    case 1:
+    case 0:
         strcpy(str, "EmptyMessage");
         break;
 
-    case 2:
+    case 1:
         strcpy(str, "ConnectionRequest");
         break;
 
-    case 3:
+    case 2:
         strcpy(str, "ConnectionAccepted");
         break;
 
-    case 4:
+    case 3:
         strcpy(str, "Election");
         break;
 
-    case 5:
+    case 4:
         strcpy(str, "CheckConnection");
         break;
 
-    case 6:
+    case 5:
         strcpy(str, "AddProcess");
         break;
 
-    case 7:
+    case 6:
         strcpy(str, "RemoveProcess");
         break;
 
-    case 8:
+    case 7:
         strcpy(str, "RequestRingInfo");
         break;
 
-    case 9:
+    case 8:
         strcpy(str, "SomeRingInfo");
         break;
 
@@ -145,9 +145,9 @@ void get_str_of_message_type(char *str, const int type)
     }
 }
 
-void print_added_new_process(const char *ip)
+void print_added_new_process(const unsigned id, const char *ip)
 {
-    printf("!-> New process joined the ring! It's adress is:%s\n", ip);
+    printf("!-> New process joined the ring! It's ID:%u, It's adress is:%s\n", id, ip);
 }
 
 void print_allocate_failed()
@@ -158,7 +158,8 @@ void print_allocate_failed()
 void print_help()
 {
     printf("Example of Tanenbaum algorithm. Usage:\n"
-           "-ip <ip>        -- provide an ip address to which we want to connect\n"
+           "-ip <ip>        -- provide an ip address to which we want to connect. Mandatory if not start mode.\n"
+           "-my_ip <ip>     -- provide our process ip. Mandatory for start mode.\n"
            "-port <port>    -- provide a port to which we want to connect. Value has to be bigger than 0. Default is 9000\n"
            "-start          -- this is first process in topology, let's start and wait for others\n"
            "-time_cc <sec>  -- set the time [sec] of frequency of checking connection between processes. 15 sec is default.\n"

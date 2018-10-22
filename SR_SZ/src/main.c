@@ -14,6 +14,7 @@ int main(int argc, char** argv)
     {
         int idx;
         bool got_ip = false;
+        bool got_my_ip = false;
         bool got_port = false;
         bool got_time_cc = false;
         bool got_time_cl = false;
@@ -21,12 +22,29 @@ int main(int argc, char** argv)
         bool can_run = false;
 
         char *ip = NULL;
+        char *my_ip = NULL;
         unsigned port = 9000;
         unsigned time_cc = 15;
         unsigned time_cl = 40;
 
         for (idx = 1; idx < argc; idx++)
         {
+            if (strcmp(argv[idx], "-my_ip") == 0 && got_my_ip)
+            {
+                print_help();
+                break;
+            }
+
+            else if (strcmp(argv[idx], "-my_ip") == 0 && !got_my_ip && (idx + 1) < argc)
+            {
+                got_my_ip = check_ip(argv[idx + 1], &my_ip);
+
+                if(!got_my_ip)
+                    break;
+
+                continue;
+            }
+
             if (strcmp(argv[idx], "-ip") == 0 && got_ip)
             {
                 print_help();
@@ -89,11 +107,11 @@ int main(int argc, char** argv)
                 is_start_node = true;
         }
 
-        if (is_start_node)
-            can_run = prepare_process(true, time_cc, time_cl, &port, ip);
+        if (is_start_node && got_my_ip)
+            can_run = prepare_process(true, time_cc, time_cl, &port, my_ip, ip);
 
         else if (!is_start_node && got_ip)
-            can_run = prepare_process(false, time_cc, time_cl, &port, ip);
+            can_run = prepare_process(false, time_cc, time_cl, &port, my_ip, ip);
 
         else
             print_help();

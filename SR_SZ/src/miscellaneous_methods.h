@@ -9,7 +9,7 @@ bool check_port(const char *arg_port, unsigned *port);
 bool check_time(const char *arg_time, unsigned *time);
 void convert_int_to_string(char* str, int integer);
 void get_str_of_message_type(char *str, const int type);
-void print_added_new_process(const char *ip);
+void print_added_new_process(const unsigned id, const char *ip);
 void print_allocate_failed();
 void print_help();
 void print_message_should_not_be_handled();

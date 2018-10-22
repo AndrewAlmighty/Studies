@@ -48,7 +48,7 @@ bool handle_RequestRingInfo(struct Message *msg);
 //---------------- Message handlers ---------------------------
 
 //This method creates socket and do everything what is needed before we join/create the ring.
-bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *ip);
+bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char* my_ip, const char *ip);
 
 //clear the ring structure.
 void remove_all_processes_from_ring();

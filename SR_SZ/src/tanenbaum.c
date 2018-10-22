@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <stdio.h>
 #include "tanenbaum.h"
 
 bool add_new_process_to_ring(const char* ip)
@@ -20,10 +20,10 @@ bool add_new_process_to_ring(const char* ip)
     }
 
     ring_info.id_arr[ring_info.process_counter - 1] = ring_info.id_counter;
+    print_added_new_process(ring_info.id_arr[ring_info.process_counter - 1], ip);
     strcat(ring_info.ip_arr, ip);
     strcat(ring_info.ip_arr, ";");
     ring_info.id_counter += 1;
-    print_added_new_process(ip);
     return true;
 }
 
@@ -224,7 +224,7 @@ bool handle_RequestRingInfo(struct Message *msg)
 
 }
 
-bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *ip)
+bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *my_ip, const char *ip)
 {
     //At start we don't have any process in the ring.
     ring_info.process_counter = 0;
@@ -249,7 +249,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
         ring_info.is_leader = true;
         ring_info.leader_id = 0;
         ring_info.process_id = 0;
-        add_new_process_to_ring("127.0.0.1");
+        add_new_process_to_ring(my_ip);
 
         while(1)
         {
@@ -258,15 +258,15 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
             if(msg.type == ConnectionRequest)
             {
                 if(add_new_process_to_ring(msg.ip))
-                {                    
-                    msg.original_sender_id = ring_info.id_arr[ring_info.process_counter];
+                {
+                    msg.original_sender_id = ring_info.id_arr[ring_info.process_counter - 1];
                     print_received_message_from(msg.original_sender_id, msg.ip, msg.type);
                     msg.type = ConnectionAccepted;
-                    convert_int_to_string(msg.ip, ring_info.process_counter);
+                    convert_int_to_string(msg.ip, ring_info.process_counter - 1);
                     //we use ip field to send how many processes are in the ring.
-                    find_ip(ring_info.id_arr[ring_info.process_counter], ring_info.tmp_ip);
+                    find_ip(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip);
                     sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, port);
-                    print_sending_message_to(ring_info.id_arr[ring_info.process_counter], ring_info.tmp_ip, msg.type);
+                    print_sending_message_to(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip, msg.type);
                     msg.type = EmptyMessage;
                 }
 
