@@ -432,6 +432,7 @@ void run()
 
     while (1)
     {
+        checkMessageBox(ring_info.socket, &msg);
         handle_message(&msg);
     }
 }
