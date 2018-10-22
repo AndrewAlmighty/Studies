@@ -464,7 +464,10 @@ void run()
             if (checking_connection)
             {
                 if(wait_for_specific_message(10, CheckConnection, &msg))
+                {
+                    stopwatch_cc = 0;
                     checking_connection = false;
+                }
             }
         }
 
@@ -486,11 +489,9 @@ bool send_message_to_next_process(struct Message *msg)
 
     unsigned tmp_id;
 
-    printf("hujowo\n");
     //Jump to the beggining  of array if this process is the last process in array.
     if (ring_info.id_arr[get_idx_from_id_arr(ring_info.process_id)] == ring_info.id_arr[ring_info.process_counter - 1])
     {
-        printf("tu 1\n");
         tmp_id = check_if_to_avoid_process(ring_info.id_arr, 0, msg -> ip);
         find_ip(tmp_id, ring_info.tmp_ip);
         print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
@@ -499,7 +500,6 @@ bool send_message_to_next_process(struct Message *msg)
     //Otherwise just send it to the next process in array
     else
     {
-        printf("tu 2\n");
         tmp_id = check_if_to_avoid_process(ring_info.id_arr, (get_idx_from_id_arr(ring_info.process_id) + 1), msg -> ip);
         find_ip(tmp_id, ring_info.tmp_ip);
         print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
@@ -513,17 +513,18 @@ bool send_message_to_next_process(struct Message *msg)
 bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Message *msg)
 {
     int i = 0;
+    bool checked_msg_box;
     for (i = 0; i < sec; i++)
     {
-        while(msg -> type != EmptyMessage)
+        checked_msg_box = false;
+        while(msg -> type != EmptyMessage || !checked_msg_box)
         {
-            checkMessageBox(&ring_info.socket, msg);
-
-            if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
-                return true;
-
             handle_message(msg, true);
-            printf("--TU jest prlbmes");
+            checkMessageBox(&ring_info.socket, msg);
+            if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
+                return true;            
+
+        checked_msg_box = true;
         }
 
         sleep(1);
