@@ -224,12 +224,14 @@ bool handle_RequestRingInfo(struct Message *msg)
 
 }
 
-bool prepare_process(bool is_start_node, const unsigned time, const char *ip, const unsigned *port)
+bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const char *ip, const unsigned *port)
 {
     //At start we don't have any process in the ring.
     ring_info.process_counter = 0;
     ring_info.id_counter = 0;
     ring_info.port = *port;
+    ring_info.checkConnection_time = time_cc;
+    ring_info.checkLeader_time = time_cl;
 
     //1.Create a socket
     if (createAndBindSocket(&ring_info.socket, port) == NotWorking)

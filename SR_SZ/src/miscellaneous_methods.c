@@ -124,22 +124,18 @@ void get_str_of_message_type(char *str, const int type)
         break;
 
     case 6:
-        strcpy(str, "ConnectionsConfirm");
-        break;
-
-    case 7:
         strcpy(str, "AddProcess");
         break;
 
-    case 8:
+    case 7:
         strcpy(str, "RemoveProcess");
         break;
 
-    case 9:
+    case 8:
         strcpy(str, "RequestRingInfo");
         break;
 
-    case 10:
+    case 9:
         strcpy(str, "SomeRingInfo");
         break;
 
@@ -165,7 +161,8 @@ void print_help()
            "-ip <ip>        -- provide an ip address to which we want to connect\n"
            "-port <port>    -- provide a port to which we want to connect. Value has to be bigger than 0. Default is 9000\n"
            "-start          -- this is first process in topology, let's start and wait for others\n"
-           "-time <sec>     -- set the time of frequency of checking connection\n");
+           "-time_cc <sec>  -- set the time [sec] of frequency of checking connection between processes. 15 sec is default.\n"
+           "-time_cl <sec>  -- set the time [sec] of frequency of checking leader. 40 sec is default.\n");
 }
 
 void print_message_should_not_be_handled()

@@ -15,13 +15,15 @@ int main(int argc, char** argv)
         int idx;
         bool got_ip = false;
         bool got_port = false;
-        bool got_time = false;
+        bool got_time_cc = false;
+        bool got_time_cl = false;
         bool is_start_node = false;
         bool can_run = false;
 
         char *ip = NULL;
         unsigned port = 9000;
-        unsigned time = 10;
+        unsigned time_cc = 15;
+        unsigned time_cl = 40;
 
         for (idx = 1; idx < argc; idx++)
         {
@@ -54,14 +56,27 @@ int main(int argc, char** argv)
                 continue;
             }
 
-            if (strcmp(argv[idx], "-time") == 0 && got_time)
+            if (strcmp(argv[idx], "-time_cc") == 0 && got_time_cc)
                 break;
 
-            else if (strcmp(argv[idx], "-time") == 0 && !got_time && (idx + 1) < argc)
+            else if (strcmp(argv[idx], "-time_cc") == 0 && !got_time_cc && (idx + 1) < argc)
             {
-                got_time = check_time(argv[idx + 1], &time);
+                got_time_cc = check_time(argv[idx + 1], &time_cc);
 
-                if(!got_time)
+                if(!got_time_cc)
+                    break;
+
+                continue;
+            }
+
+            if (strcmp(argv[idx], "-time_cl") == 0 && got_time_cl)
+                break;
+
+            else if (strcmp(argv[idx], "-time_cl") == 0 && !got_time_cl && (idx + 1) < argc)
+            {
+                got_time_cl = check_time(argv[idx + 1], &time_cl);
+
+                if(!got_time_cl)
                     break;
 
                 continue;
@@ -75,10 +90,10 @@ int main(int argc, char** argv)
         }
 
         if (is_start_node)
-            can_run = prepare_process(true, time, ip, &port);
+            can_run = prepare_process(true, time_cc, time_cl, ip, &port);
 
-        else if (got_ip)
-            can_run = prepare_process(true, time, ip, &port);
+        else if (!is_start_node && got_ip)
+            can_run = prepare_process(true, time_cc, time_cl, ip, &port);
 
         else
             print_help();
