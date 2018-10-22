@@ -45,11 +45,12 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
 
         while(!break_loop)
         {
+            sleep(1);
             checkMessageBox(&ring_info.socket, &msg);
             if (msg.type == SomeRingInfo)
                 break_loop = true;
 
-            handle_message(&msg);
+            handle_message(&msg, false);
         }
     }
 }
@@ -103,9 +104,9 @@ int get_idx_from_id_arr(unsigned id)
     return -1;
 }
 
-void handle_message(struct Message *msg)
+void handle_message(struct Message *msg, bool is_ready)
 {
-    if (msg -> type != EmptyMessage)
+    if ((msg -> type != EmptyMessage && msg -> type != SomeRingInfo) && is_ready)
     {
         find_ip(msg -> sender_id, ring_info.tmp_ip);
         print_received_message_from(msg -> sender_id, ring_info.tmp_ip, msg -> type);
@@ -113,6 +114,7 @@ void handle_message(struct Message *msg)
 
     switch (msg -> type)
     {
+
     case EmptyMessage:
         return;
 
@@ -224,6 +226,7 @@ bool handle_RequestRingInfo(struct Message *msg)
     find_ip((unsigned)tmp, msg -> ip);
     msg -> original_sender_id = (unsigned)tmp;  //we send id of process with that field.
     find_ip(msg -> sender_id, ring_info.tmp_ip);
+    msg -> type = SomeRingInfo;
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
     return true;
 }
@@ -432,8 +435,8 @@ void run()
 
     while (1)
     {
-        checkMessageBox(ring_info.socket, &msg);
-        handle_message(&msg);
+        checkMessageBox(&ring_info.socket, &msg);
+        handle_message(&msg, true);
     }
 }
 
@@ -476,7 +479,7 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
             if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
                 return true;
 
-            handle_message(msg);
+            handle_message(msg, true);
         }
 
         sleep(1);

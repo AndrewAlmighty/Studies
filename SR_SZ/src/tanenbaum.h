@@ -35,7 +35,7 @@ void find_ip(unsigned id, char* ip);
 int get_idx_from_id_arr(unsigned id);
 
 //Handle incoming message
-void handle_message(struct Message *msg);
+void handle_message(struct Message *msg, bool is_ready);
 
 // --------------- Message handlers ---------------------------
 
