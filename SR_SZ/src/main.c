@@ -63,7 +63,7 @@ int main(int argc, char** argv)
             {
                 got_time_cc = check_time(argv[idx + 1], &time_cc);
 
-                if(!got_time_cc)
+                if (!got_time_cc)
                     break;
 
                 continue;
@@ -90,10 +90,10 @@ int main(int argc, char** argv)
         }
 
         if (is_start_node)
-            can_run = prepare_process(true, time_cc, time_cl, ip, &port);
+            can_run = prepare_process(true, time_cc, time_cl, &port, ip);
 
         else if (!is_start_node && got_ip)
-            can_run = prepare_process(true, time_cc, time_cl, ip, &port);
+            can_run = prepare_process(false, time_cc, time_cl, &port, ip);
 
         else
             print_help();

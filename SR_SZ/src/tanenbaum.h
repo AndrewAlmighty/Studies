@@ -14,6 +14,7 @@ struct RingInfo
     unsigned checkConnection_time;  //check connection every [checkConnection_time] seconds.
     unsigned checkLeader_time;      //process will check leader every [checkLeader_time] seconds.
     unsigned *id_arr;               //keeps IDs of processes in the ring
+    unsigned leader_id;             //keeps leader's id.
     bool is_leader;                 //is this process is a leader
     char tmp_ip[16];                //here we keep ip for short time. We avoid to create other pointers.
     char *ip_arr;                   //keeps ips of processes. Format of this array is: <ip>;<ip>;
@@ -47,7 +48,7 @@ bool handle_RequestRingInfo(struct Message *msg);
 //---------------- Message handlers ---------------------------
 
 //This method creates socket and do everything what is needed before we join/create the ring.
-bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const char *ip, const unsigned *port);
+bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *ip);
 
 //clear the ring structure.
 void remove_all_processes_from_ring();

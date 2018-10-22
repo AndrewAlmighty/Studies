@@ -224,7 +224,7 @@ bool handle_RequestRingInfo(struct Message *msg)
 
 }
 
-bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const char *ip, const unsigned *port)
+bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *ip)
 {
     //At start we don't have any process in the ring.
     ring_info.process_counter = 0;
@@ -247,6 +247,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
     if (is_start_node == true)
     {
         ring_info.is_leader = true;
+        ring_info.leader_id = 0;
         ring_info.process_id = 0;
         add_new_process_to_ring("127.0.0.1");
 
