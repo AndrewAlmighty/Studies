@@ -233,19 +233,19 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
     ring_info.checkConnection_time = time_cc;
     ring_info.checkLeader_time = time_cl;
 
-    //1.Create a socket
-    if (createAndBindSocket(&ring_info.socket, port) == NotWorking)
-        return false;
-
-    //2. Create a message which will handle the first message.
+    //1. Create a message which will handle the first message.
     struct Message msg;
     msg.type = EmptyMessage;
 
-    /* 3a. If it's start mode and we wait for another process to connect and create a ring,
+    /* 2a. If it's start mode and we wait for another process to connect and create a ring,
      * wait for other process to connect. This process became a leader. It's ID is 0.
      */
     if (is_start_node == true)
     {
+        //Create a socket
+        if (createAndBindSocket(&ring_info.socket, port) == NotWorking)
+            return false;
+
         ring_info.is_leader = true;
         ring_info.leader_id = 0;
         ring_info.process_id = 0;
@@ -275,7 +275,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
         }
     }
 
-    /* 3b. If it's not a start mode, we send request for conenction to other process.
+    /* 2b. If it's not a start mode, we send request for conenction to other process.
      * When we got ConnectionAccepted message, we have joined the ring.
      */
     else
