@@ -40,7 +40,6 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
         msg.type = RequestRingInfo;
         convert_int_to_string(msg.ip, i);
         sendMessage(&ring_info.socket, &msg, ring_info.process_id, ip, &ring_info.port);
- //       print_sending_message_to(node_id, ip, msg.type);
         msg.type = EmptyMessage;
         break_loop = false;
 
@@ -181,6 +180,7 @@ bool handle_AddProcess(struct Message *msg)
 
 bool handle_CheckConnection(struct Message *msg)
 {
+    ring_info.leader_id = msg -> original_sender_id;
     send_message_to_next_process(msg);
     return true;
 }
@@ -435,10 +435,40 @@ void run()
     struct Message msg;
     msg.type = EmptyMessage;
 
+    bool checking_connection = false;
+   // bool checking_leader = false;
+    unsigned stopwatch_cc = 0;
+  //  unsigned stopwatch_cl = 0;
+
     while (1)
     {
-        checkMessageBox(&ring_info.socket, &msg);
-        handle_message(&msg, true);
+        if (ring_info.is_leader)
+        {
+            if (!checking_connection && stopwatch_cc >= ring_info.checkConnection_time)
+            {
+                checking_connection = true;
+                msg.type = CheckConnection;
+                msg.original_sender_id = ring_info.process_id;
+                send_message_to_next_process(&msg);
+            }
+
+            else if (!checking_connection && stopwatch_cc < ring_info.checkConnection_time)
+                stopwatch_cc += 1;
+
+            if (checking_connection)
+            {
+                if(wait_for_specific_message(10, CheckConnection, &msg))
+                    checking_connection = false;
+            }
+        }
+
+        while (msg.type != EmptyMessage)
+        {
+            checkMessageBox(&ring_info.socket, &msg);
+            handle_message(&msg, true);
+        }
+
+        sleep(1);
     }
 }
 

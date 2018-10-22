@@ -14,7 +14,7 @@ struct RingInfo
     unsigned checkConnection_time;  //check connection every [checkConnection_time] seconds.
     unsigned checkLeader_time;      //process will check leader every [checkLeader_time] seconds.
     unsigned *id_arr;               //keeps IDs of processes in the ring
-    unsigned leader_id;             //keeps leader's id.
+    int leader_id;                  //keeps leader's id. If -1, we don't know who is he.
     bool is_leader;                 //is this process is a leader
     char tmp_ip[16];                //here we keep ip for short time. We avoid to create other pointers.
     char *ip_arr;                   //keeps ips of processes. Format of this array is: <ip>;<ip>;
