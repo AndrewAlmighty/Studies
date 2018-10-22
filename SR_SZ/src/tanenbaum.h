@@ -38,6 +38,7 @@ void handle_message(struct Message *msg);
 // --------------- Message handlers ---------------------------
 
 bool handle_AddProcess(struct Message *msg);
+bool handle_CheckConnection(struct Message *msg);
 bool handle_ConnectionRequest(struct Message *msg);
 bool handle_RemoveProcess(struct Message *msg);
 bool handle_RequestRingInfo(struct Message *msg);

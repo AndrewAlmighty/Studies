@@ -12,7 +12,6 @@ enum MessageType
     ConnectionAccepted,     //Connection accepted
     Election,               //Let's make the leader election.
     CheckConnection,        //Leader calls for checking connection.
-    ConnectionsConfirm,     //Process confirms that he is online
     AddProcess,             //Add process to list
     RemoveProcess,          //Remove process from the list
     RequestRingInfo,        //Request for list of processes in our ring. Used when we join the ring.

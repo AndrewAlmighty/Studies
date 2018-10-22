@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+unsigned check_if_to_avoid_process(unsigned *arr, unsigned idx, char* str_id);
 bool check_ip(const char* ip_from_arg, char** ip);
 bool check_port(const char *arg_port, unsigned *port);
 bool check_time(const char *arg_time, unsigned *time);

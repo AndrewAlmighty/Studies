@@ -6,6 +6,22 @@
 #include "miscellaneous_methods.h"
 #include "stdio.h"
 
+unsigned check_if_to_avoid_process(unsigned *arr, unsigned idx, char *str_id)
+{
+    //check if we have an order to avoid next process. If str_id is not a number just return a good id.
+    int i, len = strlen(str_id);
+    for (i = 0; i < len; i++)
+    {
+        if (!isdigit(str_id[i]))
+            return arr[idx];
+    }
+
+    if (arr[idx] == atoi(str_id))
+        idx += 1;
+
+    return arr[idx];
+}
+
 bool check_ip(const char* ip_from_arg, char** ip)
 {
     unsigned i, k = 0, l = 0, len = strlen(ip_from_arg);   //k is used to count numbers between '.', l is used to count '.'.

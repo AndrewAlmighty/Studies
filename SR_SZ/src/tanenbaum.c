@@ -128,10 +128,7 @@ void handle_message(struct Message *msg)
         return;
 
     case CheckConnection:
-        msg -> type = EmptyMessage;
-        return;
-
-    case ConnectionsConfirm:
+        handle_CheckConnection(msg);
         msg -> type = EmptyMessage;
         return;
 
@@ -175,6 +172,12 @@ bool handle_AddProcess(struct Message *msg)
     return true;
 }
 
+bool handle_CheckConnection(struct Message *msg)
+{
+    send_message_to_next_process(msg);
+    return true;
+}
+
 bool handle_ConnectionRequest(struct Message *msg)
 {
     if (add_new_process_to_ring(msg -> ip))
@@ -196,13 +199,12 @@ bool handle_ConnectionRequest(struct Message *msg)
 
 bool handle_RemoveProcess(struct Message *msg)
 {
+    remove_process_from_ring(atoi(msg -> ip));
+
     if (!send_message_to_next_process(msg))
         return false;
 
-    if (remove_process_from_ring(atoi(msg -> ip)))
-        return true;
-
-    return false;
+    return true;
 }
 
 bool handle_RequestRingInfo(struct Message *msg)
@@ -418,20 +420,23 @@ bool send_message_to_next_process(struct Message *msg)
     if (msg -> original_sender_id == ring_info.process_id)
         return false;
 
+    unsigned tmp_id;
+
     //Jump to the beggining  of array if this process is the last process in array.
-    if(get_idx_from_id_arr(ring_info.process_id) == (ring_info.process_counter - 1))
+    if (get_idx_from_id_arr(ring_info.process_id) == (ring_info.process_counter - 1))
     {
-        find_ip(ring_info.id_arr[0], ring_info.tmp_ip);
-        print_sending_message_to(ring_info.id_arr[0], ring_info.tmp_ip, msg -> type);
+        tmp_id = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_id + 1, msg -> ip);
+        find_ip(tmp_id, ring_info.tmp_ip);
+        print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
     }
 
     //Otherwise just send it to the next process in array
     else
     {
-        find_ip((get_idx_from_id_arr(ring_info.process_id) + 1), ring_info.tmp_ip);
-        print_sending_message_to((ring_info.process_id + 1), ring_info.tmp_ip, msg -> type);
+        tmp_id = check_if_to_avoid_process(ring_info.id_arr, (get_idx_from_id_arr(ring_info.process_id) + 1), msg -> ip);
+        find_ip(tmp_id, ring_info.tmp_ip);
+        print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
     }
-
 
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
     return true;
