@@ -17,6 +17,7 @@ void print_process_works(unsigned port, unsigned id);
 void print_received_message_from(const unsigned id, const char *ip, const int type);
 void print_remove_process(const unsigned *id, const char *ip);
 void print_sending_message_to(const unsigned id, const char *ip, const int type);
+void print_some_process_doesnt_work();
 void print_terminate();
 void print_timeout_reached();
 

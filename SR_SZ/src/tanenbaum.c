@@ -463,10 +463,43 @@ void run()
 
             if (checking_connection)
             {
-                if(wait_for_specific_message(10, CheckConnection, &msg))
+                unsigned i = 0;
+                while(1)
                 {
-                    stopwatch_cc = 0;
-                    checking_connection = false;
+                    if(wait_for_specific_message(10, CheckConnection, &msg))
+                    {
+                        stopwatch_cc = 0;
+                        checking_connection = false;
+                    }
+
+                    else
+                    {
+                        print_some_process_doesnt_work();
+                        unsigned idx_of_this_process = (unsigned)get_idx_from_id_arr(ring_info.process_id);
+                        if (ring_info.process_id == ring_info.id_arr[ring_info.process_counter - 1 - i])
+                            i += 1;
+
+                        convert_int_to_string(msg.ip, ring_info.id_arr[ring_info.process_counter - 1 - i]);
+                        msg.type = CheckConnection;
+                        msg.original_sender_id = ring_info.process_id;
+                        unsigned node_id = idx_of_this_process;
+                        if (ring_info.id_arr[node_id + 1] == atoi(msg.ip))
+                            node_id += 1;
+
+                        node_id = ring_info.id_arr[node_id + 1];
+                        find_ip(node_id, ring_info.tmp_ip);
+                        sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
+                        print_sending_message_to(node_id, ring_info.tmp_ip, msg.type);
+                        msg.type = EmptyMessage;
+                    }
+
+                    i += 1;
+
+                    if (i >= ring_info.process_counter)
+                    {
+                        print_terminate();
+                        return;
+                    }
                 }
             }
         }
@@ -522,7 +555,7 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
             handle_message(msg, true);
             checkMessageBox(&ring_info.socket, msg);
             if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
-                return true;            
+                return true;
 
         checked_msg_box = true;
         }

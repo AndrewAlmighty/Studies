@@ -195,6 +195,11 @@ void print_sending_message_to(const unsigned id, const char *ip, const int type)
     printf("!-> Message has been send to process with ID:%u. It's IP is:%s. Type of message:%s\n", id, ip, msgType);
 }
 
+void print_some_process_doesnt_work()
+{
+    printf("!!!-> CheckConnection message didn't come back. Some process doesn't work. Repeating ...\n");
+}
+
 void print_terminate()
 {
     printf("Terminating this process ...\n");
