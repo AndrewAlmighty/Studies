@@ -27,7 +27,7 @@ bool add_new_process_to_ring(const char* ip)
     return true;
 }
 
-void call_for_info_about_other_processes(const char *ip)
+void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
 {
     struct Message msg;
     msg.type = EmptyMessage;
@@ -39,6 +39,7 @@ void call_for_info_about_other_processes(const char *ip)
         msg.type = RequestRingInfo;
         convert_int_to_string(msg.ip, i);
         sendMessage(&ring_info.socket, &msg, ring_info.process_id, ip, &ring_info.port);
+        print_sending_message_to(node_id, ip, msg.type);
         msg.type = EmptyMessage;
         break_loop = false;
 
@@ -104,8 +105,11 @@ int get_idx_from_id_arr(unsigned id)
 
 void handle_message(struct Message *msg)
 {
-    find_ip(msg -> sender_id, ring_info.tmp_ip);
-    print_received_message_from(msg -> sender_id, ring_info.tmp_ip, msg -> type);
+    if (msg -> type != EmptyMessage)
+    {
+        find_ip(msg -> sender_id, ring_info.tmp_ip);
+        print_received_message_from(msg -> sender_id, ring_info.tmp_ip, msg -> type);
+    }
 
     switch (msg -> type)
     {
@@ -147,9 +151,9 @@ void handle_message(struct Message *msg)
         msg -> type = EmptyMessage;
         return;
 
-        //It's also handled in other place.
     case SomeRingInfo:
-        print_message_should_not_be_handled();
+        handle_SomeRingInfo(msg);
+        msg -> type = EmptyMessage;
         return;
     }
 }
@@ -218,10 +222,17 @@ bool handle_RequestRingInfo(struct Message *msg)
         return false;
 
     find_ip((unsigned)tmp, msg -> ip);
+    msg -> original_sender_id = (unsigned)tmp;  //we send id of process with that field.
     find_ip(msg -> sender_id, ring_info.tmp_ip);
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
     return true;
+}
 
+bool handle_SomeRingInfo(struct Message *msg)
+{
+    add_new_process_to_ring(msg -> ip);
+    ring_info.id_arr[ring_info.process_counter - 1] = msg -> original_sender_id;
+    return true;
 }
 
 bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *my_ip, const char *ip)
@@ -293,7 +304,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
                 ring_info.process_id = msg.original_sender_id;
                 //Because ip field is unsued in this case, it's used to send other info.
                 ring_info.process_counter = atoi(msg.ip);
-                call_for_info_about_other_processes(ip);
+                call_for_info_about_other_processes(ip, msg.sender_id);
                 msg.type = EmptyMessage;
                 break;
             }
@@ -416,6 +427,13 @@ bool remove_process_from_ring(const unsigned id)
 void run()
 {
     print_process_works(ring_info.port, ring_info.process_id);
+    struct Message msg;
+    msg.type = EmptyMessage;
+
+    while (1)
+    {
+        handle_message(&msg);
+    }
 }
 
 bool send_message_to_next_process(struct Message *msg)

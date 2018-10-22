@@ -26,7 +26,7 @@ bool add_new_process_to_ring(const char* ip);
 
 //this method ask process to which we connect to send us IDs and IPs of other processes which
 //are also in the same ring.
-void call_for_info_about_other_processes(const char* ip);
+void call_for_info_about_other_processes(const char* ip, const unsigned node_id);
 
 //Find ip of process with a specific identifier. IP is null when we don't find it.
 void find_ip(unsigned id, char* ip);
@@ -44,6 +44,7 @@ bool handle_CheckConnection(struct Message *msg);
 bool handle_ConnectionRequest(struct Message *msg);
 bool handle_RemoveProcess(struct Message *msg);
 bool handle_RequestRingInfo(struct Message *msg);
+bool handle_SomeRingInfo(struct Message *msg);
 
 //---------------- Message handlers ---------------------------
 
