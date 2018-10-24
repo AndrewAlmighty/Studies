@@ -42,7 +42,6 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
         sendMessage(&ring_info.socket, &msg, ring_info.process_id, ip, &ring_info.port);
         msg.type = EmptyMessage;
         break_loop = false;
-
         while(!break_loop)
         {
             checkMessageBox(&ring_info.socket, &msg);
@@ -117,12 +116,6 @@ void handle_message(struct Message *msg, bool is_ready)
     {
         find_ip(msg -> sender_id, ring_info.tmp_ip);
         print_received_message_from(msg -> sender_id, ring_info.tmp_ip, msg -> type);
-    }
-
-    if (msg -> original_sender_id == ring_info.process_id)
-    {
-        msg -> type = EmptyMessage;
-        return;
     }
 
     switch (msg -> type)
@@ -510,6 +503,12 @@ void run()
 
                     else
                     {
+                        if (ring_info.process_counter <= 2)
+                        {
+                            print_terminate("Only one process left in ring");
+                            return;
+                        }
+
                         print_some_process_doesnt_work();
                         idx_of_suspect_process = get_idx_from_id_arr(ring_info.process_id);
                         if (ring_info.process_id == ring_info.id_arr[ring_info.process_counter - 1 - i])
@@ -533,7 +532,7 @@ void run()
 
                     if (i >= ring_info.process_counter)
                     {
-                        print_terminate();
+                        print_terminate("Could find not working process");
                         return;
                     }
                 }
@@ -551,7 +550,7 @@ void run()
         keep_running = are_enough_process_to_continue();
     }
 
-    print_terminate();
+    print_terminate("Not enought process to continue");
 }
 
 bool send_message_to_next_process(struct Message *msg)
@@ -563,20 +562,14 @@ bool send_message_to_next_process(struct Message *msg)
 
     //Jump to the beggining  of array if this process is the last process in array.
     if (ring_info.id_arr[get_idx_from_id_arr(ring_info.process_id)] == ring_info.id_arr[ring_info.process_counter - 1])
-    {
         tmp_id = check_if_to_avoid_process(ring_info.id_arr, 0, msg -> ip);
-        find_ip(tmp_id, ring_info.tmp_ip);
-        print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
-    }
 
     //Otherwise just send it to the next process in array
     else
-    {
         tmp_id = check_if_to_avoid_process(ring_info.id_arr, (get_idx_from_id_arr(ring_info.process_id) + 1), msg -> ip);
-        find_ip(tmp_id, ring_info.tmp_ip);
-        print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
-    }
 
+    find_ip(tmp_id, ring_info.tmp_ip);
+    print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
     msg -> type = EmptyMessage;
     return true;
@@ -594,7 +587,10 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
             handle_message(msg, true);
             checkMessageBox(&ring_info.socket, msg);
             if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
+            {
+                handle_message(msg, true);
                 return true;
+            }
 
         checked_msg_box = true;
         }

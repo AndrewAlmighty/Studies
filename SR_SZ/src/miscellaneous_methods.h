@@ -18,7 +18,7 @@ void print_received_message_from(const unsigned id, const char *ip, const int ty
 void print_remove_process(const unsigned *id, const char *ip);
 void print_sending_message_to(const unsigned id, const char *ip, const int type);
 void print_some_process_doesnt_work();
-void print_terminate();
+void print_terminate(const char* reason);
 void print_timeout_reached();
 
 #endif

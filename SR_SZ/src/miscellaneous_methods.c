@@ -200,9 +200,9 @@ void print_some_process_doesnt_work()
     printf("!!!-> CheckConnection message didn't come back. Some process doesn't work. Repeating ...\n");
 }
 
-void print_terminate()
+void print_terminate(const char *reason)
 {
-    printf("Terminating this process ...\n");
+    printf("!!!-> Process is going to die. Reason:%s. Terminating ...\n", reason);
 }
 
 void print_timeout_reached()
