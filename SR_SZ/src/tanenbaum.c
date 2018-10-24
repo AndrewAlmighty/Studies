@@ -54,6 +54,14 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
     }
 }
 
+bool are_enough_process_to_continue()
+{
+    if (ring_info.process_counter > 1)
+        return true;
+
+    else return false;
+}
+
 void find_ip(unsigned id, char* ip)
 {
     /* Because array of ids can look like [1,3,5] and array of ips is like <ip>;<ip>;<ip>;
@@ -109,6 +117,12 @@ void handle_message(struct Message *msg, bool is_ready)
     {
         find_ip(msg -> sender_id, ring_info.tmp_ip);
         print_received_message_from(msg -> sender_id, ring_info.tmp_ip, msg -> type);
+    }
+
+    if (msg -> original_sender_id == ring_info.process_id)
+    {
+        msg -> type = EmptyMessage;
+        return;
     }
 
     switch (msg -> type)
@@ -438,9 +452,9 @@ void run()
     // bool checking_leader = false;
     unsigned stopwatch_cc = 0;
     //  unsigned stopwatch_cl = 0;
-    bool mailbox_checked;
+    bool mailbox_checked, keep_running = true;
 
-    while (1)
+    while (keep_running)
     {
         mailbox_checked = false;
         if (ring_info.is_leader)
@@ -466,23 +480,45 @@ void run()
                 unsigned i = 0;
                 while(1)
                 {
+                    /* We send message and it should come back here in x sec. If it doesn't come back,
+                     * it means that some process is not working. Then we send message again, but we
+                     * avoid one process. If then message come back to us, that means we found a process
+                     * which is not working, so we remove it from the ring. If it still doesn't come back,
+                     * then we iterate through all ring and if we don't find it, we terminate app because
+                     * something is bad.
+                     */
+
+                    int idx_of_suspect_process = -1;
+
                     if(wait_for_specific_message(10, CheckConnection, &msg))
                     {
                         stopwatch_cc = 0;
                         checking_connection = false;
+
+                        if (idx_of_suspect_process >= 0)
+                        {
+                            remove_process_from_ring(ring_info.id_arr[idx_of_suspect_process]);
+                            struct Message msg;
+                            msg.type = RemoveProcess;
+                            convert_int_to_string(msg.ip, ring_info.id_arr[idx_of_suspect_process]);
+                            msg.original_sender_id = ring_info.process_id;
+                            send_message_to_next_process(&msg);
+                        }
+
+                        break;
                     }
 
                     else
                     {
                         print_some_process_doesnt_work();
-                        unsigned idx_of_this_process = (unsigned)get_idx_from_id_arr(ring_info.process_id);
+                        idx_of_suspect_process = get_idx_from_id_arr(ring_info.process_id);
                         if (ring_info.process_id == ring_info.id_arr[ring_info.process_counter - 1 - i])
                             i += 1;
 
                         convert_int_to_string(msg.ip, ring_info.id_arr[ring_info.process_counter - 1 - i]);
                         msg.type = CheckConnection;
                         msg.original_sender_id = ring_info.process_id;
-                        unsigned node_id = idx_of_this_process;
+                        unsigned node_id = idx_of_suspect_process;
                         if (ring_info.id_arr[node_id + 1] == atoi(msg.ip))
                             node_id += 1;
 
@@ -512,7 +548,10 @@ void run()
         }
 
         sleep(1);
+        keep_running = are_enough_process_to_continue();
     }
+
+    print_terminate();
 }
 
 bool send_message_to_next_process(struct Message *msg)

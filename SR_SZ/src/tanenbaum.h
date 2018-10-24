@@ -28,6 +28,9 @@ bool add_new_process_to_ring(const char* ip);
 //are also in the same ring.
 void call_for_info_about_other_processes(const char* ip, const unsigned node_id);
 
+//Check if in the ring are at least two processes. In other case, terminate.
+bool are_enough_process_to_continue();
+
 //Find ip of process with a specific identifier. IP is null when we don't find it.
 void find_ip(unsigned id, char* ip);
 
