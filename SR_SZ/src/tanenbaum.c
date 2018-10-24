@@ -197,13 +197,18 @@ bool handle_ConnectionRequest(struct Message *msg)
     {
         msg -> type = AddProcess;
         msg -> original_sender_id = ring_info.process_id;
+        msg -> sender_id = ring_info.process_id;
         send_message_to_next_process(msg);
     }
 
     if (wait_for_specific_message(10, AddProcess, msg))
     {
         msg -> type = ConnectionAccepted;
+        msg -> original_sender_id = ring_info.id_arr[ring_info.process_counter - 1];
+        find_ip(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip);
+     //   convert_int_to_string(msg -> ip, ring_info.process_counter);
         sendMessage(&ring_info.socket, msg, ring_info.process_id, msg->ip, &ring_info.port);
+        print_sending_message_to(msg -> original_sender_id, ring_info.tmp_ip, msg -> type);
         return true;
     }
 
@@ -542,6 +547,9 @@ void run()
         while(msg.type != EmptyMessage || !mailbox_checked)
         {
             handle_message(&msg, true);
+            if (msg.type == ConnectionRequest)
+                stopwatch_cc = 0;
+
             checkMessageBox(&ring_info.socket, &msg);
             mailbox_checked = true;
         }
@@ -555,7 +563,7 @@ void run()
 
 bool send_message_to_next_process(struct Message *msg)
 {
-    if (msg -> original_sender_id == ring_info.process_id)
+    if (msg -> original_sender_id == ring_info.process_id && msg -> sender_id != ring_info.process_id)
         return false;
 
     unsigned tmp_id;
