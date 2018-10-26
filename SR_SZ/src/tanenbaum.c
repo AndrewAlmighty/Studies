@@ -38,7 +38,7 @@ void call_for_info_about_other_processes(const char *ip, const unsigned node_id)
     for (i = 0; i < nodes_in_ring; i++)
     {
         msg.type = RequestRingInfo;
-        convert_int_to_string(msg.ip, i);
+        msg.auxiliary_int = i;
         sendMessage(&ring_info.socket, &msg, ring_info.process_id, ip, &ring_info.port);
         msg.type = EmptyMessage;
         break_loop = false;
@@ -169,13 +169,16 @@ void handle_message(struct Message *msg, bool is_ready)
 bool handle_AddProcess(struct Message *msg)
 {
     if (!send_message_to_next_process(msg))
+    {
+        msg -> auxiliary_int = -1;
         return false;
+    }
 
-    if (!add_new_process_to_ring(msg -> ip))
+    if (!add_new_process_to_ring(msg -> text))
     {
         msg -> type = RemoveProcess;
         msg -> original_sender_id = ring_info.process_id;
-        convert_int_to_string(msg -> ip, ring_info.id_counter);
+        msg -> auxiliary_int = ring_info.id_counter;
         send_message_to_next_process(msg);
         wait_for_specific_message(10, RemoveProcess, msg);
         return false;
@@ -193,12 +196,15 @@ bool handle_CheckConnection(struct Message *msg)
 
 bool handle_ConnectionRequest(struct Message *msg)
 {
-    if (add_new_process_to_ring(msg -> ip))
+    if (add_new_process_to_ring(msg -> text))
     {
         msg -> type = AddProcess;
         msg -> original_sender_id = ring_info.process_id;
         msg -> sender_id = ring_info.process_id;
+        msg -> auxiliary_int = ring_info.id_arr[ring_info.process_counter - 1];
+        //we don't want to send this message to new process, so temporary reduce process_counter by one.
         send_message_to_next_process(msg);
+        msg -> auxiliary_int = - 1;
     }
 
     if (wait_for_specific_message(10, AddProcess, msg))
@@ -206,8 +212,8 @@ bool handle_ConnectionRequest(struct Message *msg)
         msg -> type = ConnectionAccepted;
         msg -> original_sender_id = ring_info.id_arr[ring_info.process_counter - 1];
         find_ip(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip);
-     //   convert_int_to_string(msg -> ip, ring_info.process_counter);
-        sendMessage(&ring_info.socket, msg, ring_info.process_id, msg->ip, &ring_info.port);
+        msg -> auxiliary_int = ring_info.process_counter;
+        sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
         print_sending_message_to(msg -> original_sender_id, ring_info.tmp_ip, msg -> type);
         return true;
     }
@@ -217,10 +223,13 @@ bool handle_ConnectionRequest(struct Message *msg)
 
 bool handle_RemoveProcess(struct Message *msg)
 {
-    remove_process_from_ring(atoi(msg -> ip));
+    remove_process_from_ring(msg -> auxiliary_int);
 
     if (!send_message_to_next_process(msg))
+    {
+        msg -> auxiliary_int = -1;
         return false;
+    }
 
     return true;
 }
@@ -231,22 +240,23 @@ bool handle_RequestRingInfo(struct Message *msg)
     if (!get_idx_from_id_arr(msg -> sender_id))
         return false;
 
-    int tmp = get_idx_from_id_arr(atoi(msg -> ip));
+    int tmp = get_idx_from_id_arr(msg -> auxiliary_int);
     if (tmp == -1)
         return false;
 
-    find_ip((unsigned)tmp, msg -> ip);
+    find_ip((unsigned)tmp, msg -> text);
     msg -> original_sender_id = (unsigned)tmp;  //we send id of process with that field.
     find_ip(msg -> sender_id, ring_info.tmp_ip);
     msg -> type = SomeRingInfo;
-    sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
-    print_sending_message_to((unsigned)tmp, ring_info.tmp_ip, msg -> type);
+    print_sending_message_to(msg -> sender_id, ring_info.tmp_ip, msg -> type);
+    sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);    
+    msg -> auxiliary_int = -1;
     return true;
 }
 
 bool handle_SomeRingInfo(struct Message *msg)
 {
-    add_new_process_to_ring(msg -> ip);
+    add_new_process_to_ring(msg -> text);
     ring_info.id_arr[ring_info.process_counter - 1] = msg -> original_sender_id;
     return true;
 }
@@ -263,6 +273,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
     //1. Create a message which will handle the first message.
     struct Message msg;
     msg.type = EmptyMessage;
+    msg.auxiliary_int = -1;
 
     /* 2a. If it's start mode and we wait for another process to connect and create a ring,
      * wait for other process to connect. This process became a leader. It's ID is 0.
@@ -284,17 +295,17 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
 
             if(msg.type == ConnectionRequest)
             {
-                if(add_new_process_to_ring(msg.ip))
+                if(add_new_process_to_ring(msg.text))
                 {
                     msg.original_sender_id = ring_info.id_arr[ring_info.process_counter - 1];
-                    print_received_message_from(msg.original_sender_id, msg.ip, msg.type);
+                    print_received_message_from(msg.original_sender_id, msg.text, msg.type);
                     msg.type = ConnectionAccepted;
-                    convert_int_to_string(msg.ip, ring_info.process_counter);
+                    msg.auxiliary_int = ring_info.process_counter;
                     //we use ip field to send how many processes are in the ring.
                     find_ip(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip);
                     sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, port);
                     print_sending_message_to(ring_info.id_arr[ring_info.process_counter - 1], ring_info.tmp_ip, msg.type);
-                    msg.type = EmptyMessage;
+                    msg.type = EmptyMessage;                    
                 }
 
                 break;
@@ -319,7 +330,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
                 print_received_message_from(msg.sender_id, "Not known yet", msg.type);
                 ring_info.process_id = msg.original_sender_id;
                 //Because ip field is unsued in this case, it's used to send other info.
-                ring_info.process_counter = atoi(msg.ip);
+                ring_info.process_counter = msg.auxiliary_int;
                 call_for_info_about_other_processes(ip, msg.sender_id);
                 msg.type = EmptyMessage;
                 break;
@@ -457,16 +468,15 @@ void run()
         mailbox_checked = false;
         if (ring_info.is_leader)
         {
+            //time to check connection. We send this message to next process.
             if (!checking_connection && stopwatch_cc >= ring_info.checkConnection_time)
             {
                 checking_connection = true;
                 msg.type = CheckConnection;
-                msg.original_sender_id = ring_info.process_id;
-                unsigned node_id = (unsigned)get_idx_from_id_arr(ring_info.process_id);
-                node_id = ring_info.id_arr[node_id + 1];
-                find_ip(node_id, ring_info.tmp_ip);
-                sendMessage(&ring_info.socket, &msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
-                print_sending_message_to(node_id, ring_info.tmp_ip, msg.type);
+                //We have to reset sender id because it will cause problem in next method.
+                msg.original_sender_id = msg.sender_id = ring_info.process_id;
+                msg.auxiliary_int = -1;
+                send_message_to_next_process(&msg);
                 msg.type = EmptyMessage;
             }
 
@@ -488,7 +498,7 @@ void run()
 
                     int idx_of_suspect_process = -1;
 
-                    if(wait_for_specific_message(10, CheckConnection, &msg))
+                    if (wait_for_specific_message(10, CheckConnection, &msg))
                     {
                         stopwatch_cc = 0;
                         checking_connection = false;
@@ -498,7 +508,7 @@ void run()
                             remove_process_from_ring(ring_info.id_arr[idx_of_suspect_process]);
                             struct Message msg;
                             msg.type = RemoveProcess;
-                            convert_int_to_string(msg.ip, ring_info.id_arr[idx_of_suspect_process]);
+                            convert_int_to_string(msg.text, ring_info.id_arr[idx_of_suspect_process]);
                             msg.original_sender_id = ring_info.process_id;
                             send_message_to_next_process(&msg);
                         }
@@ -519,11 +529,11 @@ void run()
                         if (ring_info.process_id == ring_info.id_arr[ring_info.process_counter - 1 - i])
                             i += 1;
 
-                        convert_int_to_string(msg.ip, ring_info.id_arr[ring_info.process_counter - 1 - i]);
+                        convert_int_to_string(msg.text, ring_info.id_arr[ring_info.process_counter - 1 - i]);
                         msg.type = CheckConnection;
                         msg.original_sender_id = ring_info.process_id;
                         unsigned node_id = idx_of_suspect_process;
-                        if (ring_info.id_arr[node_id + 1] == atoi(msg.ip))
+                        if (ring_info.id_arr[node_id + 1] == atoi(msg.text))
                             node_id += 1;
 
                         node_id = ring_info.id_arr[node_id + 1];
@@ -566,20 +576,23 @@ bool send_message_to_next_process(struct Message *msg)
     if (msg -> original_sender_id == ring_info.process_id && msg -> sender_id != ring_info.process_id)
         return false;
 
-    unsigned tmp_id;
+    unsigned tmp_id, idx_to_check;
 
     //Jump to the beggining  of array if this process is the last process in array.
     if (ring_info.id_arr[get_idx_from_id_arr(ring_info.process_id)] == ring_info.id_arr[ring_info.process_counter - 1])
-        tmp_id = check_if_to_avoid_process(ring_info.id_arr, 0, msg -> ip);
+        idx_to_check = 0;
 
     //Otherwise just send it to the next process in array
     else
-        tmp_id = check_if_to_avoid_process(ring_info.id_arr, (get_idx_from_id_arr(ring_info.process_id) + 1), msg -> ip);
+        idx_to_check = get_idx_from_id_arr(ring_info.process_id) + 1;
 
+    tmp_id = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, idx_to_check, msg ->auxiliary_int);
+    tmp_id = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, tmp_id, ring_info.process_id);
     find_ip(tmp_id, ring_info.tmp_ip);
     print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
     sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
     msg -> type = EmptyMessage;
+
     return true;
 }
 

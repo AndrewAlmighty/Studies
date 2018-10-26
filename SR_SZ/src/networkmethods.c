@@ -52,7 +52,7 @@ void checkMessageBox(const int *socket, struct Message *msg)
     recvfrom(*socket, msg, sizeof(*msg), MSG_DONTWAIT, (struct sockaddr *) &client_addr, &socket_len);
 
     if(msg -> type == ConnectionRequest)
-        strcpy(msg -> ip, inet_ntoa(client_addr.sin_addr));
+        strcpy(msg -> text, inet_ntoa(client_addr.sin_addr));
 }
 
 void sendMessage(const int *mySocket, struct Message *msg, const int id, const char *ip, const unsigned *port)

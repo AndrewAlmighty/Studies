@@ -24,7 +24,8 @@ struct Message
     int sender_id;
     int original_sender_id;         //First process which has send message. If its ConnectionAccepted msg,
                                     //we send here id for new process.
-    char ip[MESSAGE_MAX_LENGTH];    //We will not send message longer than ip address - xxx.xxx.xxx.xxx
+    int auxiliary_int;              //this integer is used if we want to send some integer for special reason.
+    char text[MESSAGE_MAX_LENGTH];    //We will not send message longer than ip address - xxx.xxx.xxx.xxx
                                     //Sometimes used to send other info than ip address
 
 };

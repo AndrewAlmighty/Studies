@@ -6,18 +6,19 @@
 #include "miscellaneous_methods.h"
 #include "stdio.h"
 
-unsigned check_if_to_avoid_process(unsigned *arr, unsigned idx, char *str_id)
+unsigned check_if_to_avoid_process(unsigned *arr, unsigned arr_size, unsigned idx, int id_to_avoid)
 {
-    //check if we have an order to avoid next process. If str_id is not a number just return a good id.
-    int i, len = strlen(str_id);
-    for (i = 0; i < len; i++)
-    {
-        if (!isdigit(str_id[i]))
-            return arr[idx];
-    }
+    if (id_to_avoid < 0)
+        return arr[idx];
 
-    if (arr[idx] == atoi(str_id))
+    //check if we have an order to avoid next process.
+    if (arr[idx] == id_to_avoid)
+    {
         idx += 1;
+
+        if (idx >= arr_size)
+            idx = 0;
+    }
 
     return arr[idx];
 }
@@ -176,11 +177,11 @@ void print_process_works(unsigned port, unsigned id)
     printf("!-> Tanenbaum algorithm process just started working! Process ID:%u. Port:%u\n", id, port);
 }
 
-void print_received_message_from(const unsigned id, const char *ip, const int type)
+void print_received_message_from(const int id, const char *ip, const int type)
 {
     char msgType[20];
     get_str_of_message_type(msgType, type);
-    printf("!-> Received message from process with ID:%u. It's IP is:%s. Type of message:%s\n", id, ip, msgType);
+    printf("!-> Received message from process with ID:%d. It's IP is:%s. Type of message:%s\n", id, ip, msgType);
 }
 
 void print_remove_process(const unsigned *id, const char *ip)
