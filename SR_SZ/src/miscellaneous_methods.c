@@ -203,7 +203,7 @@ void print_some_process_doesnt_work()
 
 void print_terminate(const char *reason)
 {
-    printf("!!!-> Process is going to die. Reason:%s. Terminating ...\n", reason);
+    printf("\n!!!-> Process is going to die. Reason: %s. Terminating ...\n", reason);
 }
 
 void print_timeout_reached()

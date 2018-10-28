@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -6,6 +7,9 @@
 
 int main(int argc, char** argv)
 {
+    //Connect signals to proper method which will handle terminate the program.
+    signal(SIGINT, terminate);
+
     //check arguments. We need ip and port or single mode on. If something is wrong, print help and terminate.
     if (argc < 2)
         print_help();

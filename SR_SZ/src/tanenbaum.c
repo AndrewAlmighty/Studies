@@ -238,13 +238,15 @@ bool handle_ConnectionRequest(struct Message *msg)
 
 bool handle_RemoveProcess(struct Message *msg)
 {
-    if (!send_message_to_next_process(msg))
+    bool was_sent_to_next = send_message_to_next_process(msg);
+    remove_process_from_ring(msg -> auxiliary_int);
+
+    if (was_sent_to_next)
     {
         msg -> auxiliary_int = -1;
         return false;
-    }
+    }    
 
-    remove_process_from_ring(msg -> auxiliary_int);
     return true;
 }
 
@@ -377,7 +379,8 @@ bool remove_process_from_ring(const unsigned id)
     //If in ring is only one process, free all allocate space and send info that the process has to terminate.
     if (ring_info.process_counter - 1 < 2)
     {
-        remove_all_processes_from_ring();
+        print_terminate("Just one process left in the ring");
+        terminate();
         return false;
     }
 
@@ -523,8 +526,7 @@ void run()
                             if (!remove_process_from_ring(msg.auxiliary_int))
                             {
                                 print_terminate("Error while removing process ...");
-                                remove_all_processes_from_ring();
-                                return;
+                                terminate();
                             }
 
                             struct Message msg_remove;
@@ -542,8 +544,7 @@ void run()
                         if (ring_info.process_counter <= 2)
                         {
                             print_terminate("Only one process left in ring");
-                            remove_all_processes_from_ring();
-                            return;
+                            terminate();
                         }
 
                         print_some_process_doesnt_work();
@@ -563,9 +564,8 @@ void run()
 
                     if (i >= ring_info.process_counter)
                     {
-                        remove_all_processes_from_ring();
                         print_terminate("Could find not working process");
-                        return;
+                        terminate();
                     }
                 }
             }
@@ -576,8 +576,9 @@ void run()
 
             handle_message(&msg, true);
             checkMessageBox(&ring_info.socket, &msg);
-            if (msg.type == ConnectionRequest)
+            if (msg.type == ConnectionRequest || msg.type == AddProcess || msg.type == RemoveProcess)
                 stopwatch_cc = 0;
+
             mailbox_checked = true;
         }
 
@@ -589,7 +590,10 @@ void run()
 }
 
 bool send_message_to_next_process(struct Message *msg)
-{
+{    
+    if (ring_info.process_counter < 2)
+        return false;
+
     if (msg -> original_sender_id == ring_info.process_id && msg -> sender_id != ring_info.process_id)
         return false;
 
@@ -601,6 +605,13 @@ bool send_message_to_next_process(struct Message *msg)
     //Otherwise just send it to the next process in array
     else
         idx_to_check = get_idx_from_id_arr(ring_info.process_id) + 1;
+
+    //if any process terminate, do not make infinite loop (original sender does not longer exist)
+    if (msg -> type == RemoveProcess && msg -> auxiliary_int == ring_info.id_arr[idx_to_check] && strcmp(msg -> text, "BYE") == 0)
+    {
+        msg -> type = EmptyMessage;
+        return false;
+    }
 
     tmp_id = (unsigned)check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, idx_to_check, msg ->auxiliary_int);
     //reusing varriable, don't want to create more.
@@ -640,4 +651,17 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
     }
 
     return false;
+}
+
+void terminate()
+{
+    struct Message msg;
+    msg.type = RemoveProcess;
+    msg.sender_id = msg.original_sender_id = ring_info.process_id;
+    msg.auxiliary_int = ring_info.process_id;
+    strcpy(msg.text, "BYE");
+    send_message_to_next_process(&msg);
+    remove_all_processes_from_ring();
+    shutdownSocket(&ring_info.socket);
+    exit(0);
 }
