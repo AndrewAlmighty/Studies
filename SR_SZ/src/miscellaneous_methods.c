@@ -6,7 +6,7 @@
 #include "miscellaneous_methods.h"
 #include "stdio.h"
 
-unsigned check_if_to_avoid_process(unsigned *arr, unsigned arr_size, unsigned idx, int id_to_avoid)
+int check_if_to_avoid_process(unsigned *arr, unsigned arr_size, unsigned idx, int id_to_avoid)
 {
     if (id_to_avoid < 0)
         return arr[idx];

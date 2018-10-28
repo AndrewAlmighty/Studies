@@ -22,7 +22,7 @@ struct RingInfo
 } ring_info;
 
 //this method adds a new process to RingInfo structure.
-bool add_new_process_to_ring(const char* ip);
+bool add_new_process_to_ring(const char* ip, const int id);
 
 //this method ask process to which we connect to send us IDs and IPs of other processes which
 //are also in the same ring.
