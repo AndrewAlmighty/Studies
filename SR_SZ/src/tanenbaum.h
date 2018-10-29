@@ -45,11 +45,16 @@ void handle_message(struct Message *msg, bool is_ready);
 bool handle_AddProcess(struct Message *msg);
 bool handle_CheckConnection(struct Message *msg);
 bool handle_ConnectionRequest(struct Message *msg);
+bool handle_Coordinator(struct Message *msg);
+bool handle_Election(struct Message *msg);
 bool handle_RemoveProcess(struct Message *msg);
 bool handle_RequestRingInfo(struct Message *msg);
 bool handle_SomeRingInfo(struct Message *msg);
 
 //---------------- Message handlers ---------------------------
+
+//Process find out that leader doesn't answer for his call. Making an election!.
+void make_an_election();
 
 //This method creates socket and do everything what is needed before we join/create the ring.
 bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char* my_ip, const char *ip);

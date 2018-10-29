@@ -28,8 +28,8 @@ int main(int argc, char** argv)
         char *ip = NULL;
         char *my_ip = NULL;
         unsigned port = 9000;
-        unsigned time_cc = 15;
-        unsigned time_cl = 40;
+        unsigned time_cc = 20;
+        unsigned time_cl = 10;
 
         for (idx = 1; idx < argc; idx++)
         {

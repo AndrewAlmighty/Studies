@@ -140,6 +140,14 @@ void get_str_of_message_type(char *str, const int type)
         strcpy(str, "SomeRingInfo");
         break;
 
+    case 9:
+        strcpy(str, "CheckLeader");
+        break;
+
+    case 10:
+        strcpy(str, "Coordinator");
+        break;
+
     default:
         strcpy(str, "Unknown message type");
         break;
@@ -165,6 +173,21 @@ void print_help()
            "-start          -- this is first process in topology, let's start and wait for others\n"
            "-time_cc <sec>  -- set the time [sec] of frequency of checking connection between processes. 15 sec is default.\n"
            "-time_cl <sec>  -- set the time [sec] of frequency of checking leader. 40 sec is default.\n");
+}
+
+void print_leader_does_not_react()
+{
+    printf("!!!-> Error! Leader does not react for checking! Making an election!\n");
+}
+
+void print_leader_works_other_process_dont()
+{
+    printf("!-> Message Election hasn't came back. Leader works, other process doesn't. Leades is looking for a bad process\n");
+}
+
+void print_new_leader(unsigned id)
+{
+    printf("!!!-> New leader is %u\n", id);
 }
 
 void print_message_should_not_be_handled()

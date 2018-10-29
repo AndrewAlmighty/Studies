@@ -152,6 +152,7 @@ void handle_message(struct Message *msg, bool is_ready)
         return;
 
     case Election:
+        handle_Election(msg);
         msg -> type = EmptyMessage;
         return;
 
@@ -177,6 +178,16 @@ void handle_message(struct Message *msg, bool is_ready)
 
     case SomeRingInfo:
         handle_SomeRingInfo(msg);
+        msg -> type = EmptyMessage;
+        return;
+
+    case CheckLeader:
+        send_message_to_next_process(msg);
+        msg -> type = EmptyMessage;
+        return;
+
+    case Coordinator:
+        handle_Coordinator(msg);
         msg -> type = EmptyMessage;
         return;
     }
@@ -236,6 +247,22 @@ bool handle_ConnectionRequest(struct Message *msg)
     return false;
 }
 
+bool handle_Coordinator(struct Message *msg)
+{
+    ring_info.leader_id = atoi(msg -> text);
+    print_new_leader((unsigned)ring_info.leader_id);
+    send_message_to_next_process(msg);
+    msg -> auxiliary_int = -1;
+    return true;
+}
+
+bool handle_Election(struct Message *msg)
+{
+    send_message_to_next_process(msg);
+    msg -> auxiliary_int = -1;
+    return true;
+}
+
 bool handle_RemoveProcess(struct Message *msg)
 {
     bool was_sent_to_next = send_message_to_next_process(msg);
@@ -287,6 +314,75 @@ bool handle_SomeRingInfo(struct Message *msg)
 {
     add_new_process_to_ring(msg -> text, msg -> auxiliary_int);
     return true;
+}
+
+void make_an_election()
+{
+    //not enough to make an election. And it should be here.
+    if (ring_info.process_counter < 2)
+    {
+        print_terminate("Only one process left");
+        terminate();
+    }
+
+    //Send an Election message to the ring!
+    struct Message msg;
+    msg.type = Election;
+    msg.original_sender_id = msg.sender_id = ring_info.process_id;
+    msg.auxiliary_int = ring_info.leader_id;
+    send_message_to_next_process(&msg);
+    msg.type = EmptyMessage;
+    int tmp = ring_info.leader_id;
+    ring_info.leader_id = -1;
+
+    if (wait_for_specific_message(10, Election, &msg))
+    {
+        remove_process_from_ring((unsigned)tmp);
+
+        //check if another process hasn't sent Coordinator already!
+        if (ring_info.leader_id != -1)
+            return;
+
+        //send message to remove leader from ring.
+        msg.type = RemoveProcess;
+        msg.sender_id = msg.original_sender_id = ring_info.process_id;
+        msg.auxiliary_int = tmp;
+        strcpy(msg.text, "BYE");    //with this this message will stay on last node before this.
+        send_message_to_next_process(&msg);
+
+        //find process with bigest id
+        int i;
+        tmp = 0;
+        for (i = 0; i < ring_info.process_counter; i++)
+        {
+            if (ring_info.id_arr[i] > tmp)
+                tmp = ring_info.id_arr[i];
+        }
+
+        print_new_leader((unsigned)tmp);
+
+        //if it's this process, it became leader.
+        if (tmp == ring_info.process_id)
+        {
+            ring_info.leader_id = tmp;
+            ring_info.is_leader = true;
+        }
+
+        //If Election came back to us, send other processes info that process with the biggest id in ring is a new leader.
+        msg.type = Coordinator;
+        msg.original_sender_id = msg.sender_id = ring_info.process_id;
+        msg.auxiliary_int = tmp;
+        convert_int_to_string(msg.text, tmp);
+        send_message_to_next_process(&msg);
+        msg.type = EmptyMessage;
+    }
+
+    else
+    {
+        msg.type = EmptyMessage;
+        print_leader_works_other_process_dont();
+        return;
+    }
 }
 
 bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned time_cl, const unsigned *port, const char *my_ip, const char *ip)
@@ -346,6 +442,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
     else
     {
         ring_info.is_leader = false;
+        ring_info.leader_id = -1;
         sendConnectionRequest(&ring_info.socket, ip, port);
 
         while(1)
@@ -404,7 +501,7 @@ bool remove_process_from_ring(const unsigned id)
         }
     }
 
-    //if there is not such id in array, just return false. Maybe AddProcess didn't reach this process.
+    //if there is not such id in array, just return false. Maybe AddProcess didn't reach this process or there was another remove process.
     if (!found_pos)
         return false;
 
@@ -476,14 +573,16 @@ void run()
     msg.type = EmptyMessage;
 
     bool checking_connection = false;
-    // bool checking_leader = false;
+    bool checking_leader = false;
     unsigned stopwatch_cc = 0;
-    //  unsigned stopwatch_cl = 0;
+     unsigned stopwatch_cl = 0;
     bool mailbox_checked, keep_running = true;
 
     while (keep_running)
     {
         mailbox_checked = false;
+
+        //If this process is leader.
         if (ring_info.is_leader)
         {
             //time to check connection. We send this message to next process.
@@ -506,7 +605,7 @@ void run()
                 unsigned i = 0;
                 int idx_of_suspect_process_in_arr = -1;
 
-                while(1)
+                while (1)
                 {
                     /* We send message and it should come back here in x sec. If it doesn't come back,
                      * it means that some process is not working. Then we send message again, but we
@@ -564,10 +663,46 @@ void run()
 
                     if (i >= ring_info.process_counter)
                     {
-                        print_terminate("Could find not working process");
+                        print_terminate("Could find not working process! More than one crashed");
                         terminate();
-                    }
+                    }                                        
                 }
+            }
+        }
+
+        //If this process is not leader.
+        else if (!ring_info.is_leader)
+        {
+            //is it time to check leader?
+            if (!checking_leader && stopwatch_cl >= ring_info.checkLeader_time)
+            {
+                //leader is unknown yet.
+                if (ring_info.leader_id == -1)
+                    stopwatch_cl = 0;
+
+                else
+                {
+                    checking_leader = true;
+                    msg.type = CheckLeader;
+                    //We have to reset sender id because it will cause problem in next method.
+                    msg.original_sender_id = msg.sender_id = ring_info.process_id;
+                    msg.auxiliary_int = -1;
+                    send_message_to_next_process(&msg);
+                    msg.type = EmptyMessage;
+                }
+            }
+
+            else if (!checking_leader && stopwatch_cl < ring_info.checkLeader_time)
+                stopwatch_cl += 1;
+
+            if (checking_leader)
+            {
+                if (!wait_for_specific_message(10, CheckLeader, &msg))
+                    make_an_election();
+
+                stopwatch_cl = 0;
+                checking_leader = false;
+                msg.type = EmptyMessage;
             }
         }
 
@@ -576,8 +711,15 @@ void run()
 
             handle_message(&msg, true);
             checkMessageBox(&ring_info.socket, &msg);
+
             if (msg.type == ConnectionRequest || msg.type == AddProcess || msg.type == RemoveProcess)
+            {
+                stopwatch_cl = 0;
                 stopwatch_cc = 0;
+            }
+
+            else if (msg.type == CheckConnection || msg.type == Coordinator || msg.type == Election)
+                stopwatch_cl = 0;
 
             mailbox_checked = true;
         }
@@ -613,12 +755,17 @@ bool send_message_to_next_process(struct Message *msg)
         return false;
     }
 
-    tmp_id = (unsigned)check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, idx_to_check, msg ->auxiliary_int);
-    //reusing varriable, don't want to create more.
-    idx_to_check = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, get_idx_from_id_arr(tmp_id), ring_info.process_id);
 
-    if (idx_to_check >= 0)
-        tmp_id = idx_to_check;
+        //we check if next process we need to avoid. if we send coordinator msg we don't avoid any.
+        tmp_id = (unsigned)check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, idx_to_check, msg -> auxiliary_int);
+        //reusing varriable, don't want to create more. This step is to avoid to sending msg to the same process. Example 1 -> 1.
+        idx_to_check = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, get_idx_from_id_arr(tmp_id), ring_info.process_id);
+
+        if (idx_to_check >= 0)
+            tmp_id = idx_to_check;
+
+
+
 
     find_ip(tmp_id, ring_info.tmp_ip);
     print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);

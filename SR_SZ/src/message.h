@@ -16,6 +16,8 @@ enum MessageType
     RemoveProcess,          //Remove process from the list
     RequestRingInfo,        //Request for list of processes in our ring. Used when we join the ring.
     SomeRingInfo,           //Process send info about one process. Exactly one ID and it's IP.
+    CheckLeader,            //Process calls leader to answer for message to check if he is online.
+    Coordinator             //Someone wins election and became a new leader in the ring.
 };
 
 struct Message
