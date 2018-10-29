@@ -1,1 +1,1 @@
-Implement Tanenbaum algorith
+This program was prepared for Distributed Systems subject. We create ring network, to which every process can join. Every process check if leader is online and the leader check if processes in ring are online. If process is offline, leader send info about it to rest processes in the ring. If leader is offline, processes are looking for new leader with Tanenbaum algorithm.
