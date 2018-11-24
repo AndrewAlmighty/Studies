@@ -187,7 +187,7 @@ void print_leader_works_other_process_dont()
 
 void print_new_leader(unsigned id)
 {
-    printf("!!!-> New leader is %u\n", id);
+    printf("!!!-> New leader has been selected! Leader ID is %u\n", id);
 }
 
 void print_message_should_not_be_handled()

@@ -249,10 +249,12 @@ bool handle_ConnectionRequest(struct Message *msg)
 
 bool handle_Coordinator(struct Message *msg)
 {
+    if (!send_message_to_next_process(msg))
+        return false;
+
     ring_info.leader_id = atoi(msg -> text);
     print_new_leader((unsigned)ring_info.leader_id);
-    send_message_to_next_process(msg);
-    msg -> auxiliary_int = -1;
+
     return true;
 }
 
@@ -266,9 +268,11 @@ bool handle_Election(struct Message *msg)
 bool handle_RemoveProcess(struct Message *msg)
 {
     bool was_sent_to_next = send_message_to_next_process(msg);
-    remove_process_from_ring(msg -> auxiliary_int);
 
     if (was_sent_to_next)
+        remove_process_from_ring(msg -> auxiliary_int);
+
+    else
     {
         msg -> auxiliary_int = -1;
         return false;
@@ -473,15 +477,7 @@ void remove_all_processes_from_ring()
 
 bool remove_process_from_ring(const unsigned id)
 {
-    //If in ring is only one process, free all allocate space and send info that the process has to terminate.
-    if (ring_info.process_counter - 1 < 2)
-    {
-        print_terminate("Just one process left in the ring");
-        terminate();
-        return false;
-    }
-
-    //if not, rewrite arrays.
+    //rewrite arrays.
     unsigned i, ip_pos;
     bool found_pos = false;
     for (i = 0; i < ring_info.process_counter; i++)
@@ -559,6 +555,14 @@ bool remove_process_from_ring(const unsigned id)
     if (ring_info.id_arr == NULL || ring_info.ip_arr == NULL)
     {
         print_allocate_failed();
+        return false;
+    }
+
+    //If in ring is only one process, free all allocate space and send info that the process has to terminate.
+    if (ring_info.process_counter < 2)
+    {
+        print_terminate("Just one process left in the ring");
+        terminate();
         return false;
     }
 
@@ -718,7 +722,7 @@ void run()
                 stopwatch_cc = 0;
             }
 
-            else if (msg.type == CheckConnection || msg.type == Coordinator || msg.type == Election)
+            else if (msg.type == Coordinator || msg.type == Election)
                 stopwatch_cl = 0;
 
             mailbox_checked = true;
@@ -755,17 +759,13 @@ bool send_message_to_next_process(struct Message *msg)
         return false;
     }
 
+    //we check if next process we need to avoid. if we send coordinator msg we don't avoid any.
+    tmp_id = (unsigned)check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, idx_to_check, msg -> auxiliary_int);
+    //reusing varriable, don't want to create more. This step is to avoid to sending msg to the same process. Example 1 -> 1.
+    idx_to_check = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, get_idx_from_id_arr(tmp_id), ring_info.process_id);
 
-        //we check if next process we need to avoid. if we send coordinator msg we don't avoid any.
-        tmp_id = (unsigned)check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, idx_to_check, msg -> auxiliary_int);
-        //reusing varriable, don't want to create more. This step is to avoid to sending msg to the same process. Example 1 -> 1.
-        idx_to_check = check_if_to_avoid_process(ring_info.id_arr, ring_info.process_counter, get_idx_from_id_arr(tmp_id), ring_info.process_id);
-
-        if (idx_to_check >= 0)
-            tmp_id = idx_to_check;
-
-
-
+    if (idx_to_check >= 0)
+        tmp_id = idx_to_check;
 
     find_ip(tmp_id, ring_info.tmp_ip);
     print_sending_message_to(tmp_id, ring_info.tmp_ip, msg -> type);
