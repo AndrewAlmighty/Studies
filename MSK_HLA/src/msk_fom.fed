@@ -22,7 +22,7 @@
          (attribute type reliable timestamp TestSpace)
          (attribute state reliable timestamp TestSpace)
       )
-      (class Process_List
+      (class ProcessList
          (attribute process_queue reliable timestamp TestSpace)
       )
     )

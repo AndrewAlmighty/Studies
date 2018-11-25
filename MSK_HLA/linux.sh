@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="usage: linux.sh [compile] [clean] [execute [process/processor/process_list]]"
+USAGE="usage: linux.sh [compile] [clean] [execute [Process/Processor/ProcessList]]"
 
 ################################
 # check command line arguments #
@@ -39,8 +39,8 @@ if [ $1 = "clean" ]
 then
 	echo "deleting example federate jar file and left over logs"
 	rm src/msk_project/*.class
-	rm artifacts/java-msk.jar
-	rm -Rf logs/logs
+	rm src/java-msk.jar
+	rm -Rf src/logs
 	exit;
 fi
 
@@ -51,33 +51,34 @@ if [ $1 = "compile" ]
 then
 	echo "compiling example federate"
 	cd src
+	
 	javac -cp ./:$RTI_HOME/lib/portico.jar msk_project/*.java
-	jar -cf ../artifacts/java-msk.jar *.class
-	cd ../
+	jar -cf java-msk.jar msk_project/*.class
 	exit;	
 fi
 
 ############################################
 ### (target) execute #######################
 ############################################
-if [[ $1 = "execute" && $2 = "processor" ]]
+if [[ $1 = "execute" && $2 = "Processor" ]]
 then
 	shift;
 	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar artifacts/msk_project.processor $*
 	exit;
 fi
 
-if [[ $1 = "execute" && $2 = "process" ]]
+if [[ $1 = "execute" && $2 = "Process" ]]
 then
 	shift;
 	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar artifacts/msk_project.process $*
 	exit;
 fi
 
-if [[ $1 = "execute" && $2 = "process_list" ]]
+if [[ $1 = "execute" && $2 = "ProcessList" ]]
 then
 	shift;
-	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar artifacts/msk_project.process_list $*
+	cd src
+	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar msk_project.ProcessListFederate
 	exit;
 fi
 
