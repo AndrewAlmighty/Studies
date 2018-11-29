@@ -12,34 +12,27 @@
   (objects
     (class ObjectRoot
       (attribute privilegeToDelete reliable timestamp)
-      (class RTIprivate)
-      (class Processor
-        (attribute processor_id reliable timestamp TestSpace)
-        (attribute state reliable timestamp TestSpace)
-      )
-      (class Process
-         (attribute process_id reliable timestamp TestSpace)
-         (attribute type reliable timestamp TestSpace)
-         (attribute state reliable timestamp TestSpace)
-      )
-      (class ProcessList
-         (attribute process_queue reliable timestamp TestSpace)
-      )
+      (class RTIprivate)      
     )
   )
   (interactions
     (class InteractionRoot reliable timestamp
       (class RTIprivate reliable timestamp)
-      (class doJob reliable timestamp TestSpace
-        (parameter process_id)
+      (class DoJob reliable timestamp TestSpace
         (parameter processor_id)
-      )
-      (class removeProcess reliable timestamp TestSpace
-         (parameter process_id)
-      )
-      (class jobFinished reliable timestamp TestSpace
-         (parameter process_id)
+        (parameter process_id)
+      )    
+      (class JobFinished reliable timestamp TestSpace
          (parameter processor_id)
+         (parameter process_id)
+      )
+	  (class NewProcess reliable timestamp TestSpace
+         (parameter id)
+         (parameter type)
+		 (parameter state)
+	  )
+	  (class NewProcessor reliable timestamp TestSpace
+         (parameter id)
       )
     )
   )

@@ -15,6 +15,9 @@ public class main
 	if (mode.equalsIgnoreCase("ProcessList"))
 		ProcessListFederate.main(args);
 		
+	else if (mode.equalsIgnoreCase("Process"))
+		ProcessFederate.main(args);
+		
 	else
 		System.out.println("Error. Wrong federate name");	
 		

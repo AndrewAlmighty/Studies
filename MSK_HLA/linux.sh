@@ -63,14 +63,16 @@ fi
 if [[ $1 = "execute" && $2 = "Processor" ]]
 then
 	shift;
-	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar artifacts/msk_project.processor $*
+	cd src
+	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar msk_project.ProcessorFederate
 	exit;
 fi
 
 if [[ $1 = "execute" && $2 = "Process" ]]
 then
 	shift;
-	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar artifacts/msk_project.process $*
+	cd src
+	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar msk_project.ProcessFederate
 	exit;
 fi
 

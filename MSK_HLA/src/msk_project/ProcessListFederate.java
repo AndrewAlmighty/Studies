@@ -50,6 +50,7 @@ public class ProcessListFederate extends Federate
 						byte[] byte_process_id = Encoder.encodeInt(encoderFactory, process_id);
 						this.sendInteraction("DoJob", "processor_id", byte_processor_id, "process_id",
 						byte_process_id, 0);
+						processes_out++;
 					} 	
 					catch (RTIinternalError e) 
 					{
@@ -73,6 +74,8 @@ public class ProcessListFederate extends Federate
 		{
 			int id = e.getParameterInt(encoderFactory, "id");
 			processList.add(id);
+			log("New process in queue. ID:" + id);
+			processes_in++;
 		}
 		
 		else if (e.getName() == "NewProcessor")
