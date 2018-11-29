@@ -254,6 +254,8 @@ bool handle_Coordinator(struct Message *msg)
 
     ring_info.leader_id = atoi(msg -> text);
     print_new_leader((unsigned)ring_info.leader_id);
+    if (ring_info.leader_id == ring_info.process_id)
+        ring_info.is_leader = true;
 
     return true;
 }
@@ -267,6 +269,28 @@ bool handle_Election(struct Message *msg)
 
 bool handle_RemoveProcess(struct Message *msg)
 {
+    //If leader send message that he is going away, the biggest ID is new leader.
+    if (msg -> original_sender_id == ring_info.leader_id)
+    {
+        int i;
+
+        if (msg -> auxiliary_int == ring_info.leader_id)
+        {
+            int biggest_id = 0;
+            for (i = 0; i < ring_info.process_counter; i++)
+            {
+                if (ring_info.id_arr[i] > biggest_id)
+                    biggest_id = ring_info.id_arr[i];
+            }
+
+            ring_info.leader_id = biggest_id;
+            print_new_leader(biggest_id);
+
+            if (ring_info.process_id == ring_info.leader_id)
+                ring_info.is_leader = true;
+        }
+    }
+
     bool was_sent_to_next = send_message_to_next_process(msg);
 
     if (was_sent_to_next)
@@ -500,7 +524,6 @@ bool remove_process_from_ring(const unsigned id)
     //if there is not such id in array, just return false. Maybe AddProcess didn't reach this process or there was another remove process.
     if (!found_pos)
         return false;
-
 
     //find a place where ip to remove starts, when we find it, start rewriting from that pos.
     unsigned counter = 0, start_pos1 = 0, start_pos2 = 0;
@@ -756,7 +779,7 @@ bool send_message_to_next_process(struct Message *msg)
     if (msg -> type == RemoveProcess && msg -> auxiliary_int == ring_info.id_arr[idx_to_check] && strcmp(msg -> text, "BYE") == 0)
     {
         msg -> type = EmptyMessage;
-        return false;
+        return true;    //return true, because everything is ok and let algorithm remove process.
     }
 
     //we check if next process we need to avoid. if we send coordinator msg we don't avoid any.
@@ -786,6 +809,13 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
             handle_message(msg, true);
             checkMessageBox(&ring_info.socket, msg);
             if (msg -> type == msgType && msg -> original_sender_id == ring_info.process_id)
+            {
+                handle_message(msg, true);
+                return true;
+            }
+
+            //if during CheckLeader other process send us election or coordinator, break checking.
+            if (msgType == CheckLeader && (msg -> type == Election || msg -> type == Coordinator))
             {
                 handle_message(msg, true);
                 return true;
