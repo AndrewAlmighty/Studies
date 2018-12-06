@@ -64,7 +64,7 @@ if [[ $1 = "execute" && $2 = "Processor" ]]
 then
 	shift;
 	cd src
-	java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar msk_project.ProcessorFederate
+        java -cp ./java-msk.jar:$RTI_HOME/lib/portico.jar msk_project.ProcessorFederate "$2"
 	exit;
 fi
 

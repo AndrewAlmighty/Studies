@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class ProcessListFederate extends Federate
 {
-	private Queue<Integer> processList;
+        private Queue<Process> processList;
 	private HashMap<Integer, Boolean> processorsList;
 	
 	private int processes_in;
@@ -20,7 +20,7 @@ public class ProcessListFederate extends Federate
 	
 	public ProcessListFederate()
 	{
-		processList = new LinkedList<Integer>();
+                processList = new LinkedList<Process>();
 		processorsList = new HashMap<Integer, Boolean>();	//<ID, isFree>
 		processes_in = 0;
 		processes_out = 0;
@@ -38,18 +38,19 @@ public class ProcessListFederate extends Federate
 			{
 				if (processList.peek() != null)
 				{
-					int process_id = processList.poll();
+                                        Process task = processList.poll();
 					int processor_id = (Integer)mentry.getKey();
 					log("Processor with ID: " + processor_id + " begins to execute process with" + 
-					"ID: " + process_id);					
+                                        "ID: " + task.getID());
 					processorsList.put(processor_id, false);
 					
 					try 
 					{
 						byte[] byte_processor_id = Encoder.encodeInt(encoderFactory, processor_id);
-						byte[] byte_process_id = Encoder.encodeInt(encoderFactory, process_id);
+                                                byte[] byte_process_id = Encoder.encodeInt(encoderFactory, task.getID());
+                                                byte[] byte_process_type = Encoder.encodeInt(encoderFactory, task.getType());
 						this.sendInteraction("DoJob", "processor_id", byte_processor_id, "process_id",
-						byte_process_id, 0);
+                                                byte_process_id, "process_type", byte_process_type, 0);
 						processes_out++;
 					} 	
 					catch (RTIinternalError e) 
@@ -73,7 +74,8 @@ public class ProcessListFederate extends Federate
 		else if (e.getName() == "NewProcess")
 		{
 			int id = e.getParameterInt(encoderFactory, "id");
-			processList.add(id);
+                        int type = e.getParameterInt(encoderFactory, "type");
+                        processList.add(new Process(id, type));
 			log("New process in queue. ID:" + id);
 			processes_in++;
 		}

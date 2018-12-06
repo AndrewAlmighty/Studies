@@ -1,33 +1,39 @@
 package msk_project;
 
+import java.util.Random;
 import hla.rti1516e.exceptions.RTIexception;
 import hla.rti1516e.exceptions.RTIinternalError;
 
 
 public class ProcessFederate extends Federate
 {
-	Process m_process;
-	int a;
-	
+    int idCounter = 0;
+    int wait = 0;
+
 	public ProcessFederate()
 	{
-		a = 0;
+
 	}
 	
 	@Override
 	protected void onRun() throws RTIexception 
 	{
-		if(a == 0)
-		{
-		m_process = new Process();
-		byte[] byte_process_id = Encoder.encodeInt(encoderFactory, m_process.getID());
-		byte[] byte_type = Encoder.encodeInt(encoderFactory, 4);
-		byte[] byte_state = Encoder.encodeInt(encoderFactory, m_process.getState());
-		this.sendInteraction("NewProcess", "id", byte_process_id, "type",
-						byte_type, "state", byte_state,0);
-						a++;
-						}
-						
+            if (wait < 10)
+                wait++;
+
+            else
+            {
+                if (new Random().nextInt(2) == 1)
+		{                    
+                    log("Created new process:" + idCounter);
+                    int type = new Random().nextInt(3);
+                    byte[] byte_process_id = Encoder.encodeInt(encoderFactory, idCounter);
+                    byte[] byte_type = Encoder.encodeInt(encoderFactory, type);
+                    byte[] byte_state = Encoder.encodeInt(encoderFactory, 0); //state - idle
+                    this.sendInteraction("NewProcess", "id", byte_process_id, "type", byte_type, "state", byte_state, 0);
+                    idCounter++;
+                }
+            }
 	}
 	
 	@Override

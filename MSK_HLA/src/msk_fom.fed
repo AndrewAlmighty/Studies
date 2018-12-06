@@ -21,6 +21,7 @@
       (class DoJob reliable timestamp TestSpace
         (parameter processor_id)
         (parameter process_id)
+        (parameter process_type)
       )    
       (class JobFinished reliable timestamp TestSpace
          (parameter processor_id)

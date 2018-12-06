@@ -149,7 +149,7 @@ public abstract class Ambassador extends NullFederateAmbassador
 				}
 				
 				//Debug
-				String debugMessage = "Odebrano " + interaction.getName() + " ";
+                                String debugMessage = "Received interaction: " + interaction.getName() + " ";
 				for(int i = 0; i < debugParams.size(); i++) {
 					debugMessage += debugParams.get(i) + "=" +
 							Encoder.decodeInt(fed.encoderFactory, debugValues.get(i)) + " ";
