@@ -597,6 +597,22 @@ bool remove_process_from_ring(const unsigned id)
         return false;
     }
 
+    //replace leader if leader disconnected
+    if (id == ring_info.leader_id)
+    {
+        int tmp = 0;
+        for (i = 0; i < ring_info.process_counter; i++)
+        {
+            if (ring_info.id_arr[i] > tmp)
+                tmp = ring_info.id_arr[i];
+        }
+
+        ring_info.leader_id = tmp;
+
+        if (tmp == ring_info.process_id)
+            ring_info.is_leader = true;
+    }
+
     print_remove_process(&id, ip_to_remove);
     return true;
 }
