@@ -212,7 +212,8 @@ bool handle_AddProcess(struct Message *msg)
         return false;
     }
 
-    ring_info.leader_id = new_id;
+    ring_info.is_leader = false;
+    ring_info.leader_id = new_id;    
     print_new_leader(new_id);
     return true;
 }
