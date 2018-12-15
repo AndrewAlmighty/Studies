@@ -77,4 +77,8 @@ bool wait_for_specific_message(unsigned sec, enum MessageType msgType, struct Me
 //Handle kill signal
 void terminate();
 
+//Handle SIGTSTP signal. It's used to shutdown socket and it will not send remove process message.
+//Created for testing if failures are handled correctly.
+void instant_shutdown();
+
 #endif

@@ -212,6 +212,8 @@ bool handle_AddProcess(struct Message *msg)
         return false;
     }
 
+    ring_info.leader_id = new_id;
+    print_new_leader(new_id);
     return true;
 }
 
@@ -241,6 +243,10 @@ bool handle_ConnectionRequest(struct Message *msg)
         msg -> auxiliary_int = ring_info.process_counter;
         sendMessage(&ring_info.socket, msg, ring_info.process_id, ring_info.tmp_ip, &ring_info.port);
         print_sending_message_to(msg -> original_sender_id, ring_info.tmp_ip, msg -> type);
+
+        ring_info.is_leader = false;
+        ring_info.leader_id = ring_info.id_arr[ring_info.process_counter - 1];
+        print_new_leader(ring_info.leader_id);
         return true;
     }
 
@@ -279,7 +285,7 @@ bool handle_RemoveProcess(struct Message *msg)
             int biggest_id = 0;
             for (i = 0; i < ring_info.process_counter; i++)
             {
-                if (ring_info.id_arr[i] > biggest_id)
+                if (ring_info.id_arr[i] > biggest_id && ring_info.id_arr[i] != msg -> auxiliary_int)
                     biggest_id = ring_info.id_arr[i];
             }
 
@@ -436,7 +442,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
         if (createAndBindSocket(&ring_info.socket, port) == NotWorking)
             return false;
 
-        ring_info.is_leader = true;
+        ring_info.is_leader = false;
         ring_info.leader_id = 0;
         ring_info.process_id = 0;
         add_new_process_to_ring(my_ip, -1);
@@ -469,7 +475,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
      */
     else
     {
-        ring_info.is_leader = false;
+        ring_info.is_leader = true;
         ring_info.leader_id = -1;
         sendConnectionRequest(&ring_info.socket, ip, port);
 
@@ -485,6 +491,7 @@ bool prepare_process(bool is_start_node, const unsigned time_cc, const unsigned 
                 ring_info.process_counter = msg.auxiliary_int;
                 call_for_info_about_other_processes(ip, msg.sender_id);
                 msg.type = EmptyMessage;
+                print_new_leader(ring_info.process_id);
                 break;
             }
         }
@@ -640,7 +647,7 @@ void run()
                      * which is not working, so we remove it from the ring. If it still doesn't come back,
                      * then we iterate through all ring and if we don't find it, we terminate app because
                      * something is bad.
-                     */                    
+                     */
 
                     if (wait_for_specific_message(10, CheckConnection, &msg))
                     {
@@ -657,7 +664,7 @@ void run()
 
                             struct Message msg_remove;
                             msg_remove.type = RemoveProcess;
-                            msg_remove.original_sender_id = msg.sender_id = ring_info.process_id;
+                            msg_remove.original_sender_id = msg_remove.sender_id = ring_info.process_id;
                             msg_remove.auxiliary_int = msg.auxiliary_int;
                             send_message_to_next_process(&msg_remove);
                         }
@@ -688,7 +695,7 @@ void run()
 
                     i += 1;
 
-                    if (i >= ring_info.process_counter)
+                    if (i > ring_info.process_counter)
                     {
                         print_terminate("Could find not working process! More than one crashed");
                         terminate();
@@ -746,6 +753,9 @@ void run()
             }
 
             else if (msg.type == Coordinator || msg.type == Election)
+                stopwatch_cl = 0;
+
+            else if (msg.type == CheckConnection && msg.auxiliary_int != -1 && !ring_info.is_leader)
                 stopwatch_cl = 0;
 
             mailbox_checked = true;
@@ -838,6 +848,14 @@ void terminate()
     msg.auxiliary_int = ring_info.process_id;
     strcpy(msg.text, "BYE");
     send_message_to_next_process(&msg);
+    remove_all_processes_from_ring();
+    shutdownSocket(&ring_info.socket);
+    exit(0);
+}
+
+void instant_shutdown()
+{
+    print_terminate("User called for immediately shutdown");
     remove_all_processes_from_ring();
     shutdownSocket(&ring_info.socket);
     exit(0);
