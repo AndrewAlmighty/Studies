@@ -18,11 +18,20 @@ namespace Shooting_range
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
+    /// 
+
     public partial class MainWindow : Window
     {
+        private DatabaseManager m_dbManager;
+
         public MainWindow()
         {
             InitializeComponent();
+            m_dbManager = new DatabaseManager();
+            int x = m_dbManager.getAmmoQuantity("AK");
+            System.Console.WriteLine("-----");
+            System.Console.WriteLine(x);
+            System.Console.WriteLine("-----");
         }
     }
 }
