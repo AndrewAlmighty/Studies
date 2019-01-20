@@ -28,10 +28,7 @@ namespace Shooting_range
         {
             InitializeComponent();
             m_dbManager = new DatabaseManager();
-            int x = m_dbManager.getAmmoQuantity("AK");
-            System.Console.WriteLine("-----");
-            System.Console.WriteLine(x);
-            System.Console.WriteLine("-----");
+            m_dbManager.insertToTimeTable("2018-02-01", 2);
         }
     }
 }

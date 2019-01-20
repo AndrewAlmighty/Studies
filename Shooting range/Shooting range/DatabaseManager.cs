@@ -37,14 +37,44 @@ namespace Shooting_range
             cmd.Dispose();
             return value;
         }
+
+        public bool checkIfDayAndHourIsFree(String Date, int hour)
+        {
+            bool isFree = false;
+            SqlCommand cmd;
+            SqlDataReader dataReader;
+            cmd = new SqlCommand("SELECT * FROM TimeTable WHERE OnDay = \'" + Date + 
+                "\' AND OnHour = " + hour.ToString(), m_sqlConnection);
+            dataReader = cmd.ExecuteReader();
+
+            if (dataReader.Read())
+                isFree = true;
+
+            dataReader.Close();
+            cmd.Dispose();
+            return isFree;
+        }
+
+        public void insertToTimeTable(String Date, int hour)
+        {
+            //INSERT INTO TimeTable (OnDay, OnHour) VALUES ('2018-01-20', 19);
+            SqlCommand cmd;
+            SqlDataAdapter dataAdapter = new SqlDataAdapter();
+            cmd = new SqlCommand("INSERT INTO TimeTable (OnDay, OnHour) VALUES (\'" + Date + 
+                "\', " + hour.ToString() + ")", m_sqlConnection);
+            dataAdapter.UpdateCommand = cmd;
+            dataAdapter.UpdateCommand.ExecuteNonQuery();
+            cmd.Dispose();
+        }
+
+        public void updateAmmoQuantity(string weapon, int ammo)
+        {
+            SqlCommand cmd;
+            SqlDataAdapter dataAdapter = new SqlDataAdapter();
+            cmd = new SqlCommand("Update Ammunition SET Quantity = "+ ammo.ToString() +" from Ammunition where Weapon=\'" + weapon + "\'", m_sqlConnection);
+            dataAdapter.UpdateCommand = cmd;
+            dataAdapter.UpdateCommand.ExecuteNonQuery();
+            cmd.Dispose();
+        }
     }
 }
-
-/* 
- *            SqlCommand cmd;
-               SqlDataReader dataReader;
-               cmd = new SqlCommand("Select * from Ammunition", m_sqlConnection);
- 
-               dataReader.Close();
-               cmd.Dispose();
- */
