@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Shooting_range"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Strzelnica" Height="418" Width="704">
+    <Grid HorizontalAlignment="Left" Height="386" Margin="0,0,-8,0" VerticalAlignment="Top" Width="704">
+        <TextBox Name="QuestionTextBox" HorizontalAlignment="Left" Height="97" Margin="162,43,0,0" TextWrapping="Wrap" Text="Question" VerticalAlignment="Top" Width="386"/>
+        <TextBox Name="AnswersTextBox" HorizontalAlignment="Left" Height="131" Margin="162,211,0,0" TextWrapping="Wrap" Text="Answers" VerticalAlignment="Top" Width="386"/>
     </Grid>
 </Window>

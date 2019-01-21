@@ -1,0 +1,487 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<grammar version="1.0" xml:lang="pl-PL"
+         xmlns="http://www.w3.org/2001/06/grammar"
+         tag-format="semantics/1.0" root="rootRule">
+
+  <rule id="rootRule">
+    <item repeat ="0-1">
+      <ruleref uri="#rejestracja" />
+      <tag> out.rejestracja=rules.latest(); </tag>
+    </item>
+    <item repeat ="0-1">
+      <ruleref uri="#liczby" />
+      <tag> out.liczby=rules.latest(); </tag>
+    </item>
+    <item repeat ="0-1">
+      <ruleref uri="#termin"/>
+      <tag> out.termin=rules.latest(); </tag>
+    </item>
+    <item repeat ="0-1">
+    <ruleref uri="#bronzamunicja"/>
+      <tag> out.strzelanie=rules.latest(); </tag>
+    </item>
+    <item repeat ="0-1">
+    <ruleref uri="#amunicjazbronia"/>
+      <tag> out.strzelanie=rules.latest(); </tag>
+    </item>
+  </rule>
+
+  <rule id="rejestracja">
+    <one-of>
+    <item>
+      zakończ <tag>out="finish";</tag>
+    </item>
+    <item>
+      powrót <tag>out="return";</tag>
+    </item>
+    <item>
+      powtórz <tag>out="again";</tag>
+    </item>
+    <item>
+      opcja pierwsza <tag>out="register";</tag>
+    </item>
+    <item>
+      Chcę zapisać się na strzelnicę <tag>out="register";</tag>
+    </item>
+    <item>
+      Chcę zapisać się <tag>out="register";</tag>
+    </item>
+    <item>
+      Chcę strzelać <tag>out="register";</tag>
+    </item>
+    <item>
+      Rejestracja <tag>out="register";</tag>
+    </item>
+    <item>
+      Cennik <tag>out="price-list";</tag>
+    </item>
+    <item>
+      Jakie są ceny <tag>out="price-list";</tag>
+    </item>
+    <item>
+      Jakie są bronie <tag>out="weapon-list";</tag>
+    </item>
+    <item>
+      Tak <tag>out="yes";</tag>
+    </item>
+	    <item>
+      <ruleref uri="#bronie"/>
+    </item>
+    </one-of>
+  </rule>
+  
+  <rule id="amunicjazbronia">
+    <item repeat ="0-1">
+      <ruleref uri="#liczby"/>
+      <tag>out = out + ":" + rules.latest();</tag>
+    </item>
+    <item repeat ="0-1">naboje z</item>
+    <item repeat ="0-1">naboi z</item>
+    <item repeat ="0-1">naboi</item>
+      <item repeat ="0-1">
+        <ruleref uri="#bronie" />
+        <tag>out = out + ":" + rules.latest();</tag>
+      </item>
+  </rule>
+  
+  <rule id="bronzamunicja">
+    <item repeat ="0-1">
+      <ruleref uri="#bronie" />
+      <tag>out = out + ":" + rules.latest();</tag>
+    </item>
+      <item repeat ="0-1">
+        <ruleref uri="#liczby" />
+        <tag>out = out + ":" + rules.latest();</tag>
+      </item>
+    <item>naboi</item>
+  </rule>
+  
+  <rule id="bronie">
+    <one-of>
+    <item>
+      kalach<tag>out="ak"</tag>
+    </item>
+    <item>
+      kalasznikow<tag>out="ak"</tag>
+    </item>
+    <item>
+      ak<tag>out="ak"</tag>
+    </item>
+    <item>
+      mcztery<tag>out="m4"</tag>
+    </item>
+    <item>
+      mczwórki<tag>out="m4"</tag>
+    </item>
+    <item>
+      kolt<tag>out="colt"</tag>
+    </item>
+    <item>
+      glock<tag>out="glock"</tag>
+    </item>
+    <item>
+      glock dziewietnaście<tag>out="glock"</tag>
+    </item>
+    <item>
+      cztki<tag>out="cz"</tag>
+    </item>
+    <item>
+      pistolet cz<tag>out="cz"</tag>
+    </item>
+    <item>
+      pistolet cztka<tag>out="cz"</tag>
+    </item>
+    <item>
+      cz 75<tag>out="cz"</tag>
+    </item>
+    <item>
+      mczternaście<tag>out="m14"</tag>
+    </item>
+    </one-of>
+  </rule>
+  
+  <rule id="termin">
+    <item repeat="0-1">
+      <ruleref uri="#dni" />
+      <tag>out = out + ":" + rules.latest();</tag>
+    </item>
+    <item repeat="0-1">
+      <ruleref uri="#miesiace" />
+      <tag>out = out + ":" + rules.latest();</tag>
+    </item>
+  </rule>
+
+  <rule id="miesiace" scope="public">
+    <one-of>
+    <item>
+      styczeń <tag> out = "january" </tag>
+    </item>
+    <item>
+      stycznia <tag> out = "january" </tag>
+    </item>
+    <item>
+      luty <tag> out = "februrary" </tag>
+    </item>
+    <item>
+      lutego <tag> out = "februrary" </tag>
+    </item>
+    <item>
+      marca <tag> out = "march" </tag>
+    </item>
+    <item>
+      marzec <tag> out = "march" </tag>
+    </item>
+    <item>
+      kwiecień <tag> out = "april" </tag>
+    </item>
+    <item>
+      kwietnia <tag> out = "april" </tag>
+    </item>
+    <item>
+      maj <tag> out = "may" </tag>
+    </item>
+    <item>
+      maja <tag> out = "may" </tag>
+    </item>
+    <item>
+      czerwiec <tag> out = "june" </tag>
+    </item>
+    <item>
+      czerwca <tag> out = "june" </tag>
+    </item>
+    <item>
+      lipiec <tag> out = "july" </tag>
+    </item>
+    <item>
+      lipca <tag> out = "july" </tag>
+    </item>
+    <item>
+      sierpień <tag> out = "august" </tag>
+    </item>
+    <item>
+      sierpnia <tag> out = "august" </tag>
+    </item>
+    <item>
+      wrzesień <tag> out = "september" </tag>
+    </item>
+    <item>
+      września <tag> out = "september" </tag>
+    </item>
+    <item>
+      październik <tag> out = "october" </tag>
+    </item>
+    <item>
+      października <tag> out = "october" </tag>
+    </item>
+    <item>
+      listopad <tag> out = "november" </tag>
+    </item>
+    <item>
+      listopada <tag> out = "november" </tag>
+    </item>
+    <item>
+      grudzień <tag> out = "december" </tag>
+    </item>
+    <item>
+      grudnia <tag> out = "december" </tag>
+    </item>
+    </one-of>
+  </rule>
+
+  <rule id="dni" scope="public">
+    <one-of>
+    <item>
+      pierwszy <tag> out = 1; </tag>
+    </item>
+    <item>
+      drugi <tag> out = 2; </tag>
+    </item>
+    <item>
+      trzeci <tag> out = 3; </tag>
+    </item>
+    <item>
+      czwarty <tag> out = 4; </tag>
+    </item>
+    <item>
+      piąty <tag> out = 5; </tag>
+    </item>
+    <item>
+      szósty <tag> out = 6; </tag>
+    </item>
+    <item>
+      siódmy <tag> out = 7; </tag>
+    </item>
+    <item>
+      ósmy <tag> out = 8; </tag>
+    </item>
+    <item>
+      dziewiąty <tag> out = 9; </tag>
+    </item>
+    <item>
+      dziesiąty <tag> out = 10; </tag>
+    </item>
+    <item>
+      jedenasty <tag> out = 11; </tag>
+    </item>
+    <item>
+      dwunasty <tag> out = 12; </tag>
+    </item>
+    <item>
+      trzynasty <tag> out = 13; </tag>
+    </item>
+    <item>
+      czternasty <tag> out = 14; </tag>
+    </item>
+    <item>
+      piętnasty <tag> out = 15; </tag>
+    </item>
+    <item>
+      szesnasty <tag> out = 16; </tag>
+    </item>
+    <item>
+      siedemnasty <tag> out = 17; </tag>
+    </item>
+    <item>
+      osiemnasty <tag> out = 18; </tag>
+    </item>
+    <item>
+      dziewiętnasty <tag> out = 19; </tag>
+    </item>
+    <item>
+      dwudziesty <tag> out = 20; </tag>
+    </item>
+    <item>
+      dwudziesty pierwszy <tag> out = 21; </tag>
+    </item>
+    <item>
+      dwudziesty drugi  <tag> out = 22; </tag>
+    </item>
+    <item>
+      dwudziesty trzeci  <tag> out = 23; </tag>
+    </item>
+    <item>
+      dwudziesty czwarty  <tag> out = 24; </tag>
+    </item>
+    <item>
+      dwudziesty piąty  <tag> out = 25; </tag>
+    </item>
+    <item>
+      dwudziesty szósty  <tag> out = 26; </tag>
+    </item>
+    <item>
+      dwudziesty siódmy  <tag> out = 27; </tag>
+    </item>
+    <item>
+      dwudziesty ósmy  <tag> out = 28; </tag>
+    </item>
+    <item>
+      dwudziesty dziewiąty  <tag> out = 29; </tag>
+    </item>
+    <item>
+      trzydziesty  <tag> out = 30; </tag>
+    </item>
+    <item>
+      trzydziesty pierwszy  <tag> out = 31; </tag>
+    </item>
+    </one-of>
+	  </rule>
+  
+   
+
+  <rule id="liczby">
+
+    <item repeat="0-1">
+      <ruleref uri="#setki" />
+      <tag> out = out + "s"+ rules.latest(); </tag>
+    </item>
+    <item repeat="0-1">
+      <ruleref uri="#dziesiatki" />
+      <tag> out = out + "d"+ rules.latest(); </tag>
+    </item>
+    <item repeat="0-1">
+      <ruleref uri="#nastki" />
+      <tag> out = out + "n"+ rules.latest(); </tag>
+    </item>
+    <item repeat="0-1">
+      <ruleref uri="#jednostki" />
+      <tag> out = out + "j"+ rules.latest(); </tag>
+    </item>
+  </rule>
+
+  <rule id="jednostki" scope="public">
+    <one-of>
+      <item>
+        jeden <tag> out = 1; </tag>
+      </item>
+      <item>
+        dwa <tag> out = 2; </tag>
+      </item>
+      <item>
+        trzy <tag> out = 3; </tag>
+      </item>
+      <item>
+        cztery <tag> out = 4; </tag>
+      </item>
+      <item>
+        pięć <tag> out = 5; </tag>
+      </item>
+      <item>
+        sześć <tag> out = 6; </tag>
+      </item>
+      <item>
+        siedem <tag> out = 7; </tag>
+      </item>
+      <item>
+        osiem <tag> out = 8; </tag>
+      </item>
+      <item>
+        dziewięć <tag> out = 9; </tag>
+      </item>
+    </one-of>
+  </rule>
+
+
+  <rule id="nastki" scope="public">
+    <one-of>
+      <item>
+        dziesięć <tag> out = 10; </tag>
+      </item>
+      <item>
+        jedenaście <tag> out = 11; </tag>
+      </item>
+      <item>
+        dwanaście <tag> out = 12; </tag>
+      </item>
+      <item>
+        trzynaście <tag> out = 13; </tag>
+      </item>
+      <item>
+        czternaście <tag> out= 14; </tag>
+      </item>
+      <item>
+        piętnaście <tag> out = 15; </tag>
+      </item>
+      <item>
+        szesnaście <tag> out = 16; </tag>
+      </item>
+      <item>
+        siedemnaście <tag> out = 17; </tag>
+      </item>
+      <item>
+        osiemnaście <tag> out = 18; </tag>
+      </item>
+      <item>
+        dziewiętnaście <tag> out = 19; </tag>
+      </item>
+    </one-of>
+  </rule>
+
+  <rule id="dziesiatki" scope="public">
+    <one-of>
+      <item>
+        dwadzieścia
+        <tag> out = 2; </tag>
+      </item>
+      <item>
+        trzydzieści
+        <tag> out = 3; </tag>
+      </item>
+      <item>
+        czterdzieści
+        <tag> out = 4; </tag>
+      </item>
+      <item>
+        pięćdziesiąt
+        <tag> out = 5; </tag>
+      </item>
+      <item>
+        sześćdziesiąt
+        <tag> out = 6; </tag>
+      </item>
+      <item>
+        siedemdziesiąt
+        <tag> out = 7; </tag>
+      </item>
+      <item>
+        osiemdziesiąt
+        <tag> out = 8; </tag>
+      </item>
+      <item>
+        dziewięćdziesiąt
+        <tag> out = 9; </tag>
+      </item>
+    </one-of>
+  </rule>
+
+  <rule id="setki" scope="public">
+    <one-of>
+      <item>
+        sto <tag> out = 1; </tag>
+      </item>
+      <item>
+        dwieście <tag> out = 2; </tag>
+      </item>
+      <item>
+        trzysta <tag> out = 3; </tag>
+      </item>
+      <item>
+        czterysta <tag> out = 4; </tag>
+      </item>
+      <item>
+        pięćset <tag> out = 5; </tag>
+      </item>
+      <item>
+        sześćset <tag> out = 6; </tag>
+      </item>
+      <item>
+        siedemset <tag> out = 7; </tag>
+      </item>
+      <item>
+        osiemset <tag> out = 8; </tag>
+      </item>
+      <item>
+        dziewięćset <tag> out = 9; </tag>
+      </item>
+    </one-of>
+  </rule>
+</grammar>

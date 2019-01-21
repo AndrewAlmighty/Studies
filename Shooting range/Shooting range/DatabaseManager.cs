@@ -57,7 +57,6 @@ namespace Shooting_range
 
         public void insertToTimeTable(String Date, int hour)
         {
-            //INSERT INTO TimeTable (OnDay, OnHour) VALUES ('2018-01-20', 19);
             SqlCommand cmd;
             SqlDataAdapter dataAdapter = new SqlDataAdapter();
             cmd = new SqlCommand("INSERT INTO TimeTable (OnDay, OnHour) VALUES (\'" + Date + 
