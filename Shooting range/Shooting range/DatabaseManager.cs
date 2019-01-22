@@ -40,7 +40,7 @@ namespace Shooting_range
 
         public bool checkIfDayAndHourIsFree(String Date, int hour)
         {
-            bool isFree = false;
+            bool isFree = true;
             SqlCommand cmd;
             SqlDataReader dataReader;
             cmd = new SqlCommand("SELECT * FROM TimeTable WHERE OnDay = \'" + Date + 
@@ -48,7 +48,7 @@ namespace Shooting_range
             dataReader = cmd.ExecuteReader();
 
             if (dataReader.Read())
-                isFree = true;
+                isFree = false;
 
             dataReader.Close();
             cmd.Dispose();

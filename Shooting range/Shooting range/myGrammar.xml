@@ -34,6 +34,12 @@
     <item>
       powrót <tag>out="return";</tag>
     </item>
+      <item>
+        nowa broń <tag>out="again";</tag>
+      </item>
+      <item>
+        dodaj <tag>out="again";</tag>
+      </item>
     <item>
       powtórz <tag>out="again";</tag>
     </item>
@@ -61,9 +67,15 @@
     <item>
       Jakie są bronie <tag>out="weapon-list";</tag>
     </item>
+      <item>
+        pokaż bronie <tag>out="weapon-list";</tag>
+      </item>
     <item>
       Tak <tag>out="yes";</tag>
     </item>
+      <item>
+        Nie <tag>out="no";</tag>
+      </item>
 	    <item>
       <ruleref uri="#bronie"/>
     </item>
@@ -93,49 +105,50 @@
         <ruleref uri="#liczby" />
         <tag>out = out + ":" + rules.latest();</tag>
       </item>
-    <item>naboi</item>
+    <item repeat ="0-1">naboi</item>
+    <item repeat ="0-1">naboje</item>
   </rule>
   
   <rule id="bronie">
     <one-of>
     <item>
-      kalach<tag>out="ak"</tag>
+      kalach<tag>out="AK"</tag>
     </item>
     <item>
-      kalasznikow<tag>out="ak"</tag>
+      kalasznikow<tag>out="AK"</tag>
     </item>
     <item>
-      ak<tag>out="ak"</tag>
+      ak<tag>out="AK"</tag>
     </item>
     <item>
-      mcztery<tag>out="m4"</tag>
+      mcztery<tag>out="M4"</tag>
     </item>
     <item>
-      mczwórki<tag>out="m4"</tag>
+      mczwórki<tag>out="M4"</tag>
     </item>
     <item>
-      kolt<tag>out="colt"</tag>
+      kolt<tag>out="Colt 1911"</tag>
     </item>
     <item>
-      glock<tag>out="glock"</tag>
+      glok<tag>out="Glock 19"</tag>
     </item>
     <item>
-      glock dziewietnaście<tag>out="glock"</tag>
+      glok dziewietnaście<tag>out="Glock 19"</tag>
     </item>
     <item>
-      cztki<tag>out="cz"</tag>
+      c zetki<tag>out="CZ 75"</tag>
     </item>
     <item>
-      pistolet cz<tag>out="cz"</tag>
+      pistolet c zet<tag>out="CZ 75"</tag>
     </item>
     <item>
-      pistolet cztka<tag>out="cz"</tag>
+      pistolet c zetka<tag>out="CZ 75"</tag>
     </item>
     <item>
-      cz 75<tag>out="cz"</tag>
+      c zet 75<tag>out="CZ 75"</tag>
     </item>
     <item>
-      mczternaście<tag>out="m14"</tag>
+      mczternaście<tag>out="M14"</tag>
     </item>
     </one-of>
   </rule>
