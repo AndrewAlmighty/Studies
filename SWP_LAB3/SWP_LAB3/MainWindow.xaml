@@ -3,12 +3,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:k="http://schemas.microsoft.com/kinect/2014"
         xmlns:local="clr-namespace:SWP_LAB3"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Name="MainGrid">
-        <ScrollViewer Name="MainScrollViewer" Height="106" Margin="70,61,0,0" VerticalAlignment="Top" Width="649" RenderTransformOrigin="0.496,-0.326" VerticalScrollBarVisibility="Disabled" Grid.Row="1" HorizontalContentAlignment="Center" CanContentScroll="True"/>
-        <TextBox Name="InfoTextBox" HorizontalAlignment="Left" Height="135" Margin="547,250,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="172"/>
-
+    <Grid>
+        <k:KinectRegion x:Name="kinectRegion">
+            <Grid Name="MainGrid">
+                <ScrollViewer Name="MainScrollViewer" Height="184" Margin="47,61,36,0" VerticalAlignment="Top" RenderTransformOrigin="0.496,-0.326" VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center" CanContentScroll="True"/>
+                <TextBox Name="InfoTextBox" HorizontalAlignment="Left" Height="100" Margin="547,309,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="172"/>
+                <k:KinectUserViewer Width="272" Height="156" />                
+            </Grid>
+        </k:KinectRegion>
     </Grid>
 </Window>

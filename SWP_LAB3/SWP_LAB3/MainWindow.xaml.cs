@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Kinect;
+using Microsoft.Kinect.Wpf.Controls;
 
 namespace SWP_LAB3
 {
@@ -20,14 +22,17 @@ namespace SWP_LAB3
     /// </summary>
     public partial class MainWindow : Window
     {
+       
         private StackPanel m_stackPanel;
+        
         private event MouseButtonEventHandler m_click;
         private BitmapImage[] m_bitMaps = new BitmapImage[5];
-        private Image[] m_images = new Image[5];
+        private Button[] m_images = new Button[5];
         private String[] m_imageNames = { "czekolada.jpg", "banany.jpg", "belwedere.jpg", "lays.jpg", "tatra.jpg" };
         public MainWindow()
         {
             InitializeComponent();
+            
             m_stackPanel = new StackPanel();
             m_stackPanel.MouseLeftButtonUp += new MouseButtonEventHandler(StackPanel_OnMouseUp);
             m_stackPanel.Orientation = Orientation.Horizontal;
@@ -36,24 +41,23 @@ namespace SWP_LAB3
             for (int i = 0; i < 5; i++)
             {
                 m_bitMaps[i] = new BitmapImage(new Uri(".\\Images\\" + m_imageNames[i], UriKind.Relative));
-                m_images[i] = new Image();
+                m_images[i] = new Button();
                 m_images[i].Name = "obrazek_" + i.ToString();
-                m_images[i].Source = m_bitMaps[i];
-                m_images[i].Width = 100;
-                m_images[i].Height = 100;
+                Image img = new Image();
+                img.Source = m_bitMaps[i];
+                m_images[i].Content = img;
+                m_images[i].Width = 200;
+                m_images[i].Height = 200;
+                m_images[i].Click += StackPanel_OnMouseUp;
                 m_stackPanel.Children.Add(m_images[i]);
             }
 
             MainScrollViewer.Content = m_stackPanel;
         }
 
-        private void StackPanel_OnMouseUp(object sender, MouseButtonEventArgs e)
+        private void StackPanel_OnMouseUp(object sender, RoutedEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Released)
-            {
-                Image tmp = (Image)e.OriginalSource;
-                InfoTextBox.Text = tmp.Name;
-            }
+            InfoTextBox.Text = "dziala";
         }
     }
 }
