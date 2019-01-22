@@ -36,7 +36,7 @@ namespace Shooting_range
         {
             InitializeComponent();
             QuestionTextBox.Text = "Jaką operację chciałbyś wykonać?";
-            AnswersTextBox.Text = "1) Poznać cennik strzelnicy.\n2) Zobaczyc dostepne bronie\n3) Zapisać się na strzelnicę";
+            AnswersTextBox.Text = "1) Cennik.\n2) Pokaż bronie\n3) Chcę strzelać";;
 
             m_dbManager = new DatabaseManager();
 
@@ -352,7 +352,7 @@ namespace Shooting_range
                 {
                     m_dialoguePhase = 0;
                     QuestionTextBox.Text = "Jaką operację chciałbyś wykonać?";
-                    AnswersTextBox.Text = "1) Poznać cennik strzelnicy.\n2) Poznać dostępne bronie\n3) Zapisać się na strzelnicę";
+                    AnswersTextBox.Text = "1) Cennik.\n2) Pokaż bronie\n3) Chcę strzelać";
                     m_weaponTmp = "null";
                     m_tmpAmmo = 0;
                     m_finalOrder = "";
@@ -383,7 +383,7 @@ namespace Shooting_range
 
             string[] words = txt.Split(' ');
             
-            string number;
+            string number = "null";
             try
             {
                 number = e.Result.Semantics["liczby"].Value.ToString();
@@ -394,7 +394,7 @@ namespace Shooting_range
                 number = "null";
             }
 
-            string register;
+            string register = "null";
             try
             {
                 register = e.Result.Semantics["rejestracja"].Value.ToString();
@@ -404,7 +404,7 @@ namespace Shooting_range
                 register = "null";
             }
 
-            string shooting;
+            string shooting = "null";
             try
             {
                 shooting = e.Result.Semantics["strzelanie"].Value.ToString();
@@ -423,12 +423,24 @@ namespace Shooting_range
                         }
                     }
                 }
+
+                for (int i = 0; i < shooting.Length; i++)
+                {
+                    if (shooting[i] == ':')
+                        break;
+
+                    if (i == shooting.Length - 1)
+                    {
+                        register = shooting;
+                        shooting = null;
+                    }
+                }
             }
             catch
             {
                 shooting = "null";
             }
-            string date;
+            string date = "null";
             try
             {
                 date = e.Result.Semantics["termin"].Value.ToString();
@@ -439,7 +451,7 @@ namespace Shooting_range
                 date = "null";
             }
 
-           // AnswersTextBox.Text = prepareWeaponAndAmmoString(shooting);
+            //AnswersTextBox.Text = shooting + "|" + register;
            handleDialogue(number, register, shooting, date);
         }
     }
