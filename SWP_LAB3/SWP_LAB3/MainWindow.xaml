@@ -10,8 +10,14 @@
     <Grid>
         <k:KinectRegion x:Name="kinectRegion">
             <Grid Name="MainGrid">
-                <ScrollViewer Name="MainScrollViewer" Height="184" Margin="47,61,36,0" VerticalAlignment="Top" RenderTransformOrigin="0.496,-0.326" VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center" CanContentScroll="True"/>
-                <TextBox Name="InfoTextBox" HorizontalAlignment="Left" Height="100" Margin="547,309,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="172"/>
+                <ScrollViewer Name="MainScrollViewer" Height="184" Margin="47,61,36,0" VerticalAlignment="Top" RenderTransformOrigin="0.496,-0.326" HorizontalContentAlignment="Center" CanContentScroll="True" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto"/>
+                <TextBox Name="InfoTextBox" HorizontalAlignment="Left" Height="100" Margin="200,300,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="400"/>
+                <Button Name="Add" Margin="656,300,10,19" Click="AddClicked">
+                    <Label>Dodaj do koszyka</Label>
+                </Button>
+                <Button Name="Sum" Margin="10,300,620,19" Click="SumClicked">
+                    <Label>Podsumuj zakupy</Label>
+                </Button>
                 <k:KinectUserViewer Width="272" Height="156" />                
             </Grid>
         </k:KinectRegion>
