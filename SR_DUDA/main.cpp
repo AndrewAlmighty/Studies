@@ -1,20 +1,16 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-
-#include "guimanager.h"
-#include "berkeleymanager.h"
+#include "guicontroller.hpp"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
-    QQmlApplicationEngine engine;
 
-    BerkeleyManager manager;
-    GuiManager::GetInstance().setManager(manager);
-    engine.rootContext() -> setContextProperty("GuiManager", &GuiManager::GetInstance());
+    QQmlApplicationEngine engine;
+    engine.rootContext() -> setContextProperty("GuiController", &GuiController::GetInstance());
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
