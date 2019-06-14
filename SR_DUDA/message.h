@@ -10,13 +10,19 @@ enum MessageType
     EmptyMessage,           //Empty message - just ignore it.
     ConnectionRequest,      //Ask for connection
     ConnectionAccepted,     //Connection accepted
-    Disconnect              //disconnect
+    Disconnect,              //disconnect
+    NewDevice,
+    CheckConnection,
+    ConnectionAck,
+    AskToEnterCritical,
+    AnswerForAsk,
+    LeaveCritical
 };
 
 struct Message
 {
     enum MessageType type;
-    int sender_port;
+    unsigned sender_port;
     char text[MSG_MAX_LEN];
     long int timestamp;
 };

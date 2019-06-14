@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 bool createAndBindSocket(int *server_socket, const unsigned *port)
 {
@@ -48,8 +49,9 @@ void checkMessageBox(const int *socket, struct Message *msg)
         strcpy(msg -> text, inet_ntoa(client_addr.sin_addr));
 }
 
-void sendMessage(const int *mySocket, struct Message *msg, const int sender_port, const char *ip, const unsigned *port)
+void sendMessage(const int *mySocket, struct Message *msg, const unsigned sender_port, const char *ip, const unsigned *port)
 {
+    fprintf(stderr, "sending to %s:%u, type:%d\n", ip, *port, msg->type);
     msg -> sender_port = sender_port;
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));

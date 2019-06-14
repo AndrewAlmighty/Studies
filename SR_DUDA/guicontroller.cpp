@@ -1,4 +1,5 @@
 #include "guicontroller.hpp"
+#include <QDebug>
 
 GuiController &GuiController::GetInstance()
 {
@@ -6,7 +7,7 @@ GuiController &GuiController::GetInstance()
     return instance;
 }
 
-GuiController::GuiController(QObject *parent)
+GuiController::GuiController(QObject *parent) : m_Controller(this)
 {
 }
 
@@ -57,6 +58,12 @@ void GuiController::setInCritical(const bool status)
     emit inCriticalChanged();
     m_BtnEnable = true;
     emit btnEnableChanged();
+    if (m_InCritical)
+        setStatus("In Critical Section");
+
+    else
+        setStatus("Ready to enter critical section");
+
 }
 
 bool GuiController::inCritical() const

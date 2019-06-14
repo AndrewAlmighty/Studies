@@ -11,7 +11,7 @@ extern "C"{
 bool createAndBindSocket(int *server_socket, const unsigned *port);
 void sendConnectionRequest(int *client_socket, const char *dest_ip, const unsigned *port, struct Message *msg);
 void checkMessageBox(const int *socket, struct Message *msg);
-void sendMessage(const int *mySocket, struct Message *msg, const int id, const char *ip, const unsigned *port);
+void sendMessage(const int *mySocket, struct Message *msg, const unsigned sender_port, const char *ip, const unsigned *port);
 bool shutdownSocket(const int *socket);
 
 #ifdef __cplusplus
