@@ -40,6 +40,7 @@ private:
     GuiController* m_GuiPtr = nullptr;
     bool m_IsReady = false;
     bool m_inCritical = false;
+    bool m_holdLoop = false;
     int m_Socket = 0;
     long int m_curTimestamp = 0;
     std::string m_HostIp = "";

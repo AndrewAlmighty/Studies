@@ -11,7 +11,7 @@ class DeviceModel : public QObject
     Q_PROPERTY(QString timestamp READ timestamp WRITE setTimestamp NOTIFY timestampChanged)
 
 public:
-    explicit DeviceModel(QString ip, unsigned port, QString timestamp = "0", QObject *parent = nullptr);
+    explicit DeviceModel(QString ip, unsigned port, QString timestamp = "", QObject *parent = nullptr);
     QString IP() const;
     unsigned port() const;
     QString timestamp() const;

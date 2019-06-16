@@ -127,6 +127,12 @@ void GuiController::addDevice(std::string ip, unsigned port, long timestamp)
     emit newDevice(QString::fromStdString(ip), port, QString::fromStdString(std::to_string(timestamp)));
 }
 
+void GuiController::changeTimestamp(std::string ip, unsigned port, long timestamp)
+{
+    removeDevice(QString::fromStdString(ip), port);
+    addDevice(ip, port, timestamp);
+}
+
 void GuiController::removeDevice(QString ip, unsigned port)
 {
     for (const auto &dev : m_devices)

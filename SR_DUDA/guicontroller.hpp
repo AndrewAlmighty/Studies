@@ -35,6 +35,7 @@ public:
 
     QList<QObject*> model() const;
     void addDevice(std::string ip, unsigned port, long timestamp = 0);
+    void changeTimestamp(std::string ip, unsigned port, long timestamp);
     void removeDevice(QString ip, unsigned port);
 
     bool networkGood() const;
