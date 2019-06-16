@@ -1,5 +1,6 @@
 #include "guicontroller.hpp"
 #include <QDebug>
+#include "devicemodel.hpp"
 
 GuiController &GuiController::GetInstance()
 {
@@ -9,6 +10,8 @@ GuiController &GuiController::GetInstance()
 
 GuiController::GuiController(QObject *parent) : m_Controller(this)
 {
+    connect(this, SIGNAL(newDevice(QString, unsigned, QString)), this, SLOT(onAddDevice(QString, unsigned, QString)),Qt::QueuedConnection);
+
 }
 
 
@@ -114,6 +117,32 @@ void GuiController::connectTo(const QString &ip)
         setStatus("Ready to connect");
 }
 
+QList<QObject *> GuiController::model() const
+{
+    return m_devices;
+}
+
+void GuiController::addDevice(std::string ip, unsigned port, long timestamp)
+{
+    emit newDevice(QString::fromStdString(ip), port, QString::fromStdString(std::to_string(timestamp)));
+}
+
+void GuiController::removeDevice(QString ip, unsigned port)
+{
+    for (const auto &dev : m_devices)
+    {
+        if (dev->property("IP") == ip)
+        {
+            if (dev->property("port") == port)
+            {
+                m_devices.removeOne(dev);
+                emit modelChanged();
+                break;
+            }
+        }
+    }
+}
+
 void GuiController::setOurIp(const QString &ip)
 {
     if(m_ourIP == ip)
@@ -161,6 +190,12 @@ void GuiController::reset()
     emit inCriticalChanged();
     emit statusChanged();
     m_Controller.reset();
+}
+
+void GuiController::onAddDevice(QString IP, unsigned port, QString timestamp)
+{
+    m_devices.append(new DeviceModel(IP, port, timestamp));
+    emit modelChanged();
 }
 
 

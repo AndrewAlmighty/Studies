@@ -210,6 +210,7 @@ void Controller::handleMsg(Message &msg)
 
     case ConnectionRequest:
         handleConnectionRequest(std::string(msg.text),msg.sender_port);
+        m_GuiPtr->addDevice(msg.text, msg.sender_port);
         break;
 
     case ConnectionAccepted:
@@ -218,11 +219,13 @@ void Controller::handleMsg(Message &msg)
     case NewDevice:
         std::cerr << "nowe urzadzenie! Addr:" << msg.text << ":" << msg.timestamp << std::endl;
         m_devicesList.insert(std::pair<addr, unsigned>(addr(msg.text, static_cast<unsigned>(msg.timestamp)), 0));
+        m_GuiPtr -> addDevice(msg.text, static_cast<unsigned>(msg.timestamp));
     break;
 
     case Disconnect:
         std::cerr << "Usunieto urzadzenie! Addr:" << msg.text << ":" << msg.sender_port << std::endl;
         m_devicesList.erase(addr(msg.text, msg.sender_port));
+        m_GuiPtr -> removeDevice(msg.text, msg.sender_port);
     break;
 
     case CheckConnection:

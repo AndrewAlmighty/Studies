@@ -16,7 +16,8 @@ SOURCES += \
         main.cpp \
     guicontroller.cpp \
     controller.cpp \
-    networkmethods.c
+    networkmethods.c \
+    devicemodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,4 +36,5 @@ HEADERS += \
     guicontroller.hpp \
     controller.hpp \
     networkmethods.h \
-    message.h
+    message.h \
+    devicemodel.hpp

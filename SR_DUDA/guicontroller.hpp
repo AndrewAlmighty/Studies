@@ -2,6 +2,7 @@
 #define GUICONTROLLER_HPP
 
 #include <QObject>
+#include <QList>
 #include "controller.hpp"
 
 class GuiController : public QObject
@@ -13,6 +14,7 @@ class GuiController : public QObject
     Q_PROPERTY(bool networkGood READ networkGood NOTIFY networkGoodChanged)
     Q_PROPERTY(bool inCritical READ inCritical WRITE setInCritical NOTIFY inCriticalChanged)
     Q_PROPERTY(bool btnEnable READ btnEnable WRITE btnClicked NOTIFY btnEnableChanged)
+    Q_PROPERTY(QList<QObject*> model READ model NOTIFY modelChanged)
 
 public:
     static GuiController& GetInstance();
@@ -31,6 +33,10 @@ public:
 
     Q_INVOKABLE void connectTo(const QString &ip);
 
+    QList<QObject*> model() const;
+    void addDevice(std::string ip, unsigned port, long timestamp = 0);
+    void removeDevice(QString ip, unsigned port);
+
     bool networkGood() const;
     void reset();
 
@@ -40,7 +46,11 @@ signals:
     void ourIpChanged();
     void btnEnableChanged();
     void networkGoodChanged();
+    void modelChanged();
+    void newDevice(QString IP, unsigned port, QString timestamp);
 
+private slots:
+    void onAddDevice(QString IP, unsigned port, QString timestamp);
 private:
     GuiController(QObject *parent = nullptr);
     GuiController(const GuiController&) = delete;
@@ -50,6 +60,7 @@ private:
     Controller m_Controller;
     QString m_Status = "Not ready to work.";
     QString m_ourIP;
+    QList<QObject*> m_devices;
     bool m_InCritical = false;
     bool m_BtnEnable = false;
     bool m_NetworkGood = false;

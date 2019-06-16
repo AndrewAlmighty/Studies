@@ -185,5 +185,78 @@ Window
 
             onClicked: GuiController.btnClicked()
         }
+
+        Rectangle
+        {
+            anchors.top: enterBtn.bottom
+            anchors.topMargin: 20
+            anchors.leftMargin: 20
+            anchors.rightMargin: 20
+            anchors.right: parent.right
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            color: "transparent"
+            border.color: "black"
+
+            ListView
+            {
+                id: devicesList
+
+                property int argsNumber: 3
+
+                anchors.fill: parent
+                model: GuiController.model
+                highlight: Rectangle { color: "lightsteelblue"}
+                highlightFollowsCurrentItem: true
+                headerPositioning: ListView.OverlayHeader
+                clip: true
+
+                header: Row
+                {
+                    id: header
+                    width: parent.width
+                    z: 2
+
+                    Repeater
+                    {
+                        id: headerRep
+                        model:[qsTr("IP address"), qsTr("Port"), qsTr("Timestamp")]
+
+                        Rectangle
+                        {
+                            width: header.width / headerRep.count
+                            height: 30
+                            border.color: "black"
+                            border.width: 2
+
+                            Text
+                            {
+                                anchors.centerIn: parent
+                                text: modelData
+                            }
+                        }
+                    }
+                }
+
+                delegate: MouseArea
+                {
+                    width: devicesList.width
+                    height: 20
+                    Row
+                    {
+                        anchors.fill: parent
+                        Text { text: model.modelData.IP; width: parent.width / devicesList.argsNumber }
+                        Text { text: model.modelData.port; width: parent.width / devicesList.argsNumber }
+                        Text { text: model.modelData.timestamp; width: parent.width / devicesList.argsNumber }
+                    }
+
+                    onClicked:
+                    {
+                        devicesList.currentIndex = index
+                    }
+                }
+            }
+        }
     }
 }
