@@ -188,6 +188,7 @@ void Controller::loop()
     {
         Message msg;
 
+        auto start_time = std::chrono::steady_clock::now();
         while (m_LoopOn)
         {
             if (!m_IsReady || m_holdLoop)
@@ -199,6 +200,15 @@ void Controller::loop()
 
                 if (msg.type != EmptyMessage)
                     handleMsg(msg);
+            }
+
+
+            auto duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time);
+
+            if (duration.count() > 15)
+            {
+                checkConnection();
+                start_time = std::chrono::steady_clock::now();
             }
         }
     });
@@ -405,4 +415,71 @@ void Controller::handleConnectionRequest(std::string ip, unsigned port)
     msg.type = ConnectionAccepted;
     sendMessage(&m_Socket, &msg, m_port, ip.c_str(), &port);
     std::cerr << "Nowe urządzenie\n";
+}
+
+void Controller::checkConnection()
+{
+    std::unordered_map<addr, bool, addrhash> checklist;
+
+    for (const auto &dev : m_devicesList)
+        checklist.insert(std::pair<addr, bool>(addr(dev.first.first, dev.first.second), false));
+
+    {
+        Message msg;
+        msg.type = CheckConnection;
+        for (auto &dev : checklist)
+        {
+            if (dev.first.first == m_HostIp && dev.first.second == m_port)
+                continue;
+
+            std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
+            sendMessage(&m_Socket, &msg, m_port, dev.first.first.c_str(), &dev.first.second);
+        }
+    }
+
+    auto start_time = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time);
+    {
+        Message msg;
+        msg.type = EmptyMessage;
+        bool do_break = false;
+        while (duration.count() < 5)
+        {
+            checkMessageBox(&m_Socket, &msg);
+            if (msg.type != ConnectionAck)
+                handleMsg(msg);
+
+            else
+            {
+                for (auto &dev : checklist)
+                {
+                    if (dev.first.first == msg.text && dev.first.second == msg.sender_port)
+                    {
+                        dev.second = true;
+                        break;
+                    }
+                }
+
+                do_break = true;
+                for (auto &dev : checklist)
+                {
+                    if (dev.second == false)
+                        do_break = false;
+                }
+            }
+
+            if (do_break == true)
+                break;
+        }
+    }
+
+    for (const auto &dev : checklist)
+    {
+        if (dev.second == false)
+        {
+            m_devicesList.erase(addr(dev.first.first, dev.first.second));
+            m_GuiPtr -> removeDevice(dev.first.first.c_str(), dev.first.second);
+
+        }
+    }
 }

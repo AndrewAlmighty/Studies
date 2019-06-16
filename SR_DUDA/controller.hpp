@@ -36,6 +36,7 @@ private:
     void loop();
     void handleMsg(Message &msg);
     void handleConnectionRequest(std::string ip, unsigned port);
+    void checkConnection();
 
     GuiController* m_GuiPtr = nullptr;
     bool m_IsReady = false;
