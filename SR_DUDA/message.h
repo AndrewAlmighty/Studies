@@ -10,7 +10,7 @@ enum MessageType
     EmptyMessage,           //Empty message - just ignore it.
     ConnectionRequest,      //Ask for connection
     ConnectionAccepted,     //Connection accepted
-    Disconnect,              //disconnect
+    Disconnect,             //disconnect
     NewDevice,
     CheckConnection,
     ConnectionAck,

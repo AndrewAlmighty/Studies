@@ -44,8 +44,7 @@ private:
     long int m_curTimestamp = 0;
     std::string m_HostIp = "";
     unsigned m_port = 0;
-    std::unordered_map<addr, unsigned, addrhash> m_devicesList;
-    std::unordered_map<addr, int, addrhash> m_queue;
+    std::unordered_map<addr, long, addrhash> m_devicesList;
     bool m_LoopOn = true;
     std::mutex m_mutex;
 };

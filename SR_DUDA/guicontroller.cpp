@@ -62,7 +62,11 @@ void GuiController::setInCritical(const bool status)
         setStatus("In Critical Section");
 
     else
+    {
         setStatus("Ready to enter critical section");
+        m_BtnEnable = true;
+        emit btnEnableChanged();
+    }
 
 }
 
@@ -84,7 +88,9 @@ void GuiController::btnClicked(bool x)
     }
 
     else
+    {
         m_Controller.leaveCriticalSection();
+    }
 }
 
 bool GuiController::btnEnable() const

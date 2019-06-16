@@ -16,6 +16,16 @@ Controller::Controller(GuiController *ptr)
 Controller::~Controller()
 {
     m_LoopOn = false;
+    Message msg;
+    msg.type = Disconnect;
+    std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
+    for (const auto& dev : m_devicesList)
+    {
+        if (dev.first.first == m_HostIp && dev.first.second == m_port)
+            continue;
+
+        sendMessage(&m_Socket, &msg, m_port, dev.first.first.c_str(), &dev.first.second);
+    }
     shutdownSocket(&m_Socket);
 }
 
@@ -77,86 +87,83 @@ bool Controller::isReady() const
 
 void Controller::enterToCriticalSection()
 {
-    std::unordered_map<int, bool> accept_list;
-    int i = 0;
-    for (const auto& dev : m_devicesList)
-    {
-        if (dev.first.first == m_HostIp && dev.first.second == m_port)
-            continue;
+    std::thread thread([&]() {
+        std::unordered_map<int, bool> accept_list;
+        int i = 0;
+        for (const auto& dev : m_devicesList)
+        {
+            if (dev.first.first == m_HostIp && dev.first.second == m_port)
+                continue;
 
-        accept_list.insert(std::pair<int, bool>(i, false));
-        i++;
-    }
+            accept_list.insert(std::pair<int, bool>(i, false));
+            i++;
+        }
 
-    std::cerr << "rozmiar listy urzadzen: " << m_devicesList.size() << std::endl;
-     auto start_time = std::chrono::system_clock::now();
-     auto duration = start_time.time_since_epoch();
+        std::cerr << "rozmiar listy urzadzen: " << m_devicesList.size() << std::endl;
+        auto start_time = std::chrono::system_clock::now();
+        auto duration = start_time.time_since_epoch();
 
-     Message msg;
-     msg.type = AskToEnterCritical;
-     msg.timestamp = duration.count();
-     m_curTimestamp = duration.count();
-     std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
-     for (const auto &dev : m_devicesList)
-     {
-         if (dev.first.first == m_HostIp && dev.first.second == m_port)
-             continue;
+        Message msg;
+        msg.type = AskToEnterCritical;
+        msg.timestamp = duration.count();
+        m_curTimestamp = duration.count();
+        std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
+        for (const auto &dev : m_devicesList)
+        {
+            if (dev.first.first == m_HostIp && dev.first.second == m_port)
+                continue;
 
-         sendMessage(&m_Socket, &msg, m_port, dev.first.first.c_str(), &dev.first.second);
-     }
+            sendMessage(&m_Socket, &msg, m_port, dev.first.first.c_str(), &dev.first.second);
+        }
 
-     std::cerr << "i:" << i << std::endl;
-     Message newMsg;
-     newMsg.type = EmptyMessage;
-     while (i > 0)
-     {
-         checkMessageBox(&m_Socket, &newMsg);
+        std::cerr << "i:" << i << std::endl;
+        Message newMsg;
+        newMsg.type = EmptyMessage;
+        while (i > 0 && m_curTimestamp != 0)
+        {
+            checkMessageBox(&m_Socket, &newMsg);
 
-         if (newMsg.type != AnswerForAsk)
-             handleMsg(newMsg);
+            if (newMsg.type != AnswerForAsk)
+                handleMsg(newMsg);
 
-         else
-         {
-             std::cerr << "Mamy odpowiedz od ip:" << newMsg.text << "|\n";
-             int j = 0;
-             for (const auto &dev : m_devicesList)
-             {
+            else
+            {
+                std::cerr << "Mamy odpowiedz od ip:" << newMsg.text << "|\n";
+                int j = 0;
+                for (const auto &dev : m_devicesList)
+                {
 
-                 if (strcmp(dev.first.first.c_str(), newMsg.text) == 0)
-                 {
-                    if (dev.first.second == newMsg.sender_port)
+                    if (strcmp(dev.first.first.c_str(), newMsg.text) == 0)
                     {
-                    accept_list[j] = true;
-                    i--;
-                    break;
+                        if (dev.first.second == newMsg.sender_port)
+                        {
+                            accept_list[j] = true;
+                            i--;
+                            break;
+                        }
                     }
-                 }
 
-                 else
-                     j++;
-             }
-             newMsg.type = EmptyMessage;
-         }
-     }
+                    else
+                        j++;
+                }
+                newMsg.type = EmptyMessage;
+            }
+        }
 
-     m_inCritical = true;
-     m_curTimestamp = 0;
-     m_GuiPtr -> setInCritical(true);
-     std::cerr << "Jestesmy w sekcji krytycznej!\n";
+        m_inCritical = true;
+        m_curTimestamp = 0;
+        m_GuiPtr -> setInCritical(true);
+        std::cerr << "Jestesmy w sekcji krytycznej!\n";
+    });
+    thread.detach();
 }
 
 void Controller::leaveCriticalSection()
 {
     m_inCritical = false;
+    m_curTimestamp = 0;
+    std::cerr << "Opuszczamy sekcje krytyczna!\n";
     m_GuiPtr -> setInCritical(false);
-    Message msg;
-    msg.type = LeaveCritical;
-    std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
-    for (const auto &dev : m_devicesList)
-    {
-        if (dev.first.first != m_HostIp && dev.first.second != m_port)
-            sendMessage(&m_Socket, &msg, m_port, dev.first.first.c_str(), &dev.second);
-    }
 }
 
 void Controller::reset()
@@ -214,6 +221,7 @@ void Controller::handleMsg(Message &msg)
     break;
 
     case Disconnect:
+        std::cerr << "Usunieto urzadzenie! Addr:" << msg.text << ":" << msg.sender_port << std::endl;
         m_devicesList.erase(addr(msg.text, msg.sender_port));
     break;
 
@@ -245,15 +253,17 @@ void Controller::handleMsg(Message &msg)
         {
             std::thread tmpThread([&]()
             {
-               while (m_curTimestamp != 0)
-                   continue;
-
+               while (m_curTimestamp != 0) {}
+               std::cerr << "Krok 1 - curTimestamp == 0\n";
                while (m_inCritical)
-                   continue;
+               {
+                    std::cerr << m_inCritical << "|";
+               }
+               std::cerr << "Krok 2 - m_inCritical == false\n";
 
                Message tmpMsg;
                tmpMsg.type = AnswerForAsk;
-               std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
+               std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, tmpMsg.text);
                sendMessage(&m_Socket, &tmpMsg, m_port, msg.text, &msg.sender_port);
             });
 
