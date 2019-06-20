@@ -128,7 +128,7 @@ void Controller::enterToCriticalSection()
 
                 if (dev.second < m_curTimestamp && dev.second != 0)
                 {
-                    std::cerr << "Mamy proces z mniejszym timestampem:" << dev.first.first << ":" << dev.first.second << std::endl;
+                  //  std::cerr << "Mamy proces z mniejszym timestampem:" << dev.first.first << ":" << dev.first.second << std::endl;
                     can_process = false;
                     break;
                 }
@@ -204,7 +204,6 @@ void Controller::loop()
 
 
             auto duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time);
-
             if (duration.count() > 15)
             {
                 checkConnection();
@@ -247,7 +246,8 @@ void Controller::handleMsg(Message &msg)
     {
         Message tmpMsg;
         tmpMsg.type = ConnectionAck;
-        std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, msg.text);
+        std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, tmpMsg.text);
+        std::cerr << "Ktos sprawdza polaczenie: " << msg.text << ":" << msg.sender_port << std::endl;
         sendMessage(&m_Socket, &tmpMsg, m_port, msg.text, &msg.sender_port);
     }
         break;
@@ -300,7 +300,7 @@ void Controller::handleMsg(Message &msg)
 
                         if (dev.second < m_curTimestamp && dev.second != 0)
                         {
-                            std::cerr << "Mamy proces z mniejszym timestampem:" << dev.first.first << ":" << dev.first.second << std::endl;
+                            //std::cerr << "Mamy proces z mniejszym timestampem:" << dev.first.first << ":" << dev.first.second << std::endl;
                             can_process = false;
                             break;
                         }
@@ -335,8 +335,8 @@ void Controller::handleMsg(Message &msg)
                 if (dev.second == 0 || (dev.first.first == m_HostIp && dev.first.second == m_port))
                     continue;
 
-                dev.second = 0;
-                m_GuiPtr->changeTimestamp(dev.first.first, dev.first.second, 0);
+                //dev.second = 0;
+                //m_GuiPtr->changeTimestamp(dev.first.first, dev.first.second, 0);
                 Message tmpMsg;
                 tmpMsg.type = AnswerForAsk;
                 std::copy(m_HostIp.c_str(), m_HostIp.c_str() + MSG_MAX_LEN, tmpMsg.text);
@@ -419,11 +419,19 @@ void Controller::handleConnectionRequest(std::string ip, unsigned port)
 
 void Controller::checkConnection()
 {
+    std::cerr << "check connection - rozmiar mapy " << m_devicesList.size() << std::endl;
+    if (m_devicesList.size() < 2)
+        return;
+
     std::unordered_map<addr, bool, addrhash> checklist;
-
+    std::cerr << "sprawdzamy polaczenie!\n";
     for (const auto &dev : m_devicesList)
-        checklist.insert(std::pair<addr, bool>(addr(dev.first.first, dev.first.second), false));
+    {
+        if (dev.first.first == m_HostIp && dev.first.second == m_port)
+            continue;
 
+        checklist.insert(std::pair<addr, bool>(addr(dev.first.first, dev.first.second), false));
+    }
     {
         Message msg;
         msg.type = CheckConnection;
@@ -470,6 +478,8 @@ void Controller::checkConnection()
 
             if (do_break == true)
                 break;
+
+            duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time);
         }
     }
 
@@ -479,7 +489,7 @@ void Controller::checkConnection()
         {
             m_devicesList.erase(addr(dev.first.first, dev.first.second));
             m_GuiPtr -> removeDevice(dev.first.first.c_str(), dev.first.second);
-
         }
     }
+    std::cerr << "Koniec sprawdzania";
 }
